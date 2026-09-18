@@ -4,23 +4,35 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>Rellony — Hospitality Property Due Diligence in England</title>
-<meta name="description" content="Rellony checks a hospitality property against official records — planning history, food hygiene, licensing and corporate insolvency — and sets what they show against what the agent or listing claims. Due-diligence reports from £49. Currently England only.">
+<title>Rellony — Hospitality property due diligence in England · Check before you sign the lease</title>
+<meta name="description" content="Before you sign a lease on a restaurant, café or bar in England, check the premises against official records — planning history, food hygiene, licensing and insolvency — and see where the listing and the record disagree. From £49.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://YOUR-DOMAIN-HERE/">
 
-<!-- Open Graph / social. URL is a placeholder until the domain is live.
-     No og:image yet — a broken image URL is worse than none; add one
-     (1200×630) once there's an asset worth showing. -->
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.png" type="image/png" sizes="180x180">
+<link rel="apple-touch-icon" href="favicon.png">
+
+<!-- Open Graph / social. The og:image MUST be an absolute URL — relative
+     paths are ignored by every scraper — so it carries the YOUR-DOMAIN-HERE
+     placeholder and will not resolve until the real domain is set. The file
+     itself (og-image.png, 1200×630) is committed alongside this page. -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Rellony">
 <meta property="og:locale" content="en_GB">
-<meta property="og:title" content="Rellony — Hospitality Property Due Diligence in England">
-<meta property="og:description" content="Before you sign the lease: official records on planning, food hygiene, licensing and insolvency, checked against what the agent claims. Currently England only.">
+<meta property="og:title" content="Rellony — Hospitality property due diligence in England · Check before you sign the lease">
+<meta property="og:description" content="Before you sign a lease on a restaurant, café or bar in England, check the premises against official records — planning history, food hygiene, licensing and insolvency — and see where the listing and the record disagree. From £49.">
 <meta property="og:url" content="https://YOUR-DOMAIN-HERE/">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Rellony — Hospitality Property Due Diligence in England">
-<meta name="twitter:description" content="Before you sign the lease: official records checked against what the agent claims. Currently England only.">
+<meta property="og:image" content="https://YOUR-DOMAIN-HERE/og-image.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Rellony — Can I open my business here? A sample finding card marked Unverified.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Rellony — Hospitality property due diligence in England · Check before you sign the lease">
+<meta name="twitter:description" content="Before you sign a lease on a restaurant, café or bar in England, check the premises against official records — planning history, food hygiene, licensing and insolvency — and see where the listing and the record disagree. From £49.">
+<meta name="twitter:image" content="https://YOUR-DOMAIN-HERE/og-image.png">
+<meta name="twitter:image:alt" content="Rellony — Can I open my business here? A sample finding card marked Unverified.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -52,6 +64,70 @@
      submission by hand and replies by email.
      ========================================================================== -->
 
+<!-- Structured data. Every absolute URL below carries the YOUR-DOMAIN-HERE
+     placeholder and must be replaced with the live domain before launch, or
+     the @ids will not resolve. Deliberately conservative: it states only
+     what is already true on this page and in the Terms — England-only
+     coverage, a £49–£99 one-time price range, and a service prepared by a
+     person. No aggregateRating, no review markup, no opening hours, and no
+     claims the concierge MVP cannot honour. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://YOUR-DOMAIN-HERE/#organization",
+      "name": "Rellony",
+      "url": "https://YOUR-DOMAIN-HERE/",
+      "email": "support@YOUR-DOMAIN-HERE",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://YOUR-DOMAIN-HERE/favicon.png",
+        "width": 180,
+        "height": 180
+      },
+      "image": "https://YOUR-DOMAIN-HERE/og-image.png",
+      "description": "Independent due-diligence reports on hospitality property in England, checking planning history, food hygiene, licensing and insolvency records against the claims made by the agent or listing.",
+      "areaServed": {
+        "@type": "AdministrativeArea",
+        "name": "England"
+      }
+    },
+    {
+      "@type": "Service",
+      "@id": "https://YOUR-DOMAIN-HERE/#service",
+      "name": "Hospitality property due-diligence report",
+      "serviceType": "Property due diligence",
+      "url": "https://YOUR-DOMAIN-HERE/",
+      "description": "A report on a specific hospitality property that sets what official and public records show — planning history, food hygiene inspections, licensing and corporate insolvency — against the claims made in the listing, with each finding marked confirmed, unverified or contradicted.",
+      "provider": { "@id": "https://YOUR-DOMAIN-HERE/#organization" },
+      "areaServed": {
+        "@type": "AdministrativeArea",
+        "name": "England"
+      },
+      "audience": {
+        "@type": "BusinessAudience",
+        "name": "Prospective restaurant, café, bakery, takeaway and bar operators"
+      },
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": "GBP",
+        "availability": "https://schema.org/LimitedAvailability",
+        "priceSpecification": {
+          "@type": "PriceSpecification",
+          "priceCurrency": "GBP",
+          "minPrice": 49,
+          "maxPrice": 99,
+          "valueAddedTaxIncluded": true
+        },
+        "description": "Early-access introductory range. One-time charge per report; the exact price is confirmed in writing by email before payment."
+      }
+    }
+  ]
+}
+</script>
+
 <script>
   /* Set before first paint so the evidence card can start in its pending
      state without flashing the resolved one. No JS, or reduced motion → the
@@ -71,7 +147,7 @@
 
 <a class="skip" href="#check">Skip to the property check</a>
 
-<header class="site-head">
+<header class="site-head" id="top">
   <div class="shell site-head__inner">
     <a class="wordmark" href="./">Rellony</a>
     <span class="coverage-chip">Currently England only</span>
@@ -90,11 +166,12 @@
     <div class="shell hero__grid">
 
       <div class="hero__left">
-        <h1>The listing says it.<br><span class="dim">The record may not.</span></h1>
+        <h1>Can I open my business here?</h1>
+        <span class="h1-rule" aria-hidden="true"></span>
         <p class="lede hero__lede">
-          Rellony provides hospitality property due diligence in England: we check the
-          address against official records — planning history, food hygiene, licensing and
-          corporate insolvency — and set what they show against what the agent claims.
+          Before you sign a lease on a restaurant, café or bar in England, find out what
+          the official records actually say — planning history, food hygiene, licensing,
+          insolvency — and where they contradict the agent’s listing.
         </p>
 
         <p class="coverage-line">Currently available for properties in England</p>
@@ -148,7 +225,7 @@
           <fieldset class="field-group">
             <legend>What it needs to do</legend>
             <span class="hint">
-              The same unit can be fine for a café and a real problem for a late-night kitchen.
+              The same unit can suit one operation and fail another — tell us what you’ll run
             </span>
             <div class="chips">
               <label class="chip">
@@ -217,6 +294,8 @@
 
           <button type="submit" class="btn" id="submit-btn">Request a check</button>
 
+          <p class="btn-note">Free preliminary check. Full report from £49</p>
+
           <p class="form-error" id="form-error" hidden role="alert"></p>
 
         </form>
@@ -231,7 +310,7 @@
     <div class="shell">
 
       <div class="record-section__intro">
-        <h2 id="finding-h">This is what you get back</h2>
+        <h2 id="finding-h">The listing says it.<br><span class="dim">The record may not.</span></h2>
         <p>
           Every finding keeps three things apart: what a record actually says, what that
           could plausibly mean, and what you should go and ask.
@@ -358,7 +437,9 @@
 
   <!-- ======================= HOW IT WORKS + LIMITS ======================= -->
   <section class="twocol" aria-labelledby="how-h">
-    <div class="shell twocol__grid">
+    <div class="shell">
+     <div class="twocol__band paper">
+      <div class="twocol__grid">
 
       <div>
         <h2 id="how-h">How it works</h2>
@@ -386,8 +467,9 @@
             <div>
               <h3>You get the report</h3>
               <p>
-                Every finding sourced, every status earned, and an explicit list of what
-                could not be verified.
+                Every finding sourced and its status earned, an explicit list of what could
+                not be verified, and at the end: a verdict on the evidence, the questions to
+                put to the agent or landlord, and the documents to ask for before you commit.
               </p>
             </div>
           </li>
@@ -416,6 +498,8 @@
         </ul>
       </div>
 
+      </div>
+     </div>
     </div>
   </section>
 
@@ -424,14 +508,17 @@
 <footer class="site-foot">
   <div class="shell">
 
-    <p class="signoff">
-      <span>Rely on the evidence</span>
-      <span>Know before you commit</span>
-    </p>
+    <div class="lockup">
+      <a class="lockup__mark" href="#top">Rellony</a>
+      <p class="signoff">
+        <span>Rely on the evidence</span>
+        <span>Know before you commit</span>
+      </p>
+    </div>
 
     <div class="foot__row">
       <div class="foot__about">
-        <p><strong>Rellony</strong> — due-diligence reports on hospitality property, prepared before you sign the lease</p>
+        <p>Due-diligence reports on hospitality property, prepared before you sign the lease</p>
         <span class="coverage-chip">Currently England only</span>
       </div>
 
@@ -440,9 +527,10 @@
         <li><a href="#finding">Sample finding</a></li>
         <li><a href="privacy.html">Privacy Policy</a></li>
         <li><a href="terms.html">Terms of Service</a></li>
-        <!-- SUPPORT_EMAIL placeholder — replace once the domain is live -->
-        <li><a href="mailto:support@YOUR-DOMAIN-HERE">support@YOUR-DOMAIN-HERE</a></li>
       </ul>
+
+      <!-- SUPPORT_EMAIL placeholder — replace once the domain is live -->
+      <p class="foot__contact"><a href="mailto:support@YOUR-DOMAIN-HERE">support@YOUR-DOMAIN-HERE</a></p>
     </div>
 
     <p class="fine foot__note">
@@ -490,6 +578,18 @@
   }
 
   /* ---------------------------------------------------------------- */
+  /* H1 hairline: drawn once on load, then static. Never loops.        */
+  /* Without motion-ok (reduced motion, or no JS) it is already at     */
+  /* full width and nothing animates.                                  */
+  /* ---------------------------------------------------------------- */
+  var h1Rule = document.querySelector('.h1-rule');
+  if (h1Rule && document.documentElement.classList.contains('motion-ok')) {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { h1Rule.classList.add('is-drawn'); });
+    });
+  }
+
+  /* ---------------------------------------------------------------- */
   /* Chip state fallback for engines without :has()                    */
   /* ---------------------------------------------------------------- */
   var supportsHas = false;
@@ -520,6 +620,16 @@
   if (!form) { return; }
 
   form.setAttribute('action', FORMSPREE_ENDPOINT);
+
+  /* The submit button's muted/ready state is handled entirely in CSS, by
+     `form:valid .btn` — see styles.css. It used to be a class toggled from
+     'input' and 'change' handlers here, which went stale whenever a value
+     arrived without an event (password managers and form-fillers assign
+     .value directly; so does back/forward and session restore), leaving a
+     fully completed form with a dimmed button. Validity is the real state,
+     so the style reads validity directly. Do not reintroduce a JS mirror
+     of it. The button is still never `disabled`, so a click on an
+     incomplete form runs the check below and reports what is missing. */
 
   function showError(message) {
     errorEl.textContent = message;

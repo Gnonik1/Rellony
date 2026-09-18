@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Rellony">
+  <!-- Brand colours only: the olive desk (#454B37) and vellum (#F4F1E9).
+       The R is drawn as a path rather than set as <text>, so it renders
+       identically everywhere instead of depending on a font being available
+       in the favicon rendering context. -->
+  <rect width="32" height="32" rx="7" fill="#454B37"/>
+  <g transform="translate(-1.4 0)" fill="#F4F1E9" fill-rule="evenodd">
+    <path d="M9.5 7.5
+             H18.2
+             C22.3 7.5 24.6 9.6 24.6 13
+             C24.6 15.6 23.3 17.5 21 18.4
+             L25.4 24.5
+             H20.1
+             L16.3 18.9
+             H13.6
+             V24.5
+             H9.5
+             Z
+             M13.6 11.2
+             V15.3
+             H18
+             C19.6 15.3 20.5 14.5 20.5 13.2
+             C20.5 11.9 19.6 11.2 18 11.2
+             Z"/>
+  </g>
+</svg>
