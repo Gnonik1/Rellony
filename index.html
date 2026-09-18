@@ -290,6 +290,28 @@
                   <span class="result__detail" id="result-authority"></span>
                 </span>
               </li>
+
+              <!-- Conservation area. Both wordings are about the AREA, never
+                   the premises and never what the visitor may or may not do
+                   there: the lookup asks which polygon contains the postcode
+                   centroid, and that is all it can answer. "None found
+                   covering this address" is deliberately not "this address is
+                   not in a conservation area" — the first is what we looked
+                   up, the second is a conclusion we have not earned.
+                   Hidden entirely when the lookup could not answer. -->
+              <li id="result-conservation-line" hidden>
+                <span class="result__tick" id="result-conservation-mark" aria-hidden="true">&#10003;</span>
+                <span>
+                  <strong>Conservation area</strong>
+                  <span class="result__detail result__detail--prose" id="result-conservation"></span>
+                  <a class="result__source" id="result-conservation-link"
+                     href="#" target="_blank" rel="noopener noreferrer" hidden>The council’s own page for this area<span class="vh"> (opens in a new tab)</span></a>
+                  <span class="result__aside" id="result-conservation-note" hidden>
+                    A conservation area can affect shopfronts, signage and external
+                    alterations — something the full report looks into properly.
+                  </span>
+                </span>
+              </li>
             </ul>
 
             <div class="result__note">
@@ -417,6 +439,8 @@
           <input type="hidden" name="country" id="hidden-country">
           <input type="hidden" name="region" id="hidden-region">
           <input type="hidden" name="coordinates" id="hidden-coords">
+          <input type="hidden" name="conservation_area" id="hidden-conservation">
+          <input type="hidden" name="conservation_area_source" id="hidden-conservation-url">
           <input type="hidden" name="_subject" id="hidden-subject" value="Rellony — property check request">
 
           <!-- The address itself. With JS this is filled from Stage 1 and
@@ -930,6 +954,18 @@
   var LOOKUP_TIMEOUT_MS = 4000;
   var COVERED_COUNTRY   = 'England';
 
+  /* The conservation-area lookup runs on the coordinates the postcode lookup
+     returns, so the two are sequential and the second one needs a tighter
+     cap than the first — plus an overall budget, so a slow-but-successful
+     first leg cannot push the pair past something a visitor will wait for.
+     `field=` is not a nicety: without it every entity ships its full
+     boundary polygon and a single result runs to tens of kilobytes. Asking
+     only for what is displayed brings a hit down to a few hundred bytes. */
+  var PLANNING_API        = 'https://www.planning.data.gov.uk/entity.json';
+  var PLANNING_FIELDS     = '&field=name&field=reference&field=documentation-url&field=dataset';
+  var CONSERVATION_TIMEOUT_MS = 3000;
+  var TOTAL_BUDGET_MS     = 6500;
+
   /* Outward code, then inward code, tolerating any or no space between.
      Matches the LAST occurrence in the string, because an address puts its
      postcode at the end and a street name can occasionally look like an
@@ -942,6 +978,16 @@
     return last ? last.replace(/\s+/g, ' ').trim().toUpperCase() : null;
   }
 
+  /* "unavailable" is the conservation status for every way of not knowing —
+     lookup failed, timed out, never ran because there were no coordinates,
+     or the address was never resolved in the first place. The UI drops the
+     line entirely on it, which is the same silent-fallback rule the postcode
+     lookup follows: a visitor is not told about a records service they did
+     not ask us to call. */
+  function conservationUnavailable() {
+    return { status: 'unavailable', name: null, reference: null, documentationUrl: null };
+  }
+
   function unresolved(postcode) {
     return {
       status: 'unresolved',
@@ -950,31 +996,94 @@
       region: null,
       localAuthority: null,
       lat: null,
-      lng: null
+      lng: null,
+      conservationArea: conservationUnavailable()
     };
   }
 
-  function runPreliminaryCheck(addressString) {
-    var postcode = extractPostcode(addressString || '');
-
-    if (!postcode) { return Promise.resolve(unresolved(null)); }
-    if (typeof fetch !== 'function') { return Promise.resolve(unresolved(postcode)); }
+  /* One timed fetch for both lookups. Resolves to the parsed body, or to
+     null for every failure mode there is — network error, non-200, bad
+     JSON, timeout, or no fetch in this engine. Callers decide what null
+     means for them; neither of them treats it as an error worth showing. */
+  function fetchJSON(url, timeoutMs) {
+    if (typeof fetch !== 'function' || !(timeoutMs > 0)) { return Promise.resolve(null); }
 
     var controller = null;
     try { controller = new AbortController(); } catch (e) {}
 
-    var lookup = fetch(POSTCODES_API + encodeURIComponent(postcode),
-                       controller ? { signal: controller.signal } : undefined)
-      .then(function (response) {
-        /* 404 is the ordinary answer for a terminated, invalid or unknown
-           postcode, not an exception. It is not coverage, so it is not a
-           result — it is "unresolved". */
-        return response.ok ? response.json() : null;
-      })
+    var request = fetch(url, controller ? { signal: controller.signal } : undefined)
+      .then(function (response) { return response.ok ? response.json() : null; })
+      .catch(function () { return null; });
+
+    var expiry = new Promise(function (resolve) {
+      setTimeout(function () {
+        if (controller) { try { controller.abort(); } catch (e) {} }
+        resolve(null);
+      }, timeoutMs);
+    });
+
+    return Promise.race([request, expiry]);
+  }
+
+  /* A URL arriving from a third-party record never reaches an href without
+     passing this. Anything that is not plain http(s) — a javascript: URL
+     above all — is dropped and the link simply does not appear. */
+  function safeHttpUrl(value) {
+    if (typeof value !== 'string') { return null; }
+    var trimmed = value.trim();
+    return /^https?:\/\//i.test(trimmed) ? trimmed : null;
+  }
+
+  /* Conservation areas are polygons, and this asks which one contains a
+     point. The point is the postcode centroid, not the premises — which is
+     why every word the UI puts on screen about it is about the area. */
+  function lookupConservationArea(lat, lng, timeoutMs) {
+    if (lat == null || lng == null) { return Promise.resolve(conservationUnavailable()); }
+
+    var url = PLANNING_API + '?dataset=conservation-area' +
+              '&latitude=' + encodeURIComponent(lat) +
+              '&longitude=' + encodeURIComponent(lng) +
+              PLANNING_FIELDS;
+
+    return fetchJSON(url, timeoutMs).then(function (body) {
+      if (!body || !Object.prototype.hasOwnProperty.call(body, 'entities') ||
+          !Array.isArray(body.entities)) {
+        return conservationUnavailable();
+      }
+      /* An empty list is a real answer — the service looked and found no
+         polygon covering this point. That is not the same as "unavailable",
+         and the two are worded differently on screen. */
+      if (!body.entities.length) {
+        return { status: 'none', name: null, reference: null, documentationUrl: null };
+      }
+      var area = body.entities[0];
+      return {
+        status: 'found',
+        /* printed exactly as the record holds it, including its casing —
+           councils publish these inconsistently and correcting them would
+           be inventing a name the record does not use */
+        name: area.name || null,
+        reference: area.reference || null,
+        documentationUrl: safeHttpUrl(area['documentation-url'])
+      };
+    });
+  }
+
+  function runPreliminaryCheck(addressString) {
+    var postcode = extractPostcode(addressString || '');
+    if (!postcode) { return Promise.resolve(unresolved(null)); }
+
+    var deadline = Date.now() + TOTAL_BUDGET_MS;
+
+    return fetchJSON(POSTCODES_API + encodeURIComponent(postcode), LOOKUP_TIMEOUT_MS)
       .then(function (body) {
+        /* A 404 is the ordinary answer for a terminated, invalid or unknown
+           postcode, and fetchJSON has already turned it into null. It is not
+           coverage, so it is not a result — it is "unresolved". */
         var r = body && body.result;
         if (!r || !r.country) { return unresolved(postcode); }
-        return {
+
+        var check = {
           status: r.country === COVERED_COUNTRY ? 'in_coverage' : 'outside_coverage',
           postcode: r.postcode || postcode,
           country: r.country,
@@ -983,19 +1092,22 @@
           region: r.region || null,
           localAuthority: r.admin_district || null,
           lat: typeof r.latitude  === 'number' ? r.latitude  : null,
-          lng: typeof r.longitude === 'number' ? r.longitude : null
+          lng: typeof r.longitude === 'number' ? r.longitude : null,
+          conservationArea: conservationUnavailable()
         };
-      })
-      .catch(function () { return unresolved(postcode); });
 
-    var expiry = new Promise(function (resolve) {
-      setTimeout(function () {
-        if (controller) { try { controller.abort(); } catch (e) {} }
-        resolve(unresolved(postcode));
-      }, LOOKUP_TIMEOUT_MS);
-    });
+        /* Only an in-coverage address reaches the result panel, so only an
+           in-coverage address is worth a second request. Everything else
+           keeps the "unavailable" conservation shape it was built with. */
+        if (check.status !== 'in_coverage') { return check; }
 
-    return Promise.race([lookup, expiry]);
+        var remaining = Math.min(CONSERVATION_TIMEOUT_MS, deadline - Date.now());
+        return lookupConservationArea(check.lat, check.lng, remaining)
+          .then(function (area) {
+            check.conservationArea = area;
+            return check;
+          });
+      });
   }
 
   /* ---------------------------------------------------------------- */
@@ -1050,6 +1162,79 @@
     if (node) { node.value = value == null ? '' : String(value); }
   }
 
+  /* ------------------------------------------------------------------ */
+  /* Case, and only case.                                                */
+  /*                                                                     */
+  /* Records print exactly as they are held — "Westminster", never       */
+  /* "City of Westminster" — because adding words the record does not    */
+  /* contain is inventing a name. Changing letter case invents nothing:  */
+  /* "ENFIELD TOWN" and "Enfield Town" are the same name, and the        */
+  /* shouting is a council's data-entry convention rather than anything  */
+  /* true about the place. Every other line in this panel is sentence    */
+  /* case, so the record is brought to the page's convention and no      */
+  /* further.                                                            */
+  /*                                                                     */
+  /* This runs at the point of display only. The object returned by      */
+  /* runPreliminaryCheck keeps the record's own value, and so do the     */
+  /* hidden fields that carry it to the enquiry — that copy is internal  */
+  /* and is what someone would cross-check against the source.           */
+  /* ------------------------------------------------------------------ */
+
+  /* Lowercased anywhere but the opening word. */
+  var CASE_SMALL_WORDS = {
+    a: 1, an: 1, and: 1, as: 1, at: 1, by: 1, for: 1, from: 1, in: 1,
+    nor: 1, of: 1, on: 1, or: 1, the: 1, to: 1, under: 1, upon: 1, with: 1
+  };
+
+  /* Lowercased only inside a hyphenated compound — Chorlton-cum-Hardy,
+     Weston-super-Mare — never when standing on their own as a word. */
+  var CASE_SMALL_IN_COMPOUND = { cum: 1, de: 1, la: 1, le: 1, super: 1 };
+
+  function capitaliseSegment(segment, isOpeningWord, insideCompound) {
+    var lower = segment.toLowerCase();
+    if (!lower) { return segment; }
+
+    if (!isOpeningWord &&
+        (CASE_SMALL_WORDS[lower] ||
+         (insideCompound && CASE_SMALL_IN_COMPOUND[lower]))) {
+      return lower;
+    }
+
+    /* the first LETTER, not the first character, so "(north)" becomes
+       "(North)" rather than being left alone */
+    var out = lower.replace(/[a-z]/, function (c) { return c.toUpperCase(); });
+
+    /* An apostrophe normally keeps what follows it lowercase — St Mary's,
+       not St Mary'S. The exception is a one-letter prefix: O'Brien. */
+    if (/^[ODL]'[a-z]/.test(out)) {
+      out = out.slice(0, 2) + out.charAt(2).toUpperCase() + out.slice(3);
+    }
+    return out;
+  }
+
+  function normaliseRecordCase(value) {
+    if (typeof value !== 'string') { return value; }
+    var text = value.trim();
+    if (!text) { return value; }
+
+    /* The condition: only a string with no lowercase letter in it at all.
+       A record that already mixes cases is carrying information we cannot
+       second-guess — "RAF Northolt" must never become "Raf Northolt" — so
+       it is returned exactly as it arrived. */
+    if (text !== text.toUpperCase() || text === text.toLowerCase()) { return value; }
+
+    var isOpeningWord = true;
+    return text.replace(/\S+/g, function (word) {
+      var out = word.split('-').map(function (segment, i) {
+        return capitaliseSegment(segment, isOpeningWord && i === 0, i > 0);
+      }).join('-');
+      /* a leading house number is not the opening word — '12 THE STREET'
+         should still give 'The' its capital */
+      if (/[a-z]/i.test(word)) { isOpeningWord = false; }
+      return out;
+    });
+  }
+
   function el(tag, className, text) {
     var node = document.createElement(tag);
     if (className) { node.className = className; }
@@ -1075,10 +1260,33 @@
       setValue('hidden-region',    check.region);
       setValue('hidden-coords',
         check.lat != null && check.lng != null ? check.lat + ', ' + check.lng : '');
+
+      /* Written for the person who reads the enquiry, so it says which of the
+         three things happened rather than leaving an empty field to guess at.
+         The name goes across exactly as the record holds it, uncorrected for
+         case — this copy is what someone would cross-check against the source,
+         so it has to match the source character for character. */
+      var area = check.conservationArea || conservationUnavailable();
+      if (area.status === 'found') {
+        setValue('hidden-conservation',
+          area.name + (area.reference ? ' (' + area.reference + ')' : ''));
+        setValue('hidden-conservation-url', area.documentationUrl);
+      } else if (area.status === 'none') {
+        setValue('hidden-conservation', 'None found covering this postcode');
+        setValue('hidden-conservation-url', '');
+      } else {
+        setValue('hidden-conservation', 'Lookup unavailable');
+        setValue('hidden-conservation-url', '');
+      }
+
       setValue('hidden-subject',
         'Rellony — property check: ' +
         (check.localAuthority ? check.localAuthority + ' ' : '') + check.postcode);
     } else {
+      /* Cleared rather than left alone: a visitor can check one address, go
+         back and check another, and nothing from the first may survive. */
+      setValue('hidden-conservation', '');
+      setValue('hidden-conservation-url', '');
       setValue('hidden-subject', 'Rellony — property check: address unresolved');
     }
 
@@ -1107,7 +1315,7 @@
 
     var parts = [];
     if (check.postcode)       { parts.push(check.postcode); }
-    if (check.localAuthority) { parts.push(check.localAuthority); }
+    if (check.localAuthority) { parts.push(normaliseRecordCase(check.localAuthority)); }
     parts.push(check.country);
     parts.push('within coverage');
 
@@ -1115,17 +1323,64 @@
 
     var authorityLine = document.getElementById('result-authority-line');
     if (check.localAuthority) {
-      setText('result-authority', '— ' + check.localAuthority);
+      setText('result-authority', '— ' + normaliseRecordCase(check.localAuthority));
       if (authorityLine) { authorityLine.hidden = false; }
     } else if (authorityLine) {
       authorityLine.hidden = true;
     }
+
+    renderConservation(check.conservationArea || conservationUnavailable());
 
     stageCheck.hidden = true;
     stageResult.hidden = false;
 
     var box = document.getElementById('result-box');
     if (box) { box.focus(); }
+  }
+
+  /* Renders from the normalized object and nothing else. "unavailable" takes
+     the whole line off the panel rather than reporting a failure: the rest of
+     the check still stands on its own. */
+  function renderConservation(area) {
+    var line = document.getElementById('result-conservation-line');
+    var mark = document.getElementById('result-conservation-mark');
+    var link = document.getElementById('result-conservation-link');
+    var note = document.getElementById('result-conservation-note');
+    if (!line) { return; }
+
+    if (area.status === 'unavailable') {
+      line.hidden = true;
+      if (link) { link.hidden = true; }
+      if (note) { note.hidden = true; }
+      return;
+    }
+
+    var found = area.status === 'found' && area.name;
+
+    setText('result-conservation', found
+      ? '— this address falls within ' + normaliseRecordCase(area.name)
+      : '— none found covering this address');
+
+    /* A tick is the panel's mark for "we found a record". Nothing was found
+       in the other case, so it takes a neutral dash instead — not an amber
+       warning, because an absence here is not a problem, just an absence. */
+    if (mark) {
+      mark.textContent = found ? '\u2713' : '\u2013';
+      mark.className = found ? 'result__tick' : 'result__tick result__tick--none';
+    }
+
+    if (link) {
+      if (found && area.documentationUrl) {
+        link.href = area.documentationUrl;
+        link.hidden = false;
+      } else {
+        link.removeAttribute('href');
+        link.hidden = true;
+      }
+    }
+
+    if (note) { note.hidden = false; }
+    line.hidden = false;
   }
 
   function showOutside(check, address) {

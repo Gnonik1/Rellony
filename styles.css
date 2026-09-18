@@ -914,6 +914,15 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
 .eyebrow--paper { color: var(--paper-soft); }
 
 /* --- a text button that reads as a link, not a control ----------------- */
+/* Text for screen readers only — used to say that a link opens in a new tab,
+   which sighted users can see from context but nobody else can. */
+.vh {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%);
+  white-space: nowrap; border: 0;
+}
+
 .linkish {
   font: inherit; font-size: inherit; color: inherit;
   background: none; border: 0; padding: 0;
@@ -945,6 +954,22 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   display: block; margin-top: 0.15rem;
   font-family: var(--record); font-size: 0.8125rem;
   color: var(--paper-soft); overflow-wrap: anywhere;
+}
+
+/* the conservation line is a sentence, not a record value, so it takes the
+   text face rather than the mono one the postcode and authority use */
+.result__detail--prose { font-family: var(--text); font-size: 0.875rem; }
+
+/* the mark for "we looked and found nothing" — neutral, not a warning */
+.result__tick--none { color: var(--paper-soft); font-weight: 500; }
+
+.result__source {
+  display: inline-block; margin-top: 0.35rem;
+  font-size: 0.8125rem; color: var(--paper-ink);
+}
+.result__aside {
+  display: block; margin-top: 0.45rem;
+  font-size: 0.8125rem; line-height: 1.45; color: var(--paper-soft);
 }
 
 .result__note {
