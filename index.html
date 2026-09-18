@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Rellony — Hospitality Property Due Diligence in England</title>
+<meta name="description" content="Rellony checks a hospitality property against official records — planning history, food hygiene, licensing and corporate insolvency — and sets what they show against what the agent or listing claims. Due-diligence reports from £49. Currently England only.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://YOUR-DOMAIN-HERE/">
+
+<!-- Open Graph / social. URL is a placeholder until the domain is live.
+     No og:image yet — a broken image URL is worse than none; add one
+     (1200×630) once there's an asset worth showing. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Rellony">
+<meta property="og:locale" content="en_GB">
+<meta property="og:title" content="Rellony — Hospitality Property Due Diligence in England">
+<meta property="og:description" content="Before you sign the lease: official records on planning, food hygiene, licensing and insolvency, checked against what the agent claims. Currently England only.">
+<meta property="og:url" content="https://YOUR-DOMAIN-HERE/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Rellony — Hospitality Property Due Diligence in England">
+<meta name="twitter:description" content="Before you sign the lease: official records checked against what the agent claims. Currently England only.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+
+<!-- ==========================================================================
+     PLACEHOLDER CONSTANTS — replace before launch.
+
+       FORMSPREE_ENDPOINT   https://formspree.io/f/xrpbgnna
+                            (appears in the <form action> below AND in the
+                             FORMSPREE_ENDPOINT constant in the script at the
+                             bottom of this file — update both)
+
+       SUPPORT_EMAIL        support@YOUR-DOMAIN-HERE
+                            (footer here, plus privacy.html and terms.html)
+
+       YOUR-DOMAIN-HERE     canonical + og:url + twitter meta above
+
+     COVERAGE: England only. The planning-verification logic is built and
+     tested for England; Scotland, Wales and Northern Ireland have separate
+     planning and licensing frameworks we have no rules for. Do not let any
+     copy on this site imply coverage beyond England — including the SEO
+     title and meta description above.
+
+     Phase 0 is a human-in-the-loop concierge MVP: this page collects an
+     enquiry and nothing else. There is no database, no API, no payment
+     integration, and no automated availability gate. A person reviews each
+     submission by hand and replies by email.
+     ========================================================================== -->
+
+<script>
+  /* Set before first paint so the evidence card can start in its pending
+     state without flashing the resolved one. No JS, or reduced motion → the
+     card simply renders fully resolved. */
+  (function () {
+    var d = document.documentElement;
+    d.classList.add('js');
+    try {
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        d.classList.add('motion-ok');
+      }
+    } catch (e) {}
+  })();
+</script>
+</head>
+<body>
+
+<a class="skip" href="#check">Skip to the property check</a>
+
+<header class="site-head">
+  <div class="shell site-head__inner">
+    <a class="wordmark" href="./">Rellony</a>
+    <span class="coverage-chip">Currently England only</span>
+    <nav class="site-nav" aria-label="Site">
+      <a href="#finding">Sample finding</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ============================ HERO + FORM ============================ -->
+  <section class="hero">
+    <div class="shell hero__grid">
+
+      <div class="hero__left">
+        <h1>The listing says it.<br><span class="dim">The record may not.</span></h1>
+        <p class="lede hero__lede">
+          Rellony provides hospitality property due diligence in England: we check the
+          address against official records — planning history, food hygiene, licensing and
+          corporate insolvency — and set what they show against what the agent claims.
+        </p>
+
+        <p class="coverage-line">Currently available for properties in England</p>
+
+        <div class="price">
+          <p>
+            <span class="price__figure">From £49–£99</span>
+            <span class="price__unit">per report, one-time</span>
+          </p>
+          <p class="fine">
+            Early-access introductory range. The exact figure depends on the property and
+            how much of it we can actually cover, and is confirmed in writing before you
+            pay anything.
+          </p>
+        </div>
+      </div>
+
+      <div class="panel" id="check">
+
+        <form id="enquiry-form"
+              action="https://formspree.io/f/xrpbgnna"
+              method="POST"
+              novalidate>
+
+          <div class="panel__head">
+            <h2>Check a property</h2>
+            <p class="fine">Takes about a minute. Nothing is charged at this stage.</p>
+          </div>
+
+          <div class="field">
+            <label for="address">Property address</label>
+            <span class="hint" id="address-hint">Street, town and postcode, as it appears on the listing</span>
+            <input type="text" id="address" name="property_address"
+                   autocomplete="street-address"
+                   aria-describedby="address-hint" required>
+          </div>
+
+          <div class="field">
+            <label for="business-type">Business type</label>
+            <select id="business-type" name="business_type" required>
+              <option value="" selected disabled>Select one…</option>
+              <option value="Restaurant">Restaurant</option>
+              <option value="Cafe">Café</option>
+              <option value="Bakery">Bakery</option>
+              <option value="Takeaway">Takeaway</option>
+              <option value="Bar / pub">Bar / pub</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <fieldset class="field-group">
+            <legend>What it needs to do</legend>
+            <span class="hint">
+              The same unit can be fine for a café and a real problem for a late-night kitchen.
+            </span>
+            <div class="chips">
+              <label class="chip">
+                <input type="checkbox" name="operating_needs" value="Alcohol licence">
+                <span>Alcohol licence</span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" name="operating_needs" value="Late-night food">
+                <span>Late-night food</span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" name="operating_needs" value="Outdoor seating">
+                <span>Outdoor seating</span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" name="operating_needs" value="Commercial extraction">
+                <span>Commercial extraction</span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" name="operating_needs" value="Delivery / takeaway">
+                <span>Delivery / takeaway</span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" name="operating_needs" value="Music or entertainment">
+                <span>Music or entertainment</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="field">
+            <label for="agent-claims">Listing link or agent claims <span class="muted">(optional)</span></label>
+            <span class="hint" id="claims-hint">
+              Paste the link, or the claims you want checked — “A3 use”, “extraction in
+              place”, “late licence”.
+            </span>
+            <textarea id="agent-claims" name="agent_claims"
+                      aria-describedby="claims-hint"
+                      placeholder="https://… or pasted text"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="email">Your email</label>
+            <input type="email" id="email" name="email"
+                   autocomplete="email" inputmode="email" required>
+          </div>
+
+          <!-- honeypot — hidden from people, left for bots -->
+          <div class="trap" aria-hidden="true">
+            <label for="company-website">Leave this field empty</label>
+            <input type="text" id="company-website" name="_gotcha" tabindex="-1" autocomplete="off">
+          </div>
+
+          <p class="pre-submit">
+            We’ll review this and get back to you <strong>within 1 business day</strong> —
+            confirming whether we can prepare a report and what it will cost.
+          </p>
+
+          <div class="consent-check">
+            <input type="checkbox" id="consent" name="consent"
+                   value="Agreed to Terms of Service and Privacy Policy" required>
+            <label for="consent">
+              I agree to the <a href="terms.html">Terms of Service</a> and
+              <a href="privacy.html">Privacy Policy</a>
+            </label>
+          </div>
+
+          <button type="submit" class="btn" id="submit-btn">Request a check</button>
+
+          <p class="form-error" id="form-error" hidden role="alert"></p>
+
+        </form>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= THE RECORD — ONE ILLUMINATED ELEMENT ================= -->
+  <section class="record-section" id="finding" aria-labelledby="finding-h">
+    <div class="shell">
+
+      <div class="record-section__intro">
+        <h2 id="finding-h">This is what you get back</h2>
+        <p>
+          Every finding keeps three things apart: what a record actually says, what that
+          could plausibly mean, and what you should go and ask.
+        </p>
+      </div>
+
+      <p class="demo-label">Example finding — illustration of our report format</p>
+
+      <article class="finding" data-status="unverified">
+
+        <div class="finding__claim">
+          <div class="finding__claim-text">
+            <p class="label">Claim from the listing</p>
+            <q>Extraction planning granted, suitable for full commercial kitchen.</q>
+          </div>
+          <p class="status">
+            <span class="status__dot" aria-hidden="true"></span>
+            <span class="status__label">
+              <span class="status__pending" aria-hidden="true">Checking the record</span>
+              <span class="status__final">Unverified</span>
+            </span>
+          </p>
+        </div>
+
+        <div class="finding__cols">
+          <div class="ev-col">
+            <h3>Evidence</h3>
+            <p>
+              No planning record granting extraction at this address was found in the
+              sources searched. The address appears only in unrelated neighbour
+              notification records, the most recent
+              <span class="record">18/04417/NEI</span>, dated
+              <span class="record">09 Nov 2018</span>.
+            </p>
+          </div>
+          <div class="ev-col">
+            <h3>Interpretation</h3>
+            <p>
+              This does not establish that no permission exists — a consent can predate the
+              searchable record, or sit under a different address format. It does mean the
+              claim is <strong>currently unsupported by any record we could find</strong>.
+            </p>
+          </div>
+          <div class="ev-col">
+            <h3>Action</h3>
+            <p>
+              Ask the landlord or agent for the planning reference and the decision notice
+              in writing, <strong>before</strong> the extraction claim influences what you
+              are willing to pay.
+            </p>
+          </div>
+        </div>
+
+      </article>
+
+      <p class="legend">
+        <span><i class="dot-confirmed"></i> Confirmed by a primary record</span>
+        <span><i class="dot-unverified"></i> No independent record found</span>
+        <span><i class="dot-contradicted"></i> Record contradicts the claim</span>
+      </p>
+
+      <p class="record-section__foot">
+        An agent’s own claim never counts as confirmation of itself. Where we cannot
+        confirm something, we say so plainly rather than filling the gap.
+      </p>
+
+    </div>
+  </section>
+
+  <!-- ========================== WHAT GETS CHECKED ========================== -->
+  <section class="checked" aria-labelledby="checked-h">
+    <div class="shell">
+
+      <div class="checked__head">
+        <h2 id="checked-h">Four record trails, one property</h2>
+        <p class="lede">
+          We work the same four sources every time, in the same order, whatever the
+          property. That repeatability is the point.
+        </p>
+      </div>
+
+      <div class="checked__grid">
+
+        <article class="trail trail--1">
+          <span class="trail__no">01</span>
+          <h3>Planning history</h3>
+          <p>
+            Applications, decisions and refusals attached to the address — attempts at
+            extraction, extensions or a change of use, and whether they were granted or
+            turned down.
+          </p>
+        </article>
+
+        <article class="trail trail--2">
+          <span class="trail__no">02</span>
+          <h3>Food hygiene</h3>
+          <p>
+            Inspection history for the premises from the national food hygiene rating
+            data, including past ratings and what inspectors recorded.
+          </p>
+        </article>
+
+        <article class="trail trail--3">
+          <span class="trail__no">03</span>
+          <h3>Licensing</h3>
+          <p>
+            What the intended operation would need, and what the public record shows about
+            licensing at this address — including refused or restricted hours applications.
+          </p>
+        </article>
+
+        <article class="trail trail--4">
+          <span class="trail__no">04</span>
+          <h3>Corporate &amp; insolvency</h3>
+          <p>
+            Company status, filing history and published insolvency or liquidation notices
+            connected to businesses that have traded from the property.
+          </p>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= HOW IT WORKS + LIMITS ======================= -->
+  <section class="twocol" aria-labelledby="how-h">
+    <div class="shell twocol__grid">
+
+      <div>
+        <h2 id="how-h">How it works</h2>
+        <ol class="steps">
+          <li>
+            <div>
+              <h3>You send the address</h3>
+              <p>
+                Plus what you intend to operate there. Nothing is charged, and sending it
+                commits you to nothing.
+              </p>
+            </div>
+          </li>
+          <li>
+            <div>
+              <h3>We come back within 1 business day</h3>
+              <p>
+                A person reviews the property and tells you what we can cover, what we
+                can’t, and the price. If we don’t think a report on this property would be
+                worth paying for, we say so.
+              </p>
+            </div>
+          </li>
+          <li>
+            <div>
+              <h3>You get the report</h3>
+              <p>
+                Every finding sourced, every status earned, and an explicit list of what
+                could not be verified.
+              </p>
+            </div>
+          </li>
+        </ol>
+      </div>
+
+      <div>
+        <h2>What a report is not</h2>
+        <ul class="limits">
+          <li>
+            It is <strong>not legal, planning, licensing or surveying advice</strong>, and
+            it is not a substitute for a solicitor or a professional survey.
+          </li>
+          <li>
+            It <strong>does not guarantee</strong> that a property is suitable, or that
+            permission will be granted for what you intend to do there.
+          </li>
+          <li>
+            It reflects <strong>the public record as it stood</strong> when the report was
+            prepared. Records change, and gaps in them are reported as gaps.
+          </li>
+          <li>
+            Early access: reports are currently prepared by <strong>a person</strong>
+            working through our evidence-checking process, not by an automated system.
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-foot">
+  <div class="shell">
+
+    <p class="signoff">
+      <span>Rely on the evidence</span>
+      <span>Know before you commit</span>
+    </p>
+
+    <div class="foot__row">
+      <div class="foot__about">
+        <p><strong>Rellony</strong> — due-diligence reports on hospitality property, prepared before you sign the lease</p>
+        <span class="coverage-chip">Currently England only</span>
+      </div>
+
+      <ul class="foot__links">
+        <li><a href="#check">Check a property</a></li>
+        <li><a href="#finding">Sample finding</a></li>
+        <li><a href="privacy.html">Privacy Policy</a></li>
+        <li><a href="terms.html">Terms of Service</a></li>
+        <!-- SUPPORT_EMAIL placeholder — replace once the domain is live -->
+        <li><a href="mailto:support@YOUR-DOMAIN-HERE">support@YOUR-DOMAIN-HERE</a></li>
+      </ul>
+    </div>
+
+    <p class="fine foot__note">
+      Rellony reports are independent research based on public records. They are not legal,
+      planning, licensing or surveying advice. Always take professional advice before
+      signing a lease.
+    </p>
+
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  /* PLACEHOLDER — paste the real Formspree form ID here, and in the
+     <form action> attribute above, before launch. */
+  var FORMSPREE_ENDPOINT = 'https://formspree.io/f/xrpbgnna';
+  var SUPPORT_EMAIL = 'support@YOUR-DOMAIN-HERE';
+
+  /* ---------------------------------------------------------------- */
+  /* The one motion moment: the sample finding resolves its status,    */
+  /* then reveals Evidence → Interpretation → Action in that order,    */
+  /* because that order is the rule the product actually follows.      */
+  /* Runs once. Skipped entirely under prefers-reduced-motion.         */
+  /* ---------------------------------------------------------------- */
+  var finding = document.querySelector('.finding');
+  if (finding) {
+    var resolve = function () { finding.classList.add('is-resolved'); };
+
+    if (!document.documentElement.classList.contains('motion-ok') ||
+        typeof IntersectionObserver === 'undefined') {
+      resolve();
+    } else {
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            resolve();
+            observer.disconnect();
+          }
+        });
+      }, { threshold: 0.35 });
+      observer.observe(finding);
+    }
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Chip state fallback for engines without :has()                    */
+  /* ---------------------------------------------------------------- */
+  var supportsHas = false;
+  try { supportsHas = CSS.supports('selector(:has(*))'); } catch (e) {}
+  if (!supportsHas) {
+    Array.prototype.forEach.call(document.querySelectorAll('.chip input'), function (input) {
+      var sync = function () { input.closest('.chip').classList.toggle('is-on', input.checked); };
+      input.addEventListener('change', sync);
+      sync();
+    });
+  }
+
+  /* Links inside the consent label must navigate, not toggle the box. */
+  Array.prototype.forEach.call(document.querySelectorAll('.consent-check a'), function (a) {
+    a.addEventListener('click', function (e) { e.stopPropagation(); });
+  });
+
+  /* ---------------------------------------------------------------- */
+  /* Enquiry form                                                      */
+  /* ---------------------------------------------------------------- */
+  var form    = document.getElementById('enquiry-form');
+  var panel   = document.getElementById('check');
+  var button  = document.getElementById('submit-btn');
+  var errorEl = document.getElementById('form-error');
+  var trap    = document.getElementById('company-website');
+  var addressField = document.getElementById('address');
+
+  if (!form) { return; }
+
+  form.setAttribute('action', FORMSPREE_ENDPOINT);
+
+  function showError(message) {
+    errorEl.textContent = message;
+    errorEl.hidden = false;
+    button.disabled = false;
+    button.textContent = 'Request a check';
+  }
+
+  function el(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) { node.className = className; }
+    if (text) { node.textContent = text; }
+    return node;
+  }
+
+  function showConfirmation(address) {
+    var box = el('div', 'confirm');
+    box.setAttribute('tabindex', '-1');
+    box.setAttribute('role', 'status');
+
+    var mark = el('span', 'confirm__mark', '✓');
+    mark.setAttribute('aria-hidden', 'true');
+    box.appendChild(mark);
+
+    var heading = el('h2');
+    heading.appendChild(document.createTextNode('We’re reviewing '));
+    /* textContent, so a pasted address can never inject markup */
+    heading.appendChild(el('span', 'addr', address || 'your property'));
+    heading.appendChild(document.createTextNode(' now'));
+    box.appendChild(heading);
+
+    box.appendChild(el('p', null,
+      'You’ll hear from us within 1 business day — we’ll confirm whether we ' +
+      'can prepare a report on this property, what it would cover, and what it will cost. ' +
+      'A person reads every enquiry; there is no automated reply coming.'));
+
+    box.appendChild(el('p', null,
+      'In the meantime, here’s what a finding from one of our checks looks like.'));
+
+    var link = document.createElement('a');
+    link.className = 'confirm__link';
+    link.href = '#finding';
+    link.appendChild(document.createTextNode('See a sample finding'));
+    var arrow = el('span', 'arrow', '→');
+    arrow.setAttribute('aria-hidden', 'true');
+    link.appendChild(arrow);
+    box.appendChild(link);
+
+    panel.innerHTML = '';
+    panel.appendChild(box);
+    box.focus();
+  }
+
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    errorEl.hidden = true;
+
+    var address = addressField ? addressField.value.trim() : '';
+
+    /* Honeypot: a real visitor never sees this field. Fail silently, so a bot
+       gets no signal about why the submission went nowhere. */
+    if (trap && trap.value !== '') {
+      showConfirmation(address);
+      return;
+    }
+
+    /* The required consent checkbox is part of this — an unchecked box fails
+       validity and focuses itself, so submit is genuinely blocked. */
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
+    button.disabled = true;
+    button.textContent = 'Sending…';
+
+    fetch(FORMSPREE_ENDPOINT, {
+      method: 'POST',
+      body: new FormData(form),
+      headers: { 'Accept': 'application/json' }
+    })
+      .then(function (response) {
+        if (response.ok) {
+          showConfirmation(address);
+        } else {
+          showError('Something went wrong sending that. Please try again, or email us ' +
+                    'directly at ' + SUPPORT_EMAIL + '.');
+        }
+      })
+      .catch(function () {
+        showError('We couldn’t reach the server — check your connection and try ' +
+                  'again, or email us at ' + SUPPORT_EMAIL + '.');
+      });
+  });
+})();
+</script>
+
+</body>
+</html>

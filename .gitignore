@@ -1,0 +1,16 @@
+# Background/reference material — NEVER commit.
+# Contains the internal MVP technical spec and collaboration plan.
+docs/
+mvp-technical-spec-v1.2.pdf
+rellony-collaboration-plan.pdf
+techspec.pdf
+collaboration.pdf
+*.pdf
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
