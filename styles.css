@@ -163,6 +163,9 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
 }
 
 .wordmark {
+  /* inline-flex + min-height so the link itself is a 44px target; the glyphs
+     are only ~22px tall and the bare <a> box was that tall too */
+  display: inline-flex; align-items: center; min-height: 2.75rem;
   font-family: var(--display);
   font-weight: 700;
   font-size: clamp(1.625rem, 0.6vw + 1.4rem, 2.125rem);
@@ -363,10 +366,22 @@ select:invalid { color: var(--paper-hint); }
 }
 .consent-check input {
   appearance: none; -webkit-appearance: none; flex: none;
+  position: relative;
   width: 1.125rem; height: 1.125rem; margin: 0.1rem 0 0;
   border: 1px solid var(--line-paper-firm); border-radius: 5px;
   background: var(--paper-well); cursor: pointer;
   transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+/* The painted box stays 18px, but the thing you tap is 44px. It extends
+   about 13px past the box on each side, which lands on "I agree to the"
+   — that text is the label and toggles the box anyway, and it stops well
+   short of the two inline links. If an engine drops pseudo-elements on
+   checkboxes, the <label> is still a full-width target. */
+.consent-check input::before {
+  content: "";
+  position: absolute; top: 50%; left: 50%;
+  width: 2.75rem; height: 2.75rem;
+  transform: translate(-50%, -50%);
 }
 .consent-check input:hover { border-color: var(--paper-ink); }
 .consent-check input:checked {
@@ -782,6 +797,98 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   letter-spacing: -0.015em; color: var(--unverified-paper); margin-bottom: 0.3rem;
 }
 .draft-flag span { display: block; font-size: 0.9375rem; line-height: 1.5; color: var(--paper-soft); }
+
+/* ==========================================================================
+   Phone — below 40rem (640px)
+
+   Density here comes from WIDENING the type scale, not from shrinking
+   everything by the same amount. Headings hold their size; supporting text
+   — hints, card copy, fine print, legend labels — steps down, so hierarchy
+   reappears instead of flattening into a wall. Containers give up padding.
+
+   Nothing interactive shrinks below 2.75rem (44px). Density is taken from
+   whitespace and from text that is not a control.
+
+   This block overrides base rules at the same specificity, so it must stay
+   below them in source order. Keep it here, above reduced-motion.
+   ========================================================================== */
+
+@media (max-width: 40rem) {
+
+  /* --- header: one compact row, wordmark left, nav right --- */
+  .site-head__inner {
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+    min-height: 3.5rem;
+    padding-block: 0.5rem;
+  }
+  /* The coverage chip already appears in the hero and again in the footer.
+     On a phone all three land on or near the first screen, so the header
+     instance goes. */
+  .site-head .coverage-chip { display: none; }
+  .wordmark { font-size: 1.375rem; }
+  .site-nav { gap: 0; flex-wrap: nowrap; }
+  .site-nav a { font-size: 0.8125rem; padding: 0.4rem 0.5rem; }
+
+  /* --- supporting text steps down --- */
+  .hint,
+  .fine,
+  .legend,
+  .btn-note,
+  .pre-submit,
+  .demo-label,
+  .finding__claim-text .label { font-size: 0.75rem; }
+  .consent-check { font-size: 0.8125rem; }
+  .field > label,
+  .field-group > legend { font-size: 0.8125rem; }
+  .trail p,
+  .ev-col p,
+  .steps p,
+  .limits li,
+  .record-section__intro p,
+  .record-section__foot,
+  .foot__about { font-size: 0.875rem; }
+  .lede { font-size: 1rem; }
+
+  /* --- headings keep their weight in the hierarchy --- */
+  .trail h3 { font-size: 1.0625rem; }
+  .panel__head h2 { font-size: 1.125rem; }
+
+  /* --- the form panel: less padding, tighter between field groups --- */
+  .panel { padding: 1.15rem 1rem; }
+  .panel__head { padding-bottom: 0.8rem; margin-bottom: 1rem; }
+  .field { margin-bottom: 0.8rem; }
+  .field-group { margin-bottom: 0.8rem; }
+  .hint { margin-bottom: 0.4rem; }
+  .chips { gap: 0.35rem; }
+  .pre-submit { margin-top: 0.9rem; }
+  .consent-check { margin: 0.7rem 0 0.9rem; }
+  .btn-note { margin-top: 0.6rem; }
+
+  /* --- record trails: shorter cells, tighter stack --- */
+  .trail { padding: 1.1rem 1rem; }
+  .trail__no { margin-bottom: 0.35rem; }
+  .checked__grid { gap: 0.5rem; }
+
+  /* --- sections give back some vertical run --- */
+  .hero { padding-block: 2rem 2.25rem; }
+  .checked { padding-block: 2.5rem; }
+  .record-section { padding-block: 2.5rem; }
+  .ev-col { padding: 1.1rem 1rem; }
+  .finding__claim { padding: 1.1rem 1rem; }
+
+  /* --- controls hold 44px no matter what the density says --- */
+  .chip { min-height: 2.75rem; padding: 0.5rem 0.65rem; }
+  input[type="text"],
+  input[type="email"],
+  select,
+  textarea { min-height: 2.75rem; }
+  .btn { min-height: 3rem; }
+  .site-nav a,
+  .foot__links a,
+  .backlink { min-height: 2.75rem; }
+  .consent-check input { width: 1.125rem; height: 1.125rem; }
+}
 
 /* ==========================================================================
    Reduced motion — the H1 rule renders static, nothing animates

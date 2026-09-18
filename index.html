@@ -4,34 +4,37 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>Rellony — Hospitality property due diligence in England · Check before you sign the lease</title>
+<title>Rellony — Property due diligence before you sign the lease</title>
 <meta name="description" content="Before you sign a lease on a restaurant, café or bar in England, check the premises against official records — planning history, food hygiene, licensing and insolvency — and see where the listing and the record disagree. From £49.">
 <meta name="robots" content="index, follow">
-<link rel="canonical" href="https://YOUR-DOMAIN-HERE/">
+
+<!-- DOMAIN: currently the GitHub Pages address. Every absolute URL on this
+     page uses it — canonical, og:url, og:image, twitter:image, and the
+     JSON-LD @ids further down. All of them switch to the real domain when
+     it is bought; search this file for gnonik1.github.io to find them. -->
+<link rel="canonical" href="https://gnonik1.github.io/Rellony/">
 
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon.png" type="image/png" sizes="180x180">
 <link rel="apple-touch-icon" href="favicon.png">
 
-<!-- Open Graph / social. The og:image MUST be an absolute URL — relative
-     paths are ignored by every scraper — so it carries the YOUR-DOMAIN-HERE
-     placeholder and will not resolve until the real domain is set. The file
-     itself (og-image.png, 1200×630) is committed alongside this page. -->
+<!-- Open Graph / social. og:image MUST be absolute — scrapers ignore
+     relative paths. DOMAIN: switches with the real domain (see above). -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Rellony">
 <meta property="og:locale" content="en_GB">
-<meta property="og:title" content="Rellony — Hospitality property due diligence in England · Check before you sign the lease">
-<meta property="og:description" content="Before you sign a lease on a restaurant, café or bar in England, check the premises against official records — planning history, food hygiene, licensing and insolvency — and see where the listing and the record disagree. From £49.">
-<meta property="og:url" content="https://YOUR-DOMAIN-HERE/">
-<meta property="og:image" content="https://YOUR-DOMAIN-HERE/og-image.png">
+<meta property="og:title" content="Can I open my business here?">
+<meta property="og:description" content="Check a hospitality property against planning, hygiene, licensing and insolvency records — before you sign.">
+<meta property="og:url" content="https://gnonik1.github.io/Rellony/">
+<meta property="og:image" content="https://gnonik1.github.io/Rellony/og-image.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Rellony — Can I open my business here? A sample finding card marked Unverified.">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Rellony — Hospitality property due diligence in England · Check before you sign the lease">
-<meta name="twitter:description" content="Before you sign a lease on a restaurant, café or bar in England, check the premises against official records — planning history, food hygiene, licensing and insolvency — and see where the listing and the record disagree. From £49.">
-<meta name="twitter:image" content="https://YOUR-DOMAIN-HERE/og-image.png">
+<meta name="twitter:title" content="Can I open my business here?">
+<meta name="twitter:description" content="Check a hospitality property against planning, hygiene, licensing and insolvency records — before you sign.">
+<meta name="twitter:image" content="https://gnonik1.github.io/Rellony/og-image.png">
 <meta name="twitter:image:alt" content="Rellony — Can I open my business here? A sample finding card marked Unverified.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -48,9 +51,16 @@
                              bottom of this file — update both)
 
        SUPPORT_EMAIL        support@YOUR-DOMAIN-HERE
-                            (footer here, plus privacy.html and terms.html)
+                            (footer here, plus privacy.html and terms.html,
+                             and the JSON-LD "email" below)
+                            STILL A PLACEHOLDER: a GitHub Pages address
+                            cannot receive mail, so this one only resolves
+                            once a real domain with a mailbox exists.
 
-       YOUR-DOMAIN-HERE     canonical + og:url + twitter meta above
+     DOMAIN: the absolute URLs above and in the JSON-LD below now point at
+     https://gnonik1.github.io/Rellony — the live GitHub Pages address, so
+     they resolve today. Search this file for gnonik1.github.io to find
+     every one of them when the real domain is bought.
 
      COVERAGE: England only. The planning-verification logic is built and
      tested for England; Scotland, Wales and Northern Ireland have separate
@@ -64,9 +74,10 @@
      submission by hand and replies by email.
      ========================================================================== -->
 
-<!-- Structured data. Every absolute URL below carries the YOUR-DOMAIN-HERE
-     placeholder and must be replaced with the live domain before launch, or
-     the @ids will not resolve. Deliberately conservative: it states only
+<!-- Structured data. DOMAIN: the @ids and URLs below point at the live
+     GitHub Pages address and switch with the real domain (see above). The
+     "email" is the one field still on a placeholder — github.io cannot
+     receive mail. Deliberately conservative: it states only
      what is already true on this page and in the Terms — England-only
      coverage, a £49–£99 one-time price range, and a service prepared by a
      person. No aggregateRating, no review markup, no opening hours, and no
@@ -77,17 +88,17 @@
   "@graph": [
     {
       "@type": "Organization",
-      "@id": "https://YOUR-DOMAIN-HERE/#organization",
+      "@id": "https://gnonik1.github.io/Rellony/#organization",
       "name": "Rellony",
-      "url": "https://YOUR-DOMAIN-HERE/",
+      "url": "https://gnonik1.github.io/Rellony/",
       "email": "support@YOUR-DOMAIN-HERE",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://YOUR-DOMAIN-HERE/favicon.png",
+        "url": "https://gnonik1.github.io/Rellony/favicon.png",
         "width": 180,
         "height": 180
       },
-      "image": "https://YOUR-DOMAIN-HERE/og-image.png",
+      "image": "https://gnonik1.github.io/Rellony/og-image.png",
       "description": "Independent due-diligence reports on hospitality property in England, checking planning history, food hygiene, licensing and insolvency records against the claims made by the agent or listing.",
       "areaServed": {
         "@type": "AdministrativeArea",
@@ -96,12 +107,12 @@
     },
     {
       "@type": "Service",
-      "@id": "https://YOUR-DOMAIN-HERE/#service",
+      "@id": "https://gnonik1.github.io/Rellony/#service",
       "name": "Hospitality property due-diligence report",
       "serviceType": "Property due diligence",
-      "url": "https://YOUR-DOMAIN-HERE/",
+      "url": "https://gnonik1.github.io/Rellony/",
       "description": "A report on a specific hospitality property that sets what official and public records show — planning history, food hygiene inspections, licensing and corporate insolvency — against the claims made in the listing, with each finding marked confirmed, unverified or contradicted.",
-      "provider": { "@id": "https://YOUR-DOMAIN-HERE/#organization" },
+      "provider": { "@id": "https://gnonik1.github.io/Rellony/#organization" },
       "areaServed": {
         "@type": "AdministrativeArea",
         "name": "England"
