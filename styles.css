@@ -891,6 +891,184 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
 }
 
 /* ==========================================================================
+   Two-stage check — stages, preliminary result, coverage waitlist
+
+   The panel now holds four mutually-exclusive views rather than one form:
+   the address (Stage 1), the preliminary result, the outside-coverage
+   waitlist, and the enquiry (Stage 2). Only the result and Stage 2 are ever
+   on screen together, and then the result is collapsed to its confirmed
+   lines. Visibility is the `hidden` attribute and nothing else, so the
+   states are inspectable in the DOM without reading the script.
+   ========================================================================== */
+
+/* Nothing in the panel sets `display`, but a stray rule that did would
+   silently defeat `hidden`. This makes the attribute authoritative. */
+[hidden] { display: none !important; }
+
+/* --- small label above a heading, naming what the section is ------------ */
+.eyebrow {
+  font-family: var(--display); font-weight: 700;
+  font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--sage); margin-bottom: 0.7rem;
+}
+.eyebrow--paper { color: var(--paper-soft); }
+
+/* --- a text button that reads as a link, not a control ----------------- */
+.linkish {
+  font: inherit; font-size: inherit; color: inherit;
+  background: none; border: 0; padding: 0;
+  text-decoration: underline; text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px; cursor: pointer;
+}
+.linkish:hover { color: var(--paper-ink); }
+
+/* --- the preliminary check result -------------------------------------- */
+.result { max-width: 34rem; }
+.result:focus, .result:focus-visible { outline: none; }
+
+.result__lines { list-style: none; margin: 0 0 1.35rem; padding: 0; }
+.result__lines li {
+  display: grid; grid-template-columns: 1.15rem 1fr;
+  gap: 0.6rem; align-items: start;
+  padding-bottom: 0.7rem; margin-bottom: 0.7rem;
+  border-bottom: 1px solid var(--line-paper);
+  font-size: 0.9375rem; line-height: 1.45;
+}
+.result__lines li:last-child { border-bottom: 0; margin-bottom: 0; padding-bottom: 0; }
+.result__tick {
+  color: var(--confirmed-paper); font-size: 1rem;
+  line-height: 1.35; font-weight: 700;
+}
+.result__lines strong { display: block; color: var(--paper-ink); font-weight: 600; }
+/* the resolved values, and the one place a record value is printed back */
+.result__detail {
+  display: block; margin-top: 0.15rem;
+  font-family: var(--record); font-size: 0.8125rem;
+  color: var(--paper-soft); overflow-wrap: anywhere;
+}
+
+.result__note {
+  padding: 1rem 1.1rem; margin-bottom: 1.35rem;
+  background: var(--paper-wash); border-radius: var(--r-input);
+}
+.result__note p { color: var(--paper-soft); font-size: 0.9375rem; }
+.result__note .eyebrow { margin-bottom: 0.45rem; }
+.result__note .fine { margin-top: 0.7rem; }
+
+/* Once the visitor continues, the two confirmed lines stay as context and
+   everything that was there to get them to continue goes away. */
+.result.is-compact {
+  padding-bottom: 1.35rem; margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--line-paper);
+}
+.result.is-compact .result__note,
+.result.is-compact #continue-btn,
+.result.is-compact .result__back { display: none; }
+
+.result__back { margin-top: 0.85rem; text-align: center; font-size: 0.8125rem; color: var(--paper-soft); }
+
+/* --- outside coverage --------------------------------------------------- */
+.result--outside .result__head { font-size: 1.1875rem; margin-bottom: 0.75rem; text-wrap: balance; }
+.result--outside > p { color: var(--paper-soft); font-size: 0.9375rem; }
+.result--outside form { margin-top: 1.35rem; }
+
+.notify-done { padding: 1rem 1.1rem; margin-top: 1.35rem; background: var(--paper-wash); border-radius: var(--r-input); }
+.notify-done:focus, .notify-done:focus-visible { outline: none; }
+.notify-done p { color: var(--paper-soft); font-size: 0.9375rem; }
+.notify-done__mark { color: var(--confirmed-paper); font-size: 1.25rem; font-weight: 700; margin-bottom: 0.3rem; }
+
+/* --- Stage 2 carry-over from Stage 1 ------------------------------------ */
+.stage-echo {
+  display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap;
+  padding-bottom: 1rem; margin-bottom: 1.15rem;
+  border-bottom: 1px solid var(--line-paper);
+}
+.stage-echo__label {
+  flex: none; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--paper-soft);
+}
+.stage-echo__value { font-size: 0.9375rem; color: var(--paper-ink); overflow-wrap: anywhere; }
+
+.stage-hint {
+  padding: 0.75rem 0.9rem; margin-bottom: 1.15rem;
+  border-left: 3px solid var(--line-paper-firm);
+  background: var(--paper-wash);
+  border-radius: 0 var(--r-input) var(--r-input) 0;
+  font-size: 0.875rem; line-height: 1.45; color: var(--paper-soft);
+}
+
+/* --- buttons that are not waiting on a form ----------------------------- */
+/* The readiness rule lights a button from its own form s validity, so a
+   button with no form owner would sit dimmed forever. These two are not
+   waiting on anything a visitor has to fill in, so they are always at full
+   strength: the one that moves from the result to Stage 2, and the inline
+   CTA further down the page. */
+.btn--ready { opacity: 1; }
+.btn--ready:hover { background: #3A4030; border-color: #3A4030; }
+.btn--ready:active { transform: translateY(1px); }
+
+/* --- the check button while the lookup is in flight --------------------- */
+/* Deliberately not `disabled`: a disabled button drops focus in some
+   engines, which strands a keyboard user mid-check. A flag in the script
+   guards the double submit; this only says what is happening. */
+.btn[aria-busy="true"],
+form:valid .btn[aria-busy="true"] { opacity: 0.6; cursor: progress; }
+
+/* ==========================================================================
+   What you get — the checklist, on the olive ground
+   ========================================================================== */
+
+/* Paper, by the rule at the top of this file: this is a checklist you read,
+   the same kind of surface as the How-it-works band above it. It also gives
+   the long olive run at the foot of the page something to break against
+   before the footer, which stays olive. */
+.deliver { padding-block: 0 clamp(3rem, 5.5vw, 5.5rem); }
+.deliver__band {
+  background: var(--vellum);
+  color: var(--paper-ink);
+  border-radius: var(--r-paper);
+  padding: clamp(1.75rem, 3vw, 3.5rem);
+}
+.deliver__head { max-width: var(--measure); margin-bottom: clamp(1.5rem, 3vw, 2.25rem); }
+.deliver__head h2 { font-size: var(--h2); margin-bottom: 0.9rem; }
+.deliver__head .lede { color: var(--paper-soft); }
+
+.deliver__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
+@media (min-width: 52rem) { .deliver__list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem 1.5rem; } }
+
+.deliver__list li {
+  display: grid; grid-template-columns: 1.1rem 1fr; gap: 0.75rem; align-items: start;
+  padding: 0.85rem 1rem;
+  background: var(--paper-wash); border-radius: var(--r-cell);
+  color: var(--paper-ink); font-size: 0.96875rem; line-height: 1.5;
+}
+.deliver__list li::before {
+  content: "\2713";
+  color: var(--confirmed-paper); font-weight: 700; line-height: 1.5;
+}
+
+.deliver__cta { margin-top: clamp(1.5rem, 3vw, 2.25rem); }
+
+/* The inline CTA is a link, not a form control, so the readiness rule never
+   reaches it — it is always at full strength. It now sits on the paper band,
+   so it takes the same olive-on-paper treatment as the button in the form
+   panel and needs no colour of its own. */
+.btn--inline {
+  width: auto; opacity: 1;
+  text-decoration: none;
+}
+.btn--inline:hover { background: #3A4030; border-color: #3A4030; }
+.btn--inline:active { transform: translateY(1px); }
+
+@media (max-width: 40rem) {
+  .deliver { padding-block: 0 2.5rem; }
+  .deliver__band { padding: 1.25rem 1rem; }
+  .deliver__list li { padding: 0.75rem 0.85rem; font-size: 0.9375rem; }
+  .result__note { padding: 0.85rem 0.9rem; margin-bottom: 1.15rem; }
+  .btn--inline { width: 100%; }
+}
+
+/* ==========================================================================
    Reduced motion — the H1 rule renders static, nothing animates
    ========================================================================== */
 

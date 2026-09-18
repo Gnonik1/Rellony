@@ -183,44 +183,252 @@
         <h1>Can I open my business here?</h1>
         <span class="h1-rule" aria-hidden="true"></span>
         <p class="lede hero__lede">
-          Before you sign a lease on a restaurant, café or bar in England, find out what
-          the official records actually say — planning history, food hygiene, licensing,
-          insolvency — and where they contradict the agent’s listing.
+          Before you sign the lease, find out what the records actually say. Rellony checks
+          planning, licensing, food hygiene and company records against what the listing
+          claims.
         </p>
 
         <p class="coverage-line">Currently available for properties in England</p>
 
         <div class="price">
           <p>
-            <span class="price__figure">From £49–£99</span>
-            <span class="price__unit">per report, one-time</span>
+            <span class="price__figure">Reports from £49</span>
+            <span class="price__unit">one-time, per property</span>
           </p>
           <p class="fine">
-            Early-access introductory range. The exact figure depends on the property and
-            how much of it we can actually cover, and is confirmed in writing before you
-            pay anything.
+            The exact price is confirmed after the preliminary check, based on the records
+            available for the property. Nothing is charged until you have agreed it in
+            writing.
           </p>
         </div>
       </div>
 
       <div class="panel" id="check">
 
+        <!-- ------------------------------------------------------------------
+             STAGE 1 — the address, and nothing else.
+
+             This is a SEPARATE <form> from the enquiry further down, and that
+             separation is what keeps the form:valid .btn rule working. That
+             rule reads a button's readiness off its own form's live constraint
+             validity. With both stages inside one form, the Stage 1 button
+             would sit in a form still holding empty required fields — business
+             type, email, consent — so the form could never be :valid and the
+             button would stay dimmed no matter what was typed. Two sibling
+             forms each carry their own validity, so the rule is correct for
+             both, unchanged, and with no JS mirror of validity anywhere. HTML
+             forbids nesting forms, which gives the same answer from the other
+             direction.
+
+             This form has no action attribute and never posts. The address is
+             resolved against a public postcode API from the browser; nothing
+             reaches Formspree until Stage 2, where the visitor supplies an
+             email themselves and ticks consent next to it.
+             ------------------------------------------------------------------ -->
+        <div class="stage" id="stage-check" hidden>
+
+          <div class="panel__head">
+            <h2>Check a property</h2>
+            <p class="fine">Start with the address. Nothing is charged, and nothing is sent at this step.</p>
+          </div>
+
+          <form id="check-form" novalidate>
+
+            <div class="field">
+              <label for="address">Property address</label>
+              <span class="hint" id="address-hint">Street, town and postcode, as it appears on the listing</span>
+              <input type="text" id="address" name="property_address"
+                     autocomplete="street-address"
+                     aria-describedby="address-hint" required>
+            </div>
+
+            <button type="submit" class="btn" id="check-btn">Check this property</button>
+
+            <p class="btn-note">Free, and no email needed for this step.</p>
+
+          </form>
+
+        </div>
+
+        <!-- ------------------------------------------------------------------
+             PRELIMINARY CHECK RESULT — shown only for status "in_coverage".
+
+             Every value below is written with textContent from the object
+             runPreliminaryCheck() returns, never from the API response
+             directly, so these checks can move behind a backend later without
+             this markup changing. The local authority prints exactly as the
+             record returns it — "Westminster", not "City of Westminster".
+
+             Nothing here is worded as a claim about the premises. A postcode
+             identifies an area, and the fine print says so in as many words.
+             ------------------------------------------------------------------ -->
+        <div class="stage" id="stage-result" hidden>
+          <div class="result" id="result-box" tabindex="-1">
+
+            <!-- The address as the visitor typed it, above the findings rather
+                 than below them: they should be able to catch their own typo
+                 before deciding whether to carry on, not after. It survives
+                 into Stage 2 with the confirmed lines, which is why the Stage 2
+                 echo stands down whenever this one is on screen. -->
+            <p class="stage-echo" id="result-echo">
+              <span class="stage-echo__label">Property</span>
+              <span class="stage-echo__value" id="result-address"></span>
+            </p>
+
+            <ul class="result__lines">
+              <li>
+                <span class="result__tick" aria-hidden="true">&#10003;</span>
+                <span>
+                  <strong>Address recognised</strong>
+                  <span class="result__detail" id="result-summary"></span>
+                </span>
+              </li>
+              <li id="result-authority-line">
+                <span class="result__tick" aria-hidden="true">&#10003;</span>
+                <span>
+                  <strong>Local authority</strong>
+                  <span class="result__detail" id="result-authority"></span>
+                </span>
+              </li>
+            </ul>
+
+            <div class="result__note">
+              <p class="eyebrow eyebrow--paper">Preliminary check</p>
+              <p>
+                This address is within Rellony’s current coverage. A full report
+                cross-checks planning history, licensing, food hygiene, company records
+                and the agent’s claims.
+              </p>
+              <p class="fine">
+                A postcode identifies an area, not an individual unit. This confirms the
+                area is one we cover — it says nothing yet about the premises itself.
+              </p>
+            </div>
+
+            <button type="button" class="btn btn--ready" id="continue-btn">Continue to full check</button>
+
+            <p class="result__back">
+              <button type="button" class="linkish" data-restart>Check a different address</button>
+            </p>
+
+          </div>
+        </div>
+
+        <!-- ------------------------------------------------------------------
+             OUTSIDE COVERAGE — status "outside_coverage".
+
+             The country is named as the record returns it rather than softened,
+             and this branch deliberately does not continue to Stage 2: we are
+             not taking an enquiry on a property we cannot research. The only
+             thing offered is a waitlist, posting to Formspree under its own
+             subject line so it never lands in the enquiry pile.
+             ------------------------------------------------------------------ -->
+        <div class="stage" id="stage-outside" hidden>
+          <div class="result result--outside" id="outside-box" tabindex="-1">
+
+            <p class="eyebrow eyebrow--paper">Preliminary check</p>
+            <h2 class="result__head" id="outside-head">This address is outside our coverage</h2>
+
+            <p>
+              Rellony currently covers England only. Planning, licensing and food hygiene
+              records sit under different frameworks elsewhere in the UK, and we are not
+              going to check records we do not hold.
+            </p>
+
+            <form id="notify-form"
+                  action="https://formspree.io/f/xrpbgnna"
+                  method="POST"
+                  novalidate>
+
+              <input type="hidden" name="_subject" id="notify-subject" value="Rellony coverage waitlist">
+              <input type="hidden" name="requested_country" id="notify-country">
+              <input type="hidden" name="property_address" id="notify-address">
+
+              <div class="field">
+                <label for="notify-email" id="notify-label">Notify me when this area is covered</label>
+                <input type="email" id="notify-email" name="email"
+                       autocomplete="email" inputmode="email" required>
+              </div>
+
+              <!-- honeypot — hidden from people, left for bots -->
+              <div class="trap" aria-hidden="true">
+                <label for="notify-trap">Leave this field empty</label>
+                <input type="text" id="notify-trap" name="_gotcha" tabindex="-1" autocomplete="off">
+              </div>
+
+              <button type="submit" class="btn" id="notify-btn">Notify me</button>
+
+              <p class="form-error" id="notify-error" hidden role="alert"></p>
+
+            </form>
+
+            <p class="result__back">
+              <button type="button" class="linkish" data-restart>Check a different address</button>
+            </p>
+
+          </div>
+        </div>
+
+        <!-- ------------------------------------------------------------------
+             STAGE 2 — revealed after the check. This is the form that actually
+             posts, and it is where the consent checkbox lives: next to the
+             email address it consents to, not three fields earlier where
+             nothing personal had been asked for yet. The hidden inputs carry
+             what Stage 1 resolved, so whoever reads the enquiry gets the
+             postcode and local authority the visitor never had to type.
+             ------------------------------------------------------------------ -->
         <form id="enquiry-form"
               action="https://formspree.io/f/xrpbgnna"
               method="POST"
               novalidate>
 
+          <!-- Two headings, one of which is always hidden. With JS this form
+               is Stage 2 and the address is already known; without JS it is
+               the only form on the page and has to introduce itself. Keeping
+               both in the markup keeps the copy reviewable in the HTML. -->
           <div class="panel__head">
-            <h2>Check a property</h2>
-            <p class="fine">Takes about a minute. Nothing is charged at this stage.</p>
+            <h2 id="enquiry-head-nojs">Check a property</h2>
+            <h2 id="enquiry-head-js" hidden>What will you run there?</h2>
+            <p class="fine" id="enquiry-sub-nojs">Takes about a minute. Nothing is charged at this stage.</p>
+            <p class="fine" id="enquiry-sub-js" hidden>What you intend to operate decides which records matter.</p>
           </div>
 
-          <div class="field">
-            <label for="address">Property address</label>
-            <span class="hint" id="address-hint">Street, town and postcode, as it appears on the listing</span>
-            <input type="text" id="address" name="property_address"
+          <p class="stage-echo" id="enquiry-echo" hidden>
+            <span class="stage-echo__label">Property</span>
+            <span class="stage-echo__value" id="enquiry-address"></span>
+          </p>
+
+          <!-- Shown only when no postcode could be read out of the address. A
+               lookup that fails or times out lands on this same stage silently,
+               with this hint hidden — there is no point telling a visitor about
+               a network problem they can do nothing about. -->
+          <p class="stage-hint" id="unresolved-hint" hidden>
+            We couldn’t read a postcode from that address. Including one gives an instant
+            coverage check — without it, a person confirms coverage when they review this.
+          </p>
+
+          <!-- Carried from Stage 1, populated from the normalized check object.
+               The postcode and authority fields are filled only when the lookup
+               actually resolved, so an unconfirmed guess never travels as
+               though it were established fact. -->
+          <input type="hidden" name="preliminary_check" id="hidden-status">
+          <input type="hidden" name="resolved_postcode" id="hidden-postcode">
+          <input type="hidden" name="local_authority" id="hidden-authority">
+          <input type="hidden" name="country" id="hidden-country">
+          <input type="hidden" name="region" id="hidden-region">
+          <input type="hidden" name="coordinates" id="hidden-coords">
+          <input type="hidden" name="_subject" id="hidden-subject" value="Rellony — property check request">
+
+          <!-- The address itself. With JS this is filled from Stage 1 and
+               hidden, because the visitor has already typed it. Without JS it
+               is an ordinary required field and this form posts natively to
+               Formspree with everything in it. -->
+          <div class="field" id="enquiry-address-field">
+            <label for="enquiry-address-input">Property address</label>
+            <span class="hint" id="enquiry-address-hint">Street, town and postcode, as it appears on the listing</span>
+            <input type="text" id="enquiry-address-input" name="property_address"
                    autocomplete="street-address"
-                   aria-describedby="address-hint" required>
+                   aria-describedby="enquiry-address-hint" required>
           </div>
 
           <div class="field">
@@ -308,13 +516,49 @@
 
           <button type="submit" class="btn" id="submit-btn">Request a check</button>
 
-          <p class="btn-note">Free preliminary check. Full report from £49</p>
+          <p class="btn-note">Nothing is charged here. Reports from £49.</p>
 
           <p class="form-error" id="form-error" hidden role="alert"></p>
+
+          <p class="result__back">
+            <button type="button" class="linkish" data-restart>Check a different address</button>
+          </p>
 
         </form>
 
       </div>
+
+      <script>
+        /* Runs the moment the panel has been parsed, before anything of it can
+           be painted, so neither state flashes. Everything it does is the
+           difference between "JS is available" and "JS is not":
+
+             JS on  — the panel starts at Stage 1, Stage 2 is put away until
+                      the check has run, and the address field in Stage 2 is
+                      hidden because Stage 1 already asked for it.
+             JS off — Stage 1 never appears (its button could not do anything),
+                      and Stage 2 is simply the form: visible, with its own
+                      address field, posting natively to Formspree the way this
+                      page did before the check existed.
+
+           The result and outside-coverage blocks stay hidden in the markup in
+           both cases; they are renderings of a check that cannot have run. */
+        (function () {
+          var swap = [
+            ['stage-check',           false],
+            ['enquiry-form',          true],
+            ['enquiry-address-field', true],
+            ['enquiry-head-nojs',     true],
+            ['enquiry-sub-nojs',      true],
+            ['enquiry-head-js',       false],
+            ['enquiry-sub-js',        false]
+          ];
+          for (var i = 0; i < swap.length; i++) {
+            var node = document.getElementById(swap[i][0]);
+            if (node) { node.hidden = swap[i][1]; }
+          }
+        })();
+      </script>
 
     </div>
   </section>
@@ -324,6 +568,7 @@
     <div class="shell">
 
       <div class="record-section__intro">
+        <p class="eyebrow">Agent vs Evidence</p>
         <h2 id="finding-h">The listing says it.<br><span class="dim">The record may not.</span></h2>
         <p>
           Every finding keeps three things apart: what a record actually says, what that
@@ -399,7 +644,7 @@
     <div class="shell">
 
       <div class="checked__head">
-        <h2 id="checked-h">Four record trails, one property</h2>
+        <h2 id="checked-h">One address. Multiple evidence trails. One decision.</h2>
         <p class="lede">
           We work the same four sources every time, in the same order, whatever the
           property. That repeatability is the point.
@@ -438,7 +683,7 @@
 
         <article class="trail trail--4">
           <span class="trail__no">04</span>
-          <h3>Corporate &amp; insolvency</h3>
+          <h3>Company and insolvency records</h3>
           <p>
             Company status, filing history and published insolvency or liquidation notices
             connected to businesses that have traded from the property.
@@ -460,30 +705,35 @@
         <ol class="steps">
           <li>
             <div>
-              <h3>You send the address</h3>
+              <h3>Check the property</h3>
               <p>
-                Plus what you intend to operate there. Nothing is charged, and sending it
-                commits you to nothing.
+                Enter the address and see instantly whether we can assess it.
               </p>
             </div>
           </li>
           <li>
             <div>
-              <h3>We come back within 1 business day</h3>
+              <h3>Tell us what you’ll run</h3>
               <p>
-                A person reviews the property and tells you what we can cover, what we
-                can’t, and the price. If we don’t think a report on this property would be
-                worth paying for, we say so.
+                What you intend to operate decides which records matter.
               </p>
             </div>
           </li>
           <li>
             <div>
-              <h3>You get the report</h3>
+              <h3>We confirm scope and price</h3>
               <p>
-                Every finding sourced and its status earned, an explicit list of what could
-                not be verified, and at the end: a verdict on the evidence, the questions to
-                put to the agent or landlord, and the documents to ask for before you commit.
+                A person reviews the property and comes back within 1 business day with
+                what we can cover and what it costs.
+              </p>
+            </div>
+          </li>
+          <li>
+            <div>
+              <h3>You get the evidence</h3>
+              <p>
+                A sourced report showing what’s confirmed, what’s unsupported, what
+                contradicts the listing, and what to ask before you sign.
               </p>
             </div>
           </li>
@@ -513,6 +763,37 @@
       </div>
 
       </div>
+     </div>
+    </div>
+  </section>
+
+  <!-- ============================= WHAT YOU GET ============================= -->
+  <section class="deliver" aria-labelledby="deliver-h">
+    <div class="shell">
+     <div class="deliver__band paper">
+
+      <div class="deliver__head">
+        <h2 id="deliver-h">What you get</h2>
+        <p class="lede">
+          Not a summary of the listing. A document you can take into the negotiation and
+          point at.
+        </p>
+      </div>
+
+      <ul class="deliver__list">
+        <li>A source for every finding — the record it came from, not our word for it</li>
+        <li>What is confirmed</li>
+        <li>What could not be verified</li>
+        <li>What contradicts the listing</li>
+        <li>The questions to put to the agent or landlord</li>
+        <li>The documents to request</li>
+        <li>A verdict based on the evidence available</li>
+      </ul>
+
+      <p class="deliver__cta">
+        <a class="btn btn--inline" href="#check">Check a property</a>
+      </p>
+
      </div>
     </div>
   </section>
@@ -621,35 +902,152 @@
     a.addEventListener('click', function (e) { e.stopPropagation(); });
   });
 
+  /* ================================================================== */
+  /* PRELIMINARY CHECK                                                   */
+  /*                                                                     */
+  /* runPreliminaryCheck() is the whole boundary between the UI and the  */
+  /* outside world. It always resolves — never rejects — to one          */
+  /* normalized object:                                                  */
+  /*                                                                     */
+  /*   { status: "in_coverage" | "outside_coverage" | "unresolved",      */
+  /*     postcode, country, region, localAuthority, lat, lng }           */
+  /*                                                                     */
+  /* The render functions below read only that object and never touch a  */
+  /* response body, so when these checks move behind our own backend the */
+  /* UI does not change: only the body of this one function does.        */
+  /*                                                                     */
+  /* "unresolved" is deliberately one status covering three different    */
+  /* causes — no postcode in the address, a postcode the record does not */
+  /* know, and a lookup that failed or timed out. All three lead to the  */
+  /* same place: Stage 2, silently. The visitor is never shown an error  */
+  /* about an availability check they did not ask for. The `postcode`    */
+  /* field is what distinguishes them for the one bit of UI that cares:  */
+  /* it is null only when nothing postcode-shaped was in the address, so */
+  /* the "include a postcode" hint appears exactly when it is useful.    */
+  /* ================================================================== */
+
+  var POSTCODES_API     = 'https://api.postcodes.io/postcodes/';
+  var LOOKUP_TIMEOUT_MS = 4000;
+  var COVERED_COUNTRY   = 'England';
+
+  /* Outward code, then inward code, tolerating any or no space between.
+     Matches the LAST occurrence in the string, because an address puts its
+     postcode at the end and a street name can occasionally look like an
+     outward code. Anything that matches the shape but is not a real
+     postcode simply fails the lookup and resolves to "unresolved". */
+  function extractPostcode(input) {
+    var re = /\b(?:gir\s*0aa|[a-z]{1,2}\d[a-z\d]?\s*\d[a-z]{2})\b/gi;
+    var match, last = null;
+    while ((match = re.exec(input)) !== null) { last = match[0]; }
+    return last ? last.replace(/\s+/g, ' ').trim().toUpperCase() : null;
+  }
+
+  function unresolved(postcode) {
+    return {
+      status: 'unresolved',
+      postcode: postcode || null,
+      country: null,
+      region: null,
+      localAuthority: null,
+      lat: null,
+      lng: null
+    };
+  }
+
+  function runPreliminaryCheck(addressString) {
+    var postcode = extractPostcode(addressString || '');
+
+    if (!postcode) { return Promise.resolve(unresolved(null)); }
+    if (typeof fetch !== 'function') { return Promise.resolve(unresolved(postcode)); }
+
+    var controller = null;
+    try { controller = new AbortController(); } catch (e) {}
+
+    var lookup = fetch(POSTCODES_API + encodeURIComponent(postcode),
+                       controller ? { signal: controller.signal } : undefined)
+      .then(function (response) {
+        /* 404 is the ordinary answer for a terminated, invalid or unknown
+           postcode, not an exception. It is not coverage, so it is not a
+           result — it is "unresolved". */
+        return response.ok ? response.json() : null;
+      })
+      .then(function (body) {
+        var r = body && body.result;
+        if (!r || !r.country) { return unresolved(postcode); }
+        return {
+          status: r.country === COVERED_COUNTRY ? 'in_coverage' : 'outside_coverage',
+          postcode: r.postcode || postcode,
+          country: r.country,
+          /* region is populated for England and null everywhere else in
+             the UK, so it is carried but never relied on for coverage. */
+          region: r.region || null,
+          localAuthority: r.admin_district || null,
+          lat: typeof r.latitude  === 'number' ? r.latitude  : null,
+          lng: typeof r.longitude === 'number' ? r.longitude : null
+        };
+      })
+      .catch(function () { return unresolved(postcode); });
+
+    var expiry = new Promise(function (resolve) {
+      setTimeout(function () {
+        if (controller) { try { controller.abort(); } catch (e) {} }
+        resolve(unresolved(postcode));
+      }, LOOKUP_TIMEOUT_MS);
+    });
+
+    return Promise.race([lookup, expiry]);
+  }
+
   /* ---------------------------------------------------------------- */
-  /* Enquiry form                                                      */
+  /* Stages                                                            */
   /* ---------------------------------------------------------------- */
-  var form    = document.getElementById('enquiry-form');
-  var panel   = document.getElementById('check');
-  var button  = document.getElementById('submit-btn');
-  var errorEl = document.getElementById('form-error');
-  var trap    = document.getElementById('company-website');
+
+  var panel        = document.getElementById('check');
+  var checkForm    = document.getElementById('check-form');
+  var enquiryForm  = document.getElementById('enquiry-form');
+  var notifyForm   = document.getElementById('notify-form');
+
+  if (!checkForm || !enquiryForm) { return; }
+
+  var stageCheck   = document.getElementById('stage-check');
+  var stageResult  = document.getElementById('stage-result');
+  var stageOutside = document.getElementById('stage-outside');
+
   var addressField = document.getElementById('address');
+  var checkBtn     = document.getElementById('check-btn');
+  var continueBtn  = document.getElementById('continue-btn');
+  var submitBtn    = document.getElementById('submit-btn');
+  var notifyBtn    = document.getElementById('notify-btn');
 
-  if (!form) { return; }
+  var errorEl      = document.getElementById('form-error');
+  var notifyError  = document.getElementById('notify-error');
+  var trap         = document.getElementById('company-website');
+  var notifyTrap   = document.getElementById('notify-trap');
 
-  form.setAttribute('action', FORMSPREE_ENDPOINT);
+  enquiryForm.setAttribute('action', FORMSPREE_ENDPOINT);
+  if (notifyForm) { notifyForm.setAttribute('action', FORMSPREE_ENDPOINT); }
 
-  /* The submit button's muted/ready state is handled entirely in CSS, by
+  /* The submit buttons' muted/ready state is handled entirely in CSS, by
      `form:valid .btn` — see styles.css. It used to be a class toggled from
      'input' and 'change' handlers here, which went stale whenever a value
      arrived without an event (password managers and form-fillers assign
      .value directly; so does back/forward and session restore), leaving a
      fully completed form with a dimmed button. Validity is the real state,
      so the style reads validity directly. Do not reintroduce a JS mirror
-     of it. The button is still never `disabled`, so a click on an
-     incomplete form runs the check below and reports what is missing. */
+     of it. This is also why the two stages are two sibling forms rather
+     than one: each form's validity then describes exactly the fields its
+     own button is waiting on. The buttons are still never `disabled`, so a
+     click on an incomplete form runs the check below and reports what is
+     missing. */
 
-  function showError(message) {
-    errorEl.textContent = message;
-    errorEl.hidden = false;
-    button.disabled = false;
-    button.textContent = 'Request a check';
+  function setText(id, value) {
+    var node = document.getElementById(id);
+    if (node) { node.textContent = value == null ? '' : String(value); }
+  }
+
+  function setValue(id, value) {
+    var node = document.getElementById(id);
+    if (node) { node.value = value == null ? '' : String(value); }
   }
 
   function el(tag, className, text) {
@@ -657,6 +1055,173 @@
     if (className) { node.className = className; }
     if (text) { node.textContent = text; }
     return node;
+  }
+
+  var lastCheck = null;
+
+  /* ---- Stage 2 ---------------------------------------------------- */
+
+  function openEnquiry(check, address) {
+    setValue('enquiry-address-input', address);
+    setValue('hidden-status', check.status);
+
+    /* Only a resolved check contributes resolved facts. On "unresolved"
+       these stay empty rather than carrying a postcode we could not
+       confirm, which would read as established in the enquiry email. */
+    if (check.status === 'in_coverage') {
+      setValue('hidden-postcode',  check.postcode);
+      setValue('hidden-authority', check.localAuthority);
+      setValue('hidden-country',   check.country);
+      setValue('hidden-region',    check.region);
+      setValue('hidden-coords',
+        check.lat != null && check.lng != null ? check.lat + ', ' + check.lng : '');
+      setValue('hidden-subject',
+        'Rellony — property check: ' +
+        (check.localAuthority ? check.localAuthority + ' ' : '') + check.postcode);
+    } else {
+      setValue('hidden-subject', 'Rellony — property check: address unresolved');
+    }
+
+    /* Only one echo of the address on screen at a time. After an in-coverage
+       check the result block is carrying it, so this one stays down. */
+    var echo = document.getElementById('enquiry-echo');
+    if (echo) {
+      setText('enquiry-address', address);
+      echo.hidden = !address || !stageResult.hidden;
+    }
+
+    /* The hint is for an address with no postcode in it. A lookup that
+       failed or timed out gets no hint and no error — it just arrives
+       here, which is the silent fallback. */
+    var hint = document.getElementById('unresolved-hint');
+    if (hint) { hint.hidden = !(check.status === 'unresolved' && !check.postcode); }
+
+    stageCheck.hidden = true;
+    enquiryForm.hidden = false;
+  }
+
+  /* ---- Stage 1 outcomes ------------------------------------------- */
+
+  function showResult(check, address) {
+    setText('result-address', address);
+
+    var parts = [];
+    if (check.postcode)       { parts.push(check.postcode); }
+    if (check.localAuthority) { parts.push(check.localAuthority); }
+    parts.push(check.country);
+    parts.push('within coverage');
+
+    setText('result-summary', '— ' + parts.join(' · '));
+
+    var authorityLine = document.getElementById('result-authority-line');
+    if (check.localAuthority) {
+      setText('result-authority', '— ' + check.localAuthority);
+      if (authorityLine) { authorityLine.hidden = false; }
+    } else if (authorityLine) {
+      authorityLine.hidden = true;
+    }
+
+    stageCheck.hidden = true;
+    stageResult.hidden = false;
+
+    var box = document.getElementById('result-box');
+    if (box) { box.focus(); }
+  }
+
+  function showOutside(check, address) {
+    var country = check.country || 'that area';
+
+    setText('outside-head', 'We don’t cover ' + country + ' yet');
+    setText('notify-label', 'Notify me when ' + country + ' is covered');
+    setValue('notify-country', country);
+    setValue('notify-address', address);
+    setValue('notify-subject', 'Rellony coverage waitlist — ' + country);
+
+    stageCheck.hidden = true;
+    stageOutside.hidden = false;
+
+    var box = document.getElementById('outside-box');
+    if (box) { box.focus(); }
+  }
+
+  function restart() {
+    lastCheck = null;
+
+    stageResult.hidden = true;
+    stageOutside.hidden = true;
+    enquiryForm.hidden = true;
+    stageCheck.hidden = false;
+
+    var box = document.getElementById('result-box');
+    if (box) { box.classList.remove('is-compact'); }
+
+    if (addressField) { addressField.focus(); addressField.select(); }
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-restart]'), function (button) {
+    button.addEventListener('click', restart);
+  });
+
+  /* ---- Stage 1 submit --------------------------------------------- */
+
+  var checking = false;
+
+  checkForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    if (checking) { return; }
+    if (!checkForm.checkValidity()) { checkForm.reportValidity(); return; }
+
+    var address = addressField ? addressField.value.trim() : '';
+
+    /* The loading state is a label swap on a button that stays focusable —
+       a `disabled` button drops focus in some engines, which would strand
+       a keyboard user mid-check. A flag guards against a double submit. */
+    checking = true;
+    checkBtn.setAttribute('aria-busy', 'true');
+    checkBtn.textContent = 'Checking…';
+
+    runPreliminaryCheck(address).then(function (check) {
+      checking = false;
+      checkBtn.removeAttribute('aria-busy');
+      checkBtn.textContent = 'Check this property';
+
+      lastCheck = check;
+
+      if (check.status === 'outside_coverage') {
+        showOutside(check, address);
+      } else if (check.status === 'in_coverage') {
+        showResult(check, address);
+      } else {
+        openEnquiry(check, address);
+      }
+    });
+  });
+
+  if (continueBtn) {
+    continueBtn.addEventListener('click', function () {
+      /* The two confirmed lines stay on screen above the form as context;
+         the explanatory note and this button collapse away. */
+      var box = document.getElementById('result-box');
+      if (box) { box.classList.add('is-compact'); }
+
+      openEnquiry(lastCheck || unresolved(null),
+                  addressField ? addressField.value.trim() : '');
+
+      var businessType = document.getElementById('business-type');
+      if (businessType) { businessType.focus(); }
+    });
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Stage 2 submit — the only place personal data leaves the page     */
+  /* ---------------------------------------------------------------- */
+
+  function showError(message) {
+    errorEl.textContent = message;
+    errorEl.hidden = false;
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Request a check';
   }
 
   function showConfirmation(address) {
@@ -697,11 +1262,12 @@
     box.focus();
   }
 
-  form.addEventListener('submit', function (event) {
+  enquiryForm.addEventListener('submit', function (event) {
     event.preventDefault();
     errorEl.hidden = true;
 
-    var address = addressField ? addressField.value.trim() : '';
+    var addressInput = document.getElementById('enquiry-address-input');
+    var address = addressInput ? addressInput.value : '';
 
     /* Honeypot: a real visitor never sees this field. Fail silently, so a bot
        gets no signal about why the submission went nowhere. */
@@ -712,17 +1278,17 @@
 
     /* The required consent checkbox is part of this — an unchecked box fails
        validity and focuses itself, so submit is genuinely blocked. */
-    if (!form.checkValidity()) {
-      form.reportValidity();
+    if (!enquiryForm.checkValidity()) {
+      enquiryForm.reportValidity();
       return;
     }
 
-    button.disabled = true;
-    button.textContent = 'Sending…';
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending…';
 
     fetch(FORMSPREE_ENDPOINT, {
       method: 'POST',
-      body: new FormData(form),
+      body: new FormData(enquiryForm),
       headers: { 'Accept': 'application/json' }
     })
       .then(function (response) {
@@ -738,6 +1304,63 @@
                   'again, or email us at ' + SUPPORT_EMAIL + '.');
       });
   });
+
+  /* ---------------------------------------------------------------- */
+  /* Coverage waitlist — the outside-coverage branch                   */
+  /* ---------------------------------------------------------------- */
+
+  if (notifyForm) {
+    notifyForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      notifyError.hidden = true;
+
+      var done = function () {
+        var box = el('div', 'notify-done');
+        box.setAttribute('tabindex', '-1');
+        box.setAttribute('role', 'status');
+        box.appendChild(el('p', 'notify-done__mark', '✓'));
+        box.appendChild(el('p', null,
+          'We’ve got your email. You’ll hear from us when coverage reaches ' +
+          (document.getElementById('notify-country').value || 'your area') +
+          ' — and not about anything else.'));
+        notifyForm.parentNode.replaceChild(box, notifyForm);
+        box.focus();
+      };
+
+      if (notifyTrap && notifyTrap.value !== '') { done(); return; }
+
+      if (!notifyForm.checkValidity()) { notifyForm.reportValidity(); return; }
+
+      notifyBtn.disabled = true;
+      notifyBtn.textContent = 'Sending…';
+
+      fetch(FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        body: new FormData(notifyForm),
+        headers: { 'Accept': 'application/json' }
+      })
+        .then(function (response) {
+          if (response.ok) {
+            done();
+          } else {
+            notifyBtn.disabled = false;
+            notifyBtn.textContent = 'Notify me';
+            notifyError.textContent =
+              'Something went wrong sending that. Please try again, or email us at ' +
+              SUPPORT_EMAIL + '.';
+            notifyError.hidden = false;
+          }
+        })
+        .catch(function () {
+          notifyBtn.disabled = false;
+          notifyBtn.textContent = 'Notify me';
+          notifyError.textContent =
+            'We couldn’t reach the server — check your connection and try again, or ' +
+            'email us at ' + SUPPORT_EMAIL + '.';
+          notifyError.hidden = false;
+        });
+    });
+  }
 })();
 </script>
 

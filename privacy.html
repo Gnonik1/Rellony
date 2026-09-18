@@ -104,7 +104,7 @@
       </p>
 
       <h2><span class="sec">02</span> What we collect, and why</h2>
-      <p>We only collect what you type into the check form on our home page. That is:</p>
+      <p>Most of what we hold is what you type into the check form on our home page:</p>
       <dl>
         <dt>The property address</dt>
         <dd>
@@ -134,7 +134,36 @@
         </dd>
       </dl>
       <p>
-        The form also contains a hidden anti-spam field that is invisible to people. If it
+        Two other things reach us that you did not type, so they are worth naming on their
+        own rather than leaving you to assume them.
+      </p>
+      <dl>
+        <dt>What the coverage check works out from your address</dt>
+        <dd>
+          Before the rest of the form appears, the home page checks whether the address is
+          somewhere we cover. If what you entered contains a postcode, that postcode is
+          looked up against a public postcode database — see section 05 — and the answer
+          comes back as the postcode in its standard form, the country, the region, the
+          local authority whose area it falls in, and the coordinates of the postcode
+          itself. If you then send an enquiry, those details are attached to it, because
+          they save the person reading it from looking the same thing up again. They are
+          worked out from your address rather than collected separately, and they describe
+          an area, not a particular building.
+        </dd>
+
+        <dt>Your email address, if you ask about a country we do not cover yet</dt>
+        <dd>
+          If the coverage check finds the property is outside England, we do not ask you
+          for anything else — there is no enquiry for us to take. We offer one field
+          instead: an email address, so we can tell you if coverage ever reaches that
+          country. If you fill it in, we hold that address and the name of the country you
+          asked about, and we use them for that one message and nothing else. It is not a
+          newsletter, we will not market to you from it, and you can ask us to delete it at
+          any time.
+        </dd>
+      </dl>
+      <p>
+        Both forms also contain a hidden anti-spam field that is invisible to people. If it
         is filled in, the submission is treated as automated and discarded.
       </p>
       <p>
@@ -181,6 +210,18 @@
       <p>We keep the number of parties involved as small as we practically can:</p>
       <ul>
         <li>
+          <strong>Postcodes.io</strong> answers the coverage check on our home page. When
+          you press the button, your browser sends the postcode contained in the address —
+          just the postcode, not the rest of what you typed — directly to
+          <a href="https://postcodes.io/">api.postcodes.io</a>. That service therefore
+          receives the postcode, and, as with any request your browser makes to any site,
+          your IP address. This happens at that moment: before you have submitted a form,
+          given us an email address, or agreed to anything. We built it that way on
+          purpose, so that we can tell you straight away whether we cover the property
+          without first asking you for personal details. The request goes from your browser
+          to them and does not pass through us.
+        </li>
+        <li>
           <strong>Our form provider (Formspree)</strong> receives your form submission and
           passes it to us by email.
         </li>
@@ -217,6 +258,11 @@
         following up, and then deleted. Reports we have delivered, and the records
         supporting them, are kept so that we can answer questions about a report you paid
         for, and so that payment records meet tax and accounting requirements.
+      </p>
+      <p>
+        A coverage-waitlist address is kept only until it has done the one job you gave it:
+        we delete it once we have sent you the message saying coverage has reached the
+        country you asked about, or sooner if you ask us to.
       </p>
       <p>
         A specific retention period is still being set as the service takes shape, and this
