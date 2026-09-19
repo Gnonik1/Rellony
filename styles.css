@@ -154,6 +154,41 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
 .site-head :focus-visible,
 .paper :focus-visible { outline-color: var(--paper-ink); }
 
+/* Controls are not prose: nothing in this list is meant to be selected or
+   long-pressed, so nothing is lost by opting them out of both.
+
+   iOS treats a tap held slightly too long as the start of a selection, and on
+   a link it also opens the long-press callout preview. Both of those paint,
+   and they paint at different bounds: the callout draws a rounded rect at the
+   ELEMENT's bounds, the selection draws a box at the TEXT's bounds. That is
+   the two-layer artefact on the device screenshots exactly — a dark rect
+   at the element box with a lighter, text-tight box inside it. ::selection is
+   not styled anywhere in this file, so what gets drawn there is the system
+   highlight, whose colour we do not control.
+
+   Supporting evidence: .chip already carried `user-select: none`, and it is
+   the one pill-shaped control on the site that never showed the artefact.
+
+   The -webkit- prefixes are not optional here. Unprefixed `user-select` only
+   landed in Safari 17.4, and the phones this is being chased on are older
+   than that.
+
+   Deliberately NOT applied to prose. The support address in the footer, the
+   links inside the legal documents and the consent copy all stay selectable,
+   because people copy those. */
+.btn,
+.wordmark,
+.site-nav a,
+.lockup__mark,
+.foot__links a,
+.backlink,
+.confirm__link,
+.chip {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
 .shell { width: 100%; max-width: var(--shell); margin-inline: auto; padding-inline: var(--gutter); }
 
 .skip {
@@ -367,7 +402,7 @@ select:invalid { color: var(--paper-hint); }
   min-height: 2.875rem; padding: 0.5rem 0.75rem;
   border: 1px solid var(--line-paper-firm); border-radius: 999px;
   font-size: 0.875rem; line-height: 1.25; color: var(--paper-soft);
-  cursor: pointer; user-select: none;
+  cursor: pointer;
   transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 }
 .chip span { min-width: 0; }
