@@ -90,6 +90,15 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* iOS paints its own highlight on every link and button that gets tapped:
+     a dark translucent fill following the border-radius, held until you tap
+     elsewhere. On the vellum bar it reads as a dark block behind the wordmark
+     and the nav links; on the olive footer, a darker patch behind the mark.
+     It is the one paint common to every element that showed the artefact, and
+     the wordmark proves it was never ours: that link has no hover, focus,
+     background or radius of its own, so nothing in this file could have drawn
+     it. Focus keeps a visible indicator - the :focus-visible ring below. */
+  -webkit-tap-highlight-color: transparent;
   scroll-behavior: smooth;
   scroll-padding-top: 5rem;
   background: var(--base);
@@ -134,7 +143,12 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
 /* Record identifiers and quoted dates ONLY. Nowhere else on the site. */
 .record { font-family: var(--record); font-weight: 500; font-size: 0.9em; letter-spacing: -0.01em; }
 
-:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; border-radius: 4px; }
+/* No border-radius here. It was setting 4px on the FOCUSED ELEMENT rather than
+   on the outline, so focusing the inline CTA squared its 999px pill down to
+   4px, and took the nav pills with it. A geometry change on focus is also the
+   kind of thing that forces a link's layer to re-rasterise. An outline already
+   follows the element's own radius. */
+:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
 .panel :focus-visible,
 .finding :focus-visible,
 .site-head :focus-visible,
@@ -200,12 +214,22 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
   transition: background-color 0.15s ease, box-shadow 0.15s ease;
 }
 /* the hover has to be readable as feedback on a light bar, so it takes a
-   real tint plus a boundary — a 5% wash alone was invisible */
-.site-nav a:hover,
-.site-nav a:focus-visible {
-  color: var(--paper-ink);
-  background: var(--paper-wash-firm);
-  box-shadow: inset 0 0 0 1px var(--line-paper-firm);
+   real tint plus a boundary — a 5% wash alone was invisible.
+
+   Hover and focus used to share this rule. They are split because hover now
+   sits behind (hover: hover): on iOS the tint was applied on tap and then
+   held, and under the UA tap highlight it read as a dark block on the vellum
+   bar. Keyboard focus is unaffected and keeps the same treatment. */
+/* Colour only. The fill and the inset ring that used to be here are now
+   hover-only: the outline from the global :focus-visible rule is the keyboard
+   indicator, and it is enough on its own. */
+.site-nav a:focus-visible { color: var(--paper-ink); }
+@media (hover: hover) and (pointer: fine) {
+  .site-nav a:hover {
+    color: var(--paper-ink);
+    background: var(--paper-wash-firm);
+    box-shadow: inset 0 0 0 1px var(--line-paper-firm);
+  }
 }
 
 /* ==========================================================================
@@ -304,10 +328,12 @@ textarea {
 }
 input::placeholder, textarea::placeholder { color: var(--paper-hint); }
 
-input[type="text"]:hover,
-input[type="email"]:hover,
-select:hover,
-textarea:hover { border-color: var(--paper-soft); }
+@media (hover: hover) and (pointer: fine) {
+  input[type="text"]:hover,
+  input[type="email"]:hover,
+  select:hover,
+  textarea:hover { border-color: var(--paper-soft); }
+}
 
 input[type="text"]:focus,
 input[type="email"]:focus,
@@ -345,7 +371,9 @@ select:invalid { color: var(--paper-hint); }
   transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 }
 .chip span { min-width: 0; }
-.chip:hover { border-color: var(--paper-ink); color: var(--paper-ink); }
+@media (hover: hover) and (pointer: fine) {
+  .chip:hover { border-color: var(--paper-ink); color: var(--paper-ink); }
+}
 .chip input {
   appearance: none; -webkit-appearance: none; flex: none;
   width: 0.875rem; height: 0.875rem; margin: 0;
@@ -389,7 +417,9 @@ select:invalid { color: var(--paper-hint); }
   width: 2.75rem; height: 2.75rem;
   transform: translate(-50%, -50%);
 }
-.consent-check input:hover { border-color: var(--paper-ink); }
+@media (hover: hover) and (pointer: fine) {
+  .consent-check input:hover { border-color: var(--paper-ink); }
+}
 .consent-check input:checked {
   background-color: var(--base);
   border-color: var(--base);
@@ -427,7 +457,9 @@ select:invalid { color: var(--paper-hint); }
    controls themselves. It is also unaffected by `novalidate`, which only
    suppresses validation at submit time. */
 form:valid .btn { opacity: 1; }
-form:valid .btn:hover { background: #3A4030; border-color: #3A4030; }
+@media (hover: hover) and (pointer: fine) {
+  form:valid .btn:hover { background: #3A4030; border-color: #3A4030; }
+}
 form:valid .btn:active { background: #2E3326; border-color: #2E3326; }
 
 /* the sending state must outrank the readiness rule above it */
@@ -467,9 +499,13 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   color: var(--paper-ink);
   transition: border-color 0.15s ease, background-color 0.15s ease;
 }
-.confirm__link:hover { border-color: var(--paper-ink); background: var(--paper-wash); }
+@media (hover: hover) and (pointer: fine) {
+  .confirm__link:hover { border-color: var(--paper-ink); background: var(--paper-wash); }
+}
 .confirm__link .arrow { transition: transform 0.15s ease; }
-.confirm__link:hover .arrow { transform: translateX(3px); }
+@media (hover: hover) and (pointer: fine) {
+  .confirm__link:hover .arrow { transform: translateX(3px); }
+}
 
 /* ==========================================================================
    The record — the sheet you receive, on the olive desk
@@ -694,8 +730,12 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   transform: scaleX(0); transform-origin: center;
   transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
-.lockup__mark:hover::after,
-.lockup__mark:focus-visible::after { transform: scaleX(1); }
+/* The hairline is a hover flourish, not the focus indicator; the global
+   outline covers focus. Keeping it off :focus-visible means nothing animates
+   a transform on this composited pseudo-element after a tap. */
+@media (hover: hover) and (pointer: fine) {
+  .lockup__mark:hover::after { transform: scaleX(1); }
+}
 
 .signoff {
   font-family: var(--text); font-weight: 500;
@@ -737,7 +777,9 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   display: inline-flex; align-items: center; min-height: 2.75rem;
   text-decoration: none; color: var(--sage); transition: color 0.15s ease;
 }
-.foot__links a:hover { color: var(--bone); text-decoration: underline; }
+@media (hover: hover) and (pointer: fine) {
+  .foot__links a:hover { color: var(--bone); text-decoration: underline; }
+}
 
 /* contact gets its own line, not jammed in with the nav links */
 .foot__contact { font-size: 0.875rem; }
@@ -745,7 +787,9 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   color: var(--sage); overflow-wrap: anywhere;
   text-underline-offset: 0.25em; transition: color 0.15s ease;
 }
-.foot__contact a:hover { color: var(--bone); }
+@media (hover: hover) and (pointer: fine) {
+  .foot__contact a:hover { color: var(--bone); }
+}
 
 .foot__note {
   margin-top: clamp(1.75rem, 3vw, 2.25rem);
@@ -764,7 +808,9 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   font-size: 0.9375rem; font-weight: 500; color: var(--sage);
   text-decoration: none; margin-bottom: 1.25rem; transition: color 0.15s ease;
 }
-.backlink:hover { color: var(--bone); }
+@media (hover: hover) and (pointer: fine) {
+  .backlink:hover { color: var(--bone); }
+}
 
 .doc__band {
   background: var(--vellum);
@@ -953,7 +999,9 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   text-decoration: underline; text-underline-offset: 0.2em;
   text-decoration-thickness: 1px; cursor: pointer;
 }
-.linkish:hover { color: var(--paper-ink); }
+@media (hover: hover) and (pointer: fine) {
+  .linkish:hover { color: var(--paper-ink); }
+}
 
 /* --- the preliminary check result -------------------------------------- */
 .result { max-width: 34rem; }
@@ -1053,7 +1101,9 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
    strength: the one that moves from the result to Stage 2, and the inline
    CTA further down the page. */
 .btn--ready { opacity: 1; transition: background-color 0.15s ease; }
-.btn--ready:hover { background: #3A4030; border-color: #3A4030; }
+@media (hover: hover) and (pointer: fine) {
+  .btn--ready:hover { background: #3A4030; border-color: #3A4030; }
+}
 .btn--ready:active { background: #2E3326; border-color: #2E3326; }
 
 /* --- the check button while the lookup is in flight --------------------- */
@@ -1110,7 +1160,9 @@ form:valid .btn[aria-busy="true"] { opacity: 0.6; cursor: progress; }
      property. */
   transition: background-color 0.15s ease;
 }
-.btn--inline:hover { background: #3A4030; border-color: #3A4030; }
+@media (hover: hover) and (pointer: fine) {
+  .btn--inline:hover { background: #3A4030; border-color: #3A4030; }
+}
 .btn--inline:active { background: #2E3326; border-color: #2E3326; }
 
 @media (max-width: 40rem) {
