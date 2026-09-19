@@ -1,0 +1,13 @@
+# Rellony — https://rellony.com
+#
+# Everything on this site is public and meant to be found, including the
+# legal pages. An empty Disallow is the original spec's way of saying
+# "nothing is off limits"; it is understood by every crawler, where the
+# later Allow directive is not.
+
+User-agent: *
+Disallow:
+
+# Sitemap discovery. This line is how crawlers actually find the file —
+# there is no <link> element that does it.
+Sitemap: https://rellony.com/sitemap.xml

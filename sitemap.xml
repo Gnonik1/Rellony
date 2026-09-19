@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Rellony sitemap.
+
+  Every <loc> is the canonical apex form, https://rellony.com/..., matching the
+  <link rel="canonical"> on each page. www and http both redirect to this form,
+  so listing anything else here would put a redirect in front of every crawl.
+
+  The home page is the only one worth ranking; the legal pages are listed so
+  they are discoverable and indexed, not because they compete for traffic.
+
+  <priority> and <changefreq> are advisory and Google ignores both. They are
+  kept because other crawlers still read them and they cost nothing.
+
+  lastmod is the date the page's content last changed. It has to be maintained
+  by hand: a stale lastmod is worse than none, because it teaches crawlers to
+  distrust the file. Update it when you change a page, not when you deploy.
+-->
+
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <url>
+    <loc>https://rellony.com/</loc>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <url>
+    <loc>https://rellony.com/privacy.html</loc>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <url>
+    <loc>https://rellony.com/terms.html</loc>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+</urlset>
