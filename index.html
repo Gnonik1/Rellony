@@ -130,7 +130,7 @@
           "priceCurrency": "GBP",
           "minPrice": 49,
           "maxPrice": 99,
-          "valueAddedTaxIncluded": true
+          "valueAddedTaxIncluded": false
         },
         "description": "Early-access introductory range. One-time charge per report; the exact price is confirmed in writing by email before payment."
       }
@@ -743,7 +743,8 @@
               <h3>We confirm scope and price</h3>
               <p>
                 A person reviews the property and comes back within 1 business day with
-                what we can cover and what it costs.
+                what we can cover and what it costs. If you want to go ahead, we send a
+                PayPal invoice by email; nothing is charged on this site.
               </p>
             </div>
           </li>
@@ -843,7 +844,6 @@
         <li><a href="terms.html">Terms of Service</a></li>
       </ul>
 
-      <!-- SUPPORT_EMAIL placeholder — replace once the domain is live -->
       <p class="foot__contact"><a href="mailto:support@rellony.com">support@rellony.com</a></p>
     </div>
 
@@ -860,8 +860,8 @@
 (function () {
   'use strict';
 
-  /* PLACEHOLDER — paste the real Formspree form ID here, and in the
-     <form action> attribute above, before launch. */
+  /* Live and tested. Also set on the <form action> attributes above — if this
+     ever changes, all of them have to change together. */
   var FORMSPREE_ENDPOINT = 'https://formspree.io/f/xrpbgnna';
   var SUPPORT_EMAIL = 'support@rellony.com';
 

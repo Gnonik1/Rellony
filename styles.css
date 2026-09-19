@@ -158,6 +158,61 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
 .site-head :focus-visible,
 .paper :focus-visible { outline-color: var(--paper-ink); }
 
+/* ==========================================================================
+   Controls under a finger
+
+   The artefact is WebKit-only: the same phone in Chrome never shows it. So
+   rather than keep chasing which paint it is, nothing on a control is left
+   for WebKit to paint at all. Three things together, where before only one
+   was ever in place at a time:
+
+     -webkit-tap-highlight-color: transparent   (on html, further up)
+     -webkit-touch-callout: none                no long-press preview
+     user-select: none                          no selection to highlight
+
+   Prose is deliberately absent from this list. The legal-page body links,
+   the consent line and the footer address stay selectable, because people
+   copy those, and a link is allowed to offer its preview.
+   ========================================================================== */
+.btn,
+.wordmark,
+.site-nav a,
+.lockup__mark,
+.foot__links a,
+.backlink,
+.confirm__link,
+.chip {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* The press itself. Each control sets its own colour wash where it is
+   defined; this is the movement that goes with it. A scale, not a translate:
+   nudging a button down slides its label within its box, which is exactly the
+   'something dropped on the text' reading we are trying to get away from.
+   Scaling presses the whole control, label and all, the way a native one
+   behaves. Transform is listed in each control's own transition so the
+   release eases back rather than snapping. */
+.btn,
+.wordmark,
+.site-nav a,
+.lockup__mark,
+.foot__links a,
+.backlink,
+.confirm__link,
+.chip {
+  transform-origin: center;
+}
+.btn:active,
+.wordmark:active,
+.site-nav a:active,
+.lockup__mark:active,
+.foot__links a:active,
+.backlink:active,
+.confirm__link:active,
+.chip:active { transform: scale(0.97); }
+
 /* Turning off the UA tap highlight took feedback away from EVERY link, not
    just the controls that get a designed press above. These are the inline
    links left over — in the legal documents, the consent line, the footer
@@ -212,7 +267,7 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
   /* room for the press wash to land as a pill rather than a tight box round
      the glyphs; the matching negative margin keeps the mark where it was */
   padding-inline: 0.5rem; margin-inline: -0.5rem; border-radius: 999px;
-  transition: background-color 0.12s ease;
+  transition: background-color 0.12s ease, transform 0.09s ease;
 }
 .wordmark:active { background: var(--press-paper); }
 
@@ -231,7 +286,7 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
   /* colour is deliberately NOT transitioned: fading paper-soft across the
      incoming wash passes through ~4.1:1, so the label snaps to full ink
      while only the background fades. No state drops below AA. */
-  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.09s ease;
 }
 /* the hover has to be readable as feedback on a light bar, so it takes a
    real tint plus a boundary — a 5% wash alone was invisible.
@@ -390,7 +445,7 @@ select:invalid { color: var(--paper-hint); }
   border: 1px solid var(--line-paper-firm); border-radius: 999px;
   font-size: 0.875rem; line-height: 1.25; color: var(--paper-soft);
   cursor: pointer; user-select: none;
-  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease, transform 0.09s ease;
 }
 .chip span { min-width: 0; }
 @media (hover: hover) and (pointer: fine) {
@@ -464,18 +519,13 @@ select:invalid { color: var(--paper-hint); }
   color: var(--vellum); background: var(--base);
   border: 1px solid var(--base); border-radius: 999px;
   padding: 0.75rem 1.5rem; cursor: pointer;
-  /* a button's label is a control, not prose: a long press that lands here
-     should not start a text selection. The system draws that selection tight
-     to the glyph run, which is the light box that appeared over this label.
-     Scoped to .btn — links and prose stay selectable so they can be copied. */
-  -webkit-user-select: none; user-select: none;
   /* muted until the form is actually completable — never `disabled`, so a
      click still runs validation and shows the visitor what is missing */
   opacity: 0.55;
   /* No transform. A transition on transform is enough to make WebKit treat
      the button as a compositing candidate, and all it bought was a 1px nudge
      on press — which the colour step below says better anyway. */
-  transition: opacity 0.2s ease, background-color 0.15s ease;
+  transition: opacity 0.2s ease, background-color 0.15s ease, transform 0.09s ease;
 }
 
 /* Readiness is read straight off the form's live constraint validity.
@@ -530,7 +580,7 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   border: 1px solid var(--line-paper-firm); border-radius: 999px;
   font-weight: 600; font-size: 0.9375rem; text-decoration: none;
   color: var(--paper-ink);
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.09s ease;
 }
 @media (hover: hover) and (pointer: fine) {
   .confirm__link:hover { border-color: var(--paper-ink); background: var(--paper-wash); }
@@ -756,7 +806,7 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   /* the inline padding is the press wash's room; the negative margin keeps
      the mark optically centred exactly where it was */
   padding: 0 0.75rem 0.4rem; margin-inline: -0.75rem; border-radius: 14px;
-  transition: background-color 0.12s ease;
+  transition: background-color 0.12s ease, transform 0.09s ease;
 }
 /* hover draws the same hairline the headline does */
 .lockup__mark::after {
@@ -813,7 +863,7 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   /* padding gives the press wash a pill to sit in, the negative margin keeps
      the row's spacing identical to what the flex gap already set */
   padding-inline: 0.7rem; margin-inline: -0.7rem; border-radius: 999px;
-  transition: color 0.15s ease, background-color 0.12s ease;
+  transition: color 0.15s ease, background-color 0.12s ease, transform 0.09s ease;
 }
 @media (hover: hover) and (pointer: fine) {
   .foot__links a:hover { color: var(--bone); text-decoration: underline; }
@@ -847,7 +897,7 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   font-size: 0.9375rem; font-weight: 500; color: var(--sage);
   text-decoration: none; margin-bottom: 1.25rem;
   padding-inline: 0.6rem; margin-inline: -0.6rem; border-radius: 999px;
-  transition: color 0.15s ease, background-color 0.12s ease;
+  transition: color 0.15s ease, background-color 0.12s ease, transform 0.09s ease;
 }
 @media (hover: hover) and (pointer: fine) {
   .backlink:hover { color: var(--bone); }
@@ -881,19 +931,15 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
 .doc dd { margin: 0.25rem 0 0; }
 .doc a { color: var(--paper-ink); overflow-wrap: anywhere; }
 
-/* A draft under review is, in this product's own language, unverified. */
-.draft-flag {
-  border: 1px solid rgba(138, 78, 6, 0.35);
-  border-left: 3px solid var(--unverified-paper);
-  border-radius: 0 var(--r-input) var(--r-input) 0;
-  background: rgba(138, 78, 6, 0.07);
-  padding: 1rem 1.15rem; margin-bottom: 2.25rem;
+/* The invoice wording, quoted verbatim in Terms 06 so it can be checked
+   against the invoice itself. A quiet inset, not a pull quote. */
+.doc blockquote {
+  margin: 1.15rem 0;
+  padding: 0.15rem 0 0.15rem 1.1rem;
+  border-left: 2px solid var(--line-paper-firm);
 }
-.draft-flag strong {
-  display: block; font-family: var(--display); font-weight: 700;
-  letter-spacing: -0.015em; color: var(--unverified-paper); margin-bottom: 0.3rem;
-}
-.draft-flag span { display: block; font-size: 0.9375rem; line-height: 1.5; color: var(--paper-soft); }
+.doc blockquote p { color: var(--paper-ink); }
+
 
 /* ==========================================================================
    Phone — below 40rem (640px)
