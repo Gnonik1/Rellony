@@ -212,8 +212,6 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
   /* room for the press wash to land as a pill rather than a tight box round
      the glyphs; the matching negative margin keeps the mark where it was */
   padding-inline: 0.5rem; margin-inline: -0.5rem; border-radius: 999px;
-  /* no long-press preview card on our own wordmark */
-  -webkit-touch-callout: none;
   transition: background-color 0.12s ease;
 }
 .wordmark:active { background: var(--press-paper); }
@@ -230,8 +228,6 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
   display: inline-flex; align-items: center; min-height: 2.75rem;
   font-size: 0.9375rem; font-weight: 500; text-decoration: none;
   color: var(--paper-soft); padding: 0.4rem 0.8rem; border-radius: 999px;
-  /* a nav link is a control, not something to preview */
-  -webkit-touch-callout: none;
   /* colour is deliberately NOT transitioned: fading paper-soft across the
      incoming wash passes through ~4.1:1, so the label snaps to full ink
      while only the background fades. No state drops below AA. */
@@ -468,6 +464,11 @@ select:invalid { color: var(--paper-hint); }
   color: var(--vellum); background: var(--base);
   border: 1px solid var(--base); border-radius: 999px;
   padding: 0.75rem 1.5rem; cursor: pointer;
+  /* a button's label is a control, not prose: a long press that lands here
+     should not start a text selection. The system draws that selection tight
+     to the glyph run, which is the light box that appeared over this label.
+     Scoped to .btn — links and prose stay selectable so they can be copied. */
+  -webkit-user-select: none; user-select: none;
   /* muted until the form is actually completable — never `disabled`, so a
      click still runs validation and shows the visitor what is missing */
   opacity: 0.55;
