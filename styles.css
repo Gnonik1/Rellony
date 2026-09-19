@@ -149,7 +149,10 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
 /* Record identifiers and quoted dates ONLY. Nowhere else on the site. */
 .record { font-family: var(--record); font-weight: 500; font-size: 0.9em; letter-spacing: -0.01em; }
 
-:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; border-radius: 4px; }
+/* No border-radius here. It applied to the FOCUSED ELEMENT, not to the ring:
+   focusing the inline CTA squared its 999px pill down to 4px, and took the
+   nav pills with it. An outline already follows the element's own radius. */
+:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
 .panel :focus-visible,
 .finding :focus-visible,
 .site-head :focus-visible,
