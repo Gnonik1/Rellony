@@ -90,15 +90,6 @@
 
 html {
   -webkit-text-size-adjust: 100%;
-  /* iOS paints its own highlight on every link and button that gets tapped:
-     a dark translucent fill following the border-radius, held until you tap
-     elsewhere. On the vellum bar it reads as a dark block behind the wordmark
-     and the nav links; on the olive footer, a darker patch behind the mark.
-     It is the one paint common to every element that showed the artefact, and
-     the wordmark proves it was never ours: that link has no hover, focus,
-     background or radius of its own, so nothing in this file could have drawn
-     it. Focus keeps a visible indicator - the :focus-visible ring below. */
-  -webkit-tap-highlight-color: transparent;
   scroll-behavior: smooth;
   scroll-padding-top: 5rem;
   background: var(--base);
@@ -117,13 +108,7 @@ body {
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"),
     linear-gradient(180deg, rgba(240,239,227,0.045) 0%, rgba(240,239,227,0) 42%, rgba(0,0,0,0.05) 100%);
   background-repeat: repeat, no-repeat;
-  /* Both layers scroll with the document. The wash used to be `fixed`, which
-     pins it to the viewport and puts WebKit on a repaint-every-frame path for
-     the whole page: on iOS Safari, content composited over that region can
-     paint blank mid-scroll and settle again only once scrolling stops. At
-     these alphas, anchoring the gradient to the document instead costs
-     nothing visually and takes the repaint region away. */
-  background-attachment: scroll, scroll;
+  background-attachment: scroll, fixed;
 }
 
 h1, h2, h3 {
@@ -143,51 +128,11 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
 /* Record identifiers and quoted dates ONLY. Nowhere else on the site. */
 .record { font-family: var(--record); font-weight: 500; font-size: 0.9em; letter-spacing: -0.01em; }
 
-/* No border-radius here. It was setting 4px on the FOCUSED ELEMENT rather than
-   on the outline, so focusing the inline CTA squared its 999px pill down to
-   4px, and took the nav pills with it. A geometry change on focus is also the
-   kind of thing that forces a link's layer to re-rasterise. An outline already
-   follows the element's own radius. */
-:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; border-radius: 4px; }
 .panel :focus-visible,
 .finding :focus-visible,
 .site-head :focus-visible,
 .paper :focus-visible { outline-color: var(--paper-ink); }
-
-/* Controls are not prose: nothing in this list is meant to be selected or
-   long-pressed, so nothing is lost by opting them out of both.
-
-   iOS treats a tap held slightly too long as the start of a selection, and on
-   a link it also opens the long-press callout preview. Both of those paint,
-   and they paint at different bounds: the callout draws a rounded rect at the
-   ELEMENT's bounds, the selection draws a box at the TEXT's bounds. That is
-   the two-layer artefact on the device screenshots exactly — a dark rect
-   at the element box with a lighter, text-tight box inside it. ::selection is
-   not styled anywhere in this file, so what gets drawn there is the system
-   highlight, whose colour we do not control.
-
-   Supporting evidence: .chip already carried `user-select: none`, and it is
-   the one pill-shaped control on the site that never showed the artefact.
-
-   The -webkit- prefixes are not optional here. Unprefixed `user-select` only
-   landed in Safari 17.4, and the phones this is being chased on are older
-   than that.
-
-   Deliberately NOT applied to prose. The support address in the footer, the
-   links inside the legal documents and the consent copy all stay selectable,
-   because people copy those. */
-.btn,
-.wordmark,
-.site-nav a,
-.lockup__mark,
-.foot__links a,
-.backlink,
-.confirm__link,
-.chip {
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-touch-callout: none;
-}
 
 .shell { width: 100%; max-width: var(--shell); margin-inline: auto; padding-inline: var(--gutter); }
 
@@ -249,22 +194,12 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
   transition: background-color 0.15s ease, box-shadow 0.15s ease;
 }
 /* the hover has to be readable as feedback on a light bar, so it takes a
-   real tint plus a boundary — a 5% wash alone was invisible.
-
-   Hover and focus used to share this rule. They are split because hover now
-   sits behind (hover: hover): on iOS the tint was applied on tap and then
-   held, and under the UA tap highlight it read as a dark block on the vellum
-   bar. Keyboard focus is unaffected and keeps the same treatment. */
-/* Colour only. The fill and the inset ring that used to be here are now
-   hover-only: the outline from the global :focus-visible rule is the keyboard
-   indicator, and it is enough on its own. */
-.site-nav a:focus-visible { color: var(--paper-ink); }
-@media (hover: hover) and (pointer: fine) {
-  .site-nav a:hover {
-    color: var(--paper-ink);
-    background: var(--paper-wash-firm);
-    box-shadow: inset 0 0 0 1px var(--line-paper-firm);
-  }
+   real tint plus a boundary — a 5% wash alone was invisible */
+.site-nav a:hover,
+.site-nav a:focus-visible {
+  color: var(--paper-ink);
+  background: var(--paper-wash-firm);
+  box-shadow: inset 0 0 0 1px var(--line-paper-firm);
 }
 
 /* ==========================================================================
@@ -363,12 +298,10 @@ textarea {
 }
 input::placeholder, textarea::placeholder { color: var(--paper-hint); }
 
-@media (hover: hover) and (pointer: fine) {
-  input[type="text"]:hover,
-  input[type="email"]:hover,
-  select:hover,
-  textarea:hover { border-color: var(--paper-soft); }
-}
+input[type="text"]:hover,
+input[type="email"]:hover,
+select:hover,
+textarea:hover { border-color: var(--paper-soft); }
 
 input[type="text"]:focus,
 input[type="email"]:focus,
@@ -402,13 +335,11 @@ select:invalid { color: var(--paper-hint); }
   min-height: 2.875rem; padding: 0.5rem 0.75rem;
   border: 1px solid var(--line-paper-firm); border-radius: 999px;
   font-size: 0.875rem; line-height: 1.25; color: var(--paper-soft);
-  cursor: pointer;
+  cursor: pointer; user-select: none;
   transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 }
 .chip span { min-width: 0; }
-@media (hover: hover) and (pointer: fine) {
-  .chip:hover { border-color: var(--paper-ink); color: var(--paper-ink); }
-}
+.chip:hover { border-color: var(--paper-ink); color: var(--paper-ink); }
 .chip input {
   appearance: none; -webkit-appearance: none; flex: none;
   width: 0.875rem; height: 0.875rem; margin: 0;
@@ -452,9 +383,7 @@ select:invalid { color: var(--paper-hint); }
   width: 2.75rem; height: 2.75rem;
   transform: translate(-50%, -50%);
 }
-@media (hover: hover) and (pointer: fine) {
-  .consent-check input:hover { border-color: var(--paper-ink); }
-}
+.consent-check input:hover { border-color: var(--paper-ink); }
 .consent-check input:checked {
   background-color: var(--base);
   border-color: var(--base);
@@ -477,10 +406,7 @@ select:invalid { color: var(--paper-hint); }
   /* muted until the form is actually completable — never `disabled`, so a
      click still runs validation and shows the visitor what is missing */
   opacity: 0.55;
-  /* No `transform` here. A transition on transform is enough to make WebKit
-     treat the button as a compositing candidate, and all it bought was a 1px
-     press; the press now reads as a colour step instead. */
-  transition: opacity 0.2s ease, background-color 0.15s ease;
+  transition: opacity 0.2s ease, background-color 0.15s ease, transform 0.08s ease;
 }
 
 /* Readiness is read straight off the form's live constraint validity.
@@ -492,10 +418,8 @@ select:invalid { color: var(--paper-hint); }
    controls themselves. It is also unaffected by `novalidate`, which only
    suppresses validation at submit time. */
 form:valid .btn { opacity: 1; }
-@media (hover: hover) and (pointer: fine) {
-  form:valid .btn:hover { background: #3A4030; border-color: #3A4030; }
-}
-form:valid .btn:active { background: #2E3326; border-color: #2E3326; }
+form:valid .btn:hover { background: #3A4030; border-color: #3A4030; }
+form:valid .btn:active { transform: translateY(1px); }
 
 /* the sending state must outrank the readiness rule above it */
 .btn[disabled],
@@ -534,13 +458,9 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   color: var(--paper-ink);
   transition: border-color 0.15s ease, background-color 0.15s ease;
 }
-@media (hover: hover) and (pointer: fine) {
-  .confirm__link:hover { border-color: var(--paper-ink); background: var(--paper-wash); }
-}
+.confirm__link:hover { border-color: var(--paper-ink); background: var(--paper-wash); }
 .confirm__link .arrow { transition: transform 0.15s ease; }
-@media (hover: hover) and (pointer: fine) {
-  .confirm__link:hover .arrow { transform: translateX(3px); }
-}
+.confirm__link:hover .arrow { transform: translateX(3px); }
 
 /* ==========================================================================
    The record — the sheet you receive, on the olive desk
@@ -765,12 +685,8 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   transform: scaleX(0); transform-origin: center;
   transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
-/* The hairline is a hover flourish, not the focus indicator; the global
-   outline covers focus. Keeping it off :focus-visible means nothing animates
-   a transform on this composited pseudo-element after a tap. */
-@media (hover: hover) and (pointer: fine) {
-  .lockup__mark:hover::after { transform: scaleX(1); }
-}
+.lockup__mark:hover::after,
+.lockup__mark:focus-visible::after { transform: scaleX(1); }
 
 .signoff {
   font-family: var(--text); font-weight: 500;
@@ -812,9 +728,7 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   display: inline-flex; align-items: center; min-height: 2.75rem;
   text-decoration: none; color: var(--sage); transition: color 0.15s ease;
 }
-@media (hover: hover) and (pointer: fine) {
-  .foot__links a:hover { color: var(--bone); text-decoration: underline; }
-}
+.foot__links a:hover { color: var(--bone); text-decoration: underline; }
 
 /* contact gets its own line, not jammed in with the nav links */
 .foot__contact { font-size: 0.875rem; }
@@ -822,9 +736,7 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   color: var(--sage); overflow-wrap: anywhere;
   text-underline-offset: 0.25em; transition: color 0.15s ease;
 }
-@media (hover: hover) and (pointer: fine) {
-  .foot__contact a:hover { color: var(--bone); }
-}
+.foot__contact a:hover { color: var(--bone); }
 
 .foot__note {
   margin-top: clamp(1.75rem, 3vw, 2.25rem);
@@ -843,9 +755,7 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   font-size: 0.9375rem; font-weight: 500; color: var(--sage);
   text-decoration: none; margin-bottom: 1.25rem; transition: color 0.15s ease;
 }
-@media (hover: hover) and (pointer: fine) {
-  .backlink:hover { color: var(--bone); }
-}
+.backlink:hover { color: var(--bone); }
 
 .doc__band {
   background: var(--vellum);
@@ -960,21 +870,6 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   .trail__no { margin-bottom: 0.35rem; }
   .checked__grid { gap: 0.5rem; }
 
-  /* --- the two checklists go flat --- */
-  /* On the vellum band the contrast already separates these items from the
-     page, so a fill and a radius on each one only adds eleven more boxes to
-     a column of boxes. Below 40rem: the mark, the text, and a hairline
-     between. The same treatment runs on .deliver__list further down. */
-  .limits li {
-    margin-bottom: 0;
-    padding: 0.5rem 0 0.55rem 1.5rem;
-    line-height: 1.45;
-    border-bottom: 1px solid var(--line-paper);
-  }
-  .limits li:last-child { border-bottom: 0; padding-bottom: 0; }
-  /* the dash tracks the first line down past the new padding */
-  .limits li::before { top: 1.2em; }
-
   /* --- sections give back some vertical run --- */
   .hero { padding-block: 2rem 2.25rem; }
   .checked { padding-block: 2.5rem; }
@@ -1034,9 +929,7 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   text-decoration: underline; text-underline-offset: 0.2em;
   text-decoration-thickness: 1px; cursor: pointer;
 }
-@media (hover: hover) and (pointer: fine) {
-  .linkish:hover { color: var(--paper-ink); }
-}
+.linkish:hover { color: var(--paper-ink); }
 
 /* --- the preliminary check result -------------------------------------- */
 .result { max-width: 34rem; }
@@ -1135,11 +1028,9 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
    waiting on anything a visitor has to fill in, so they are always at full
    strength: the one that moves from the result to Stage 2, and the inline
    CTA further down the page. */
-.btn--ready { opacity: 1; transition: background-color 0.15s ease; }
-@media (hover: hover) and (pointer: fine) {
-  .btn--ready:hover { background: #3A4030; border-color: #3A4030; }
-}
-.btn--ready:active { background: #2E3326; border-color: #2E3326; }
+.btn--ready { opacity: 1; }
+.btn--ready:hover { background: #3A4030; border-color: #3A4030; }
+.btn--ready:active { transform: translateY(1px); }
 
 /* --- the check button while the lookup is in flight --------------------- */
 /* Deliberately not `disabled`: a disabled button drops focus in some
@@ -1190,29 +1081,14 @@ form:valid .btn[aria-busy="true"] { opacity: 0.6; cursor: progress; }
 .btn--inline {
   width: auto; opacity: 1;
   text-decoration: none;
-  /* Its opacity never changes (it is not waiting on a form), so it carries
-     no opacity transition either. Nothing here animates a composited
-     property. */
-  transition: background-color 0.15s ease;
 }
-@media (hover: hover) and (pointer: fine) {
-  .btn--inline:hover { background: #3A4030; border-color: #3A4030; }
-}
-.btn--inline:active { background: #2E3326; border-color: #2E3326; }
+.btn--inline:hover { background: #3A4030; border-color: #3A4030; }
+.btn--inline:active { transform: translateY(1px); }
 
 @media (max-width: 40rem) {
   .deliver { padding-block: 0 2.5rem; }
   .deliver__band { padding: 1.25rem 1rem; }
-  /* Flat, to match .limits above: no fill, no radius, hairline between. */
-  .deliver__list { gap: 0; }
-  .deliver__list li {
-    background: none; border-radius: 0;
-    padding: 0.5rem 0 0.55rem;
-    font-size: 0.9375rem; line-height: 1.45;
-    border-bottom: 1px solid var(--line-paper);
-  }
-  .deliver__list li::before { line-height: 1.45; }
-  .deliver__list li:last-child { border-bottom: 0; padding-bottom: 0; }
+  .deliver__list li { padding: 0.75rem 0.85rem; font-size: 0.9375rem; }
   .result__note { padding: 0.85rem 0.9rem; margin-bottom: 1.15rem; }
   .btn--inline { width: 100%; }
 }
