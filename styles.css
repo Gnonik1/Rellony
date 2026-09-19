@@ -58,6 +58,17 @@
   /* nav hover on the vellum bar — the 0.05 wash above was imperceptible */
   --paper-wash-firm: rgba(69, 75, 55, 0.13);
 
+  /* Press. A press is a wash of the surface's own ink, which is the only
+     direction that reads on each ground: olive on vellum, bone on olive.
+     Both sit one notch firmer than the matching hover wash, so a press
+     always registers as more than a hover rather than competing with it. */
+  --press-paper: rgba(69, 75, 55, 0.18);
+  --press-olive: rgba(240, 239, 227, 0.14);
+  /* the filled olive buttons darken their own fill instead: washing them
+     lighter would wash out the vellum label sitting on top */
+  --btn-hover: #3A4030;
+  --btn-press: #2E3326;
+
   /* the wordmark belongs to the palette, not to black */
   --olive-ink: #363C29;
 
@@ -90,6 +101,12 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* iOS paints a grey box over any link or button held under a finger. It is
+     the artefact that sent us hunting a compositing bug: it only ever showed
+     mid-press and cleared the moment the finger lifted. Nothing was broken,
+     it just looked bad. Turning it off leaves the press unacknowledged, so
+     every control below gets a designed :active in its place. */
+  -webkit-tap-highlight-color: transparent;
   scroll-behavior: smooth;
   scroll-padding-top: 5rem;
   background: var(--base);
@@ -108,7 +125,11 @@ body {
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"),
     linear-gradient(180deg, rgba(240,239,227,0.045) 0%, rgba(240,239,227,0) 42%, rgba(0,0,0,0.05) 100%);
   background-repeat: repeat, no-repeat;
-  background-attachment: scroll, fixed;
+  /* Both layers scroll with the document. A fixed layer pins the wash to the
+     viewport and puts WebKit on a repaint-every-frame path for the whole
+     page; at these alphas, anchoring it to the document instead costs nothing
+     visually and takes that repaint region away. */
+  background-attachment: scroll, scroll;
 }
 
 h1, h2, h3 {
@@ -133,6 +154,17 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
 .finding :focus-visible,
 .site-head :focus-visible,
 .paper :focus-visible { outline-color: var(--paper-ink); }
+
+/* Turning off the UA tap highlight took feedback away from EVERY link, not
+   just the controls that get a designed press above. These are the inline
+   links left over — in the legal documents, the consent line, the footer
+   address — and without this they would feel dead under a finger. A wash
+   tight to the text is the ordinary affordance for an inline link, and at
+   these alphas it reads as a press rather than a box dropped on the words. */
+.doc a:active,
+.consent-check a:active,
+.foot__note a:active { background: var(--press-paper); border-radius: 3px; }
+.foot__contact a:active { background: var(--press-olive); border-radius: 3px; }
 
 .shell { width: 100%; max-width: var(--shell); margin-inline: auto; padding-inline: var(--gutter); }
 
@@ -174,7 +206,14 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
   /* olive, not near-black — the wordmark is part of the palette */
   color: var(--olive-ink);
   line-height: 1;
+  /* room for the press wash to land as a pill rather than a tight box round
+     the glyphs; the matching negative margin keeps the mark where it was */
+  padding-inline: 0.5rem; margin-inline: -0.5rem; border-radius: 999px;
+  /* no long-press preview card on our own wordmark */
+  -webkit-touch-callout: none;
+  transition: background-color 0.12s ease;
 }
+.wordmark:active { background: var(--press-paper); }
 
 .coverage-chip {
   font-size: 0.75rem; font-weight: 500;
@@ -188,19 +227,33 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
   display: inline-flex; align-items: center; min-height: 2.75rem;
   font-size: 0.9375rem; font-weight: 500; text-decoration: none;
   color: var(--paper-soft); padding: 0.4rem 0.8rem; border-radius: 999px;
+  /* a nav link is a control, not something to preview */
+  -webkit-touch-callout: none;
   /* colour is deliberately NOT transitioned: fading paper-soft across the
      incoming wash passes through ~4.1:1, so the label snaps to full ink
      while only the background fades. No state drops below AA. */
   transition: background-color 0.15s ease, box-shadow 0.15s ease;
 }
 /* the hover has to be readable as feedback on a light bar, so it takes a
-   real tint plus a boundary — a 5% wash alone was invisible */
-.site-nav a:hover,
+   real tint plus a boundary — a 5% wash alone was invisible.
+
+   Hover and focus used to share this rule. They are split so hover can sit
+   behind (hover: hover): iOS applies :hover on tap and holds it until you
+   tap elsewhere, which left this tint stuck on the last link touched long
+   after the finger had gone. Keyboard focus keeps the full treatment. */
 .site-nav a:focus-visible {
   color: var(--paper-ink);
   background: var(--paper-wash-firm);
   box-shadow: inset 0 0 0 1px var(--line-paper-firm);
 }
+@media (hover: hover) and (pointer: fine) {
+  .site-nav a:hover {
+    color: var(--paper-ink);
+    background: var(--paper-wash-firm);
+    box-shadow: inset 0 0 0 1px var(--line-paper-firm);
+  }
+}
+.site-nav a:active { color: var(--paper-ink); background: var(--press-paper); }
 
 /* ==========================================================================
    Hero — stays olive, so the paper panel holds its contrast
@@ -298,10 +351,12 @@ textarea {
 }
 input::placeholder, textarea::placeholder { color: var(--paper-hint); }
 
-input[type="text"]:hover,
-input[type="email"]:hover,
-select:hover,
-textarea:hover { border-color: var(--paper-soft); }
+@media (hover: hover) and (pointer: fine) {
+  input[type="text"]:hover,
+  input[type="email"]:hover,
+  select:hover,
+  textarea:hover { border-color: var(--paper-soft); }
+}
 
 input[type="text"]:focus,
 input[type="email"]:focus,
@@ -339,7 +394,12 @@ select:invalid { color: var(--paper-hint); }
   transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 }
 .chip span { min-width: 0; }
-.chip:hover { border-color: var(--paper-ink); color: var(--paper-ink); }
+@media (hover: hover) and (pointer: fine) {
+  .chip:hover { border-color: var(--paper-ink); color: var(--paper-ink); }
+}
+/* Ahead of the checked rules below on purpose: pressing a chip that is
+   already on should leave its filled state alone, not wash over it. */
+.chip:active { background: var(--press-paper); border-color: var(--paper-ink); }
 .chip input {
   appearance: none; -webkit-appearance: none; flex: none;
   width: 0.875rem; height: 0.875rem; margin: 0;
@@ -383,7 +443,9 @@ select:invalid { color: var(--paper-hint); }
   width: 2.75rem; height: 2.75rem;
   transform: translate(-50%, -50%);
 }
-.consent-check input:hover { border-color: var(--paper-ink); }
+@media (hover: hover) and (pointer: fine) {
+  .consent-check input:hover { border-color: var(--paper-ink); }
+}
 .consent-check input:checked {
   background-color: var(--base);
   border-color: var(--base);
@@ -406,7 +468,10 @@ select:invalid { color: var(--paper-hint); }
   /* muted until the form is actually completable — never `disabled`, so a
      click still runs validation and shows the visitor what is missing */
   opacity: 0.55;
-  transition: opacity 0.2s ease, background-color 0.15s ease, transform 0.08s ease;
+  /* No transform. A transition on transform is enough to make WebKit treat
+     the button as a compositing candidate, and all it bought was a 1px nudge
+     on press — which the colour step below says better anyway. */
+  transition: opacity 0.2s ease, background-color 0.15s ease;
 }
 
 /* Readiness is read straight off the form's live constraint validity.
@@ -418,8 +483,13 @@ select:invalid { color: var(--paper-hint); }
    controls themselves. It is also unaffected by `novalidate`, which only
    suppresses validation at submit time. */
 form:valid .btn { opacity: 1; }
-form:valid .btn:hover { background: #3A4030; border-color: #3A4030; }
-form:valid .btn:active { transform: translateY(1px); }
+@media (hover: hover) and (pointer: fine) {
+  form:valid .btn:hover { background: var(--btn-hover); border-color: var(--btn-hover); }
+}
+/* The press applies whether or not the form is valid: an incomplete form
+   still runs validation on click, so the button has to acknowledge the tap. */
+.btn:active,
+form:valid .btn:active { background: var(--btn-press); border-color: var(--btn-press); }
 
 /* the sending state must outrank the readiness rule above it */
 .btn[disabled],
@@ -458,9 +528,12 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   color: var(--paper-ink);
   transition: border-color 0.15s ease, background-color 0.15s ease;
 }
-.confirm__link:hover { border-color: var(--paper-ink); background: var(--paper-wash); }
+@media (hover: hover) and (pointer: fine) {
+  .confirm__link:hover { border-color: var(--paper-ink); background: var(--paper-wash); }
+  .confirm__link:hover .arrow { transform: translateX(3px); }
+}
 .confirm__link .arrow { transition: transform 0.15s ease; }
-.confirm__link:hover .arrow { transform: translateX(3px); }
+.confirm__link:active { border-color: var(--paper-ink); background: var(--press-paper); }
 
 /* ==========================================================================
    The record — the sheet you receive, on the olive desk
@@ -676,17 +749,23 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   font-size: clamp(2.5rem, 3.2vw + 1.1rem, 4.25rem);
   letter-spacing: -0.04em; line-height: 1;
   color: var(--bone); text-decoration: none;
-  padding-bottom: 0.4rem;
+  /* the inline padding is the press wash's room; the negative margin keeps
+     the mark optically centred exactly where it was */
+  padding: 0 0.75rem 0.4rem; margin-inline: -0.75rem; border-radius: 14px;
+  transition: background-color 0.12s ease;
 }
 /* hover draws the same hairline the headline does */
 .lockup__mark::after {
-  content: ""; position: absolute; left: 0; right: 0; bottom: 0;
+  content: ""; position: absolute; left: 0.75rem; right: 0.75rem; bottom: 0;
   height: 2px; background: var(--rule);
   transform: scaleX(0); transform-origin: center;
   transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
-.lockup__mark:hover::after,
 .lockup__mark:focus-visible::after { transform: scaleX(1); }
+@media (hover: hover) and (pointer: fine) {
+  .lockup__mark:hover::after { transform: scaleX(1); }
+}
+.lockup__mark:active { background: var(--press-olive); }
 
 .signoff {
   font-family: var(--text); font-weight: 500;
@@ -726,9 +805,16 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
 }
 .foot__links a {
   display: inline-flex; align-items: center; min-height: 2.75rem;
-  text-decoration: none; color: var(--sage); transition: color 0.15s ease;
+  text-decoration: none; color: var(--sage);
+  /* padding gives the press wash a pill to sit in, the negative margin keeps
+     the row's spacing identical to what the flex gap already set */
+  padding-inline: 0.7rem; margin-inline: -0.7rem; border-radius: 999px;
+  transition: color 0.15s ease, background-color 0.12s ease;
 }
-.foot__links a:hover { color: var(--bone); text-decoration: underline; }
+@media (hover: hover) and (pointer: fine) {
+  .foot__links a:hover { color: var(--bone); text-decoration: underline; }
+}
+.foot__links a:active { color: var(--bone); background: var(--press-olive); }
 
 /* contact gets its own line, not jammed in with the nav links */
 .foot__contact { font-size: 0.875rem; }
@@ -736,7 +822,9 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   color: var(--sage); overflow-wrap: anywhere;
   text-underline-offset: 0.25em; transition: color 0.15s ease;
 }
-.foot__contact a:hover { color: var(--bone); }
+@media (hover: hover) and (pointer: fine) {
+  .foot__contact a:hover { color: var(--bone); }
+}
 
 .foot__note {
   margin-top: clamp(1.75rem, 3vw, 2.25rem);
@@ -753,9 +841,14 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
 .backlink {
   display: inline-flex; align-items: center; gap: 0.45rem; min-height: 2.75rem;
   font-size: 0.9375rem; font-weight: 500; color: var(--sage);
-  text-decoration: none; margin-bottom: 1.25rem; transition: color 0.15s ease;
+  text-decoration: none; margin-bottom: 1.25rem;
+  padding-inline: 0.6rem; margin-inline: -0.6rem; border-radius: 999px;
+  transition: color 0.15s ease, background-color 0.12s ease;
 }
-.backlink:hover { color: var(--bone); }
+@media (hover: hover) and (pointer: fine) {
+  .backlink:hover { color: var(--bone); }
+}
+.backlink:active { color: var(--bone); background: var(--press-olive); }
 
 .doc__band {
   background: var(--vellum);
@@ -870,6 +963,21 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   .trail__no { margin-bottom: 0.35rem; }
   .checked__grid { gap: 0.5rem; }
 
+  /* --- the two checklists go flat --- */
+  /* On the vellum band the contrast already separates these items from the
+     page, so a fill and a radius on each one only adds eleven more boxes to
+     a column of boxes. Below 40rem: the mark, the text, and a hairline
+     between. The same treatment runs on .deliver__list further down. */
+  .limits li {
+    margin-bottom: 0;
+    padding: 0.5rem 0 0.55rem 1.5rem;
+    line-height: 1.45;
+    border-bottom: 1px solid var(--line-paper);
+  }
+  .limits li:last-child { border-bottom: 0; padding-bottom: 0; }
+  /* the dash tracks the first line down past the new padding */
+  .limits li::before { top: 1.2em; }
+
   /* --- sections give back some vertical run --- */
   .hero { padding-block: 2rem 2.25rem; }
   .checked { padding-block: 2.5rem; }
@@ -929,7 +1037,10 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   text-decoration: underline; text-underline-offset: 0.2em;
   text-decoration-thickness: 1px; cursor: pointer;
 }
-.linkish:hover { color: var(--paper-ink); }
+@media (hover: hover) and (pointer: fine) {
+  .linkish:hover { color: var(--paper-ink); }
+}
+.linkish:active { color: var(--paper-ink); }
 
 /* --- the preliminary check result -------------------------------------- */
 .result { max-width: 34rem; }
@@ -1029,8 +1140,10 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
    strength: the one that moves from the result to Stage 2, and the inline
    CTA further down the page. */
 .btn--ready { opacity: 1; }
-.btn--ready:hover { background: #3A4030; border-color: #3A4030; }
-.btn--ready:active { transform: translateY(1px); }
+@media (hover: hover) and (pointer: fine) {
+  .btn--ready:hover { background: var(--btn-hover); border-color: var(--btn-hover); }
+}
+.btn--ready:active { background: var(--btn-press); border-color: var(--btn-press); }
 
 /* --- the check button while the lookup is in flight --------------------- */
 /* Deliberately not `disabled`: a disabled button drops focus in some
@@ -1082,13 +1195,24 @@ form:valid .btn[aria-busy="true"] { opacity: 0.6; cursor: progress; }
   width: auto; opacity: 1;
   text-decoration: none;
 }
-.btn--inline:hover { background: #3A4030; border-color: #3A4030; }
-.btn--inline:active { transform: translateY(1px); }
+@media (hover: hover) and (pointer: fine) {
+  .btn--inline:hover { background: var(--btn-hover); border-color: var(--btn-hover); }
+}
+.btn--inline:active { background: var(--btn-press); border-color: var(--btn-press); }
 
 @media (max-width: 40rem) {
   .deliver { padding-block: 0 2.5rem; }
   .deliver__band { padding: 1.25rem 1rem; }
-  .deliver__list li { padding: 0.75rem 0.85rem; font-size: 0.9375rem; }
+  /* Flat, to match .limits above: no fill, no radius, hairline between. */
+  .deliver__list { gap: 0; }
+  .deliver__list li {
+    background: none; border-radius: 0;
+    padding: 0.5rem 0 0.55rem;
+    font-size: 0.9375rem; line-height: 1.45;
+    border-bottom: 1px solid var(--line-paper);
+  }
+  .deliver__list li::before { line-height: 1.45; }
+  .deliver__list li:last-child { border-bottom: 0; padding-bottom: 0; }
   .result__note { padding: 0.85rem 0.9rem; margin-bottom: 1.15rem; }
   .btn--inline { width: 100%; }
 }
