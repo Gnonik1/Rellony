@@ -108,7 +108,13 @@ body {
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"),
     linear-gradient(180deg, rgba(240,239,227,0.045) 0%, rgba(240,239,227,0) 42%, rgba(0,0,0,0.05) 100%);
   background-repeat: repeat, no-repeat;
-  background-attachment: scroll, fixed;
+  /* Both layers scroll with the document. The wash used to be `fixed`, which
+     pins it to the viewport and puts WebKit on a repaint-every-frame path for
+     the whole page: on iOS Safari, content composited over that region can
+     paint blank mid-scroll and settle again only once scrolling stops. At
+     these alphas, anchoring the gradient to the document instead costs
+     nothing visually and takes the repaint region away. */
+  background-attachment: scroll, scroll;
 }
 
 h1, h2, h3 {
@@ -406,7 +412,10 @@ select:invalid { color: var(--paper-hint); }
   /* muted until the form is actually completable — never `disabled`, so a
      click still runs validation and shows the visitor what is missing */
   opacity: 0.55;
-  transition: opacity 0.2s ease, background-color 0.15s ease, transform 0.08s ease;
+  /* No `transform` here. A transition on transform is enough to make WebKit
+     treat the button as a compositing candidate, and all it bought was a 1px
+     press; the press now reads as a colour step instead. */
+  transition: opacity 0.2s ease, background-color 0.15s ease;
 }
 
 /* Readiness is read straight off the form's live constraint validity.
@@ -419,7 +428,7 @@ select:invalid { color: var(--paper-hint); }
    suppresses validation at submit time. */
 form:valid .btn { opacity: 1; }
 form:valid .btn:hover { background: #3A4030; border-color: #3A4030; }
-form:valid .btn:active { transform: translateY(1px); }
+form:valid .btn:active { background: #2E3326; border-color: #2E3326; }
 
 /* the sending state must outrank the readiness rule above it */
 .btn[disabled],
@@ -870,6 +879,21 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   .trail__no { margin-bottom: 0.35rem; }
   .checked__grid { gap: 0.5rem; }
 
+  /* --- the two checklists go flat --- */
+  /* On the vellum band the contrast already separates these items from the
+     page, so a fill and a radius on each one only adds eleven more boxes to
+     a column of boxes. Below 40rem: the mark, the text, and a hairline
+     between. The same treatment runs on .deliver__list further down. */
+  .limits li {
+    margin-bottom: 0;
+    padding: 0.5rem 0 0.55rem 1.5rem;
+    line-height: 1.45;
+    border-bottom: 1px solid var(--line-paper);
+  }
+  .limits li:last-child { border-bottom: 0; padding-bottom: 0; }
+  /* the dash tracks the first line down past the new padding */
+  .limits li::before { top: 1.2em; }
+
   /* --- sections give back some vertical run --- */
   .hero { padding-block: 2rem 2.25rem; }
   .checked { padding-block: 2.5rem; }
@@ -1028,9 +1052,9 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
    waiting on anything a visitor has to fill in, so they are always at full
    strength: the one that moves from the result to Stage 2, and the inline
    CTA further down the page. */
-.btn--ready { opacity: 1; }
+.btn--ready { opacity: 1; transition: background-color 0.15s ease; }
 .btn--ready:hover { background: #3A4030; border-color: #3A4030; }
-.btn--ready:active { transform: translateY(1px); }
+.btn--ready:active { background: #2E3326; border-color: #2E3326; }
 
 /* --- the check button while the lookup is in flight --------------------- */
 /* Deliberately not `disabled`: a disabled button drops focus in some
@@ -1081,14 +1105,27 @@ form:valid .btn[aria-busy="true"] { opacity: 0.6; cursor: progress; }
 .btn--inline {
   width: auto; opacity: 1;
   text-decoration: none;
+  /* Its opacity never changes (it is not waiting on a form), so it carries
+     no opacity transition either. Nothing here animates a composited
+     property. */
+  transition: background-color 0.15s ease;
 }
 .btn--inline:hover { background: #3A4030; border-color: #3A4030; }
-.btn--inline:active { transform: translateY(1px); }
+.btn--inline:active { background: #2E3326; border-color: #2E3326; }
 
 @media (max-width: 40rem) {
   .deliver { padding-block: 0 2.5rem; }
   .deliver__band { padding: 1.25rem 1rem; }
-  .deliver__list li { padding: 0.75rem 0.85rem; font-size: 0.9375rem; }
+  /* Flat, to match .limits above: no fill, no radius, hairline between. */
+  .deliver__list { gap: 0; }
+  .deliver__list li {
+    background: none; border-radius: 0;
+    padding: 0.5rem 0 0.55rem;
+    font-size: 0.9375rem; line-height: 1.45;
+    border-bottom: 1px solid var(--line-paper);
+  }
+  .deliver__list li::before { line-height: 1.45; }
+  .deliver__list li:last-child { border-bottom: 0; padding-bottom: 0; }
   .result__note { padding: 0.85rem 0.9rem; margin-bottom: 1.15rem; }
   .btn--inline { width: 100%; }
 }
