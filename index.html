@@ -11,11 +11,10 @@
 <meta name="description" content="Hospitality property due diligence in England: planning, food hygiene, licensing and insolvency records checked against the agent’s listing. From £49.">
 <meta name="robots" content="index, follow">
 
-<!-- DOMAIN: currently the GitHub Pages address. Every absolute URL on this
-     page uses it — canonical, og:url, og:image, twitter:image, and the
-     JSON-LD @ids further down. All of them switch to the real domain when
-     it is bought; search this file for gnonik1.github.io to find them. -->
-<link rel="canonical" href="https://gnonik1.github.io/Rellony/">
+<!-- DOMAIN: rellony.com, live over HTTPS. Every absolute URL on this page
+     uses it — canonical, og:url, og:image, twitter:image, and the JSON-LD
+     @ids further down. Search this file for rellony.com to find them all. -->
+<link rel="canonical" href="https://rellony.com/">
 
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon.png" type="image/png" sizes="180x180">
@@ -28,8 +27,8 @@
 <meta property="og:locale" content="en_GB">
 <meta property="og:title" content="Can I open my business here?">
 <meta property="og:description" content="Check a hospitality property against planning, hygiene, licensing and insolvency records — before you sign.">
-<meta property="og:url" content="https://gnonik1.github.io/Rellony/">
-<meta property="og:image" content="https://gnonik1.github.io/Rellony/og-image.png">
+<meta property="og:url" content="https://rellony.com/">
+<meta property="og:image" content="https://rellony.com/og-image.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -37,7 +36,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Can I open my business here?">
 <meta name="twitter:description" content="Check a hospitality property against planning, hygiene, licensing and insolvency records — before you sign.">
-<meta name="twitter:image" content="https://gnonik1.github.io/Rellony/og-image.png">
+<meta name="twitter:image" content="https://rellony.com/og-image.png">
 <meta name="twitter:image:alt" content="Rellony — Can I open my business here? A sample finding card marked Unverified.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -46,24 +45,23 @@
 <link rel="stylesheet" href="styles.css">
 
 <!-- ==========================================================================
-     PLACEHOLDER CONSTANTS — replace before launch.
+     SITE CONSTANTS.
 
        FORMSPREE_ENDPOINT   https://formspree.io/f/xrpbgnna
                             (appears in the <form action> below AND in the
                              FORMSPREE_ENDPOINT constant in the script at the
                              bottom of this file — update both)
 
-       SUPPORT_EMAIL        support@YOUR-DOMAIN-HERE
+       SUPPORT_EMAIL        support@rellony.com
                             (footer here, plus privacy.html and terms.html,
-                             and the JSON-LD "email" below)
-                            STILL A PLACEHOLDER: a GitHub Pages address
-                            cannot receive mail, so this one only resolves
-                            once a real domain with a mailbox exists.
+                             the JSON-LD "email" below, and the SUPPORT_EMAIL
+                             constant in the script at the foot of this file)
+                            Live: the domain has a mailbox and routes.
 
-     DOMAIN: the absolute URLs above and in the JSON-LD below now point at
-     https://gnonik1.github.io/Rellony — the live GitHub Pages address, so
-     they resolve today. Search this file for gnonik1.github.io to find
-     every one of them when the real domain is bought.
+     DOMAIN: rellony.com, live over HTTPS. The absolute URLs above and in the
+     JSON-LD below all point at it, served from the domain root rather than
+     from a /Rellony project path. Search this file for rellony.com to find
+     every one of them.
 
      COVERAGE: England only. The planning-verification logic is built and
      tested for England; Scotland, Wales and Northern Ireland have separate
@@ -77,10 +75,9 @@
      submission by hand and replies by email.
      ========================================================================== -->
 
-<!-- Structured data. DOMAIN: the @ids and URLs below point at the live
-     GitHub Pages address and switch with the real domain (see above). The
-     "email" is the one field still on a placeholder — github.io cannot
-     receive mail. Deliberately conservative: it states only
+<!-- Structured data. DOMAIN: the @ids and URLs below point at rellony.com
+     (see above), and "email" is the live support address, which now has a
+     mailbox behind it. Deliberately conservative: it states only
      what is already true on this page and in the Terms — England-only
      coverage, a £49–£99 one-time price range, and a service prepared by a
      person. No aggregateRating, no review markup, no opening hours, and no
@@ -91,17 +88,17 @@
   "@graph": [
     {
       "@type": "Organization",
-      "@id": "https://gnonik1.github.io/Rellony/#organization",
+      "@id": "https://rellony.com/#organization",
       "name": "Rellony",
-      "url": "https://gnonik1.github.io/Rellony/",
-      "email": "support@YOUR-DOMAIN-HERE",
+      "url": "https://rellony.com/",
+      "email": "support@rellony.com",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://gnonik1.github.io/Rellony/favicon.png",
+        "url": "https://rellony.com/favicon.png",
         "width": 180,
         "height": 180
       },
-      "image": "https://gnonik1.github.io/Rellony/og-image.png",
+      "image": "https://rellony.com/og-image.png",
       "description": "Independent due-diligence reports on hospitality property in England, checking planning history, food hygiene, licensing and insolvency records against the claims made by the agent or listing.",
       "areaServed": {
         "@type": "AdministrativeArea",
@@ -110,12 +107,12 @@
     },
     {
       "@type": "Service",
-      "@id": "https://gnonik1.github.io/Rellony/#service",
+      "@id": "https://rellony.com/#service",
       "name": "Hospitality property due-diligence report",
       "serviceType": "Property due diligence",
-      "url": "https://gnonik1.github.io/Rellony/",
+      "url": "https://rellony.com/",
       "description": "A report on a specific hospitality property that sets what official and public records show — planning history, food hygiene inspections, licensing and corporate insolvency — against the claims made in the listing, with each finding marked confirmed, unverified or contradicted.",
-      "provider": { "@id": "https://gnonik1.github.io/Rellony/#organization" },
+      "provider": { "@id": "https://rellony.com/#organization" },
       "areaServed": {
         "@type": "AdministrativeArea",
         "name": "England"
@@ -847,7 +844,7 @@
       </ul>
 
       <!-- SUPPORT_EMAIL placeholder — replace once the domain is live -->
-      <p class="foot__contact"><a href="mailto:support@YOUR-DOMAIN-HERE">support@YOUR-DOMAIN-HERE</a></p>
+      <p class="foot__contact"><a href="mailto:support@rellony.com">support@rellony.com</a></p>
     </div>
 
     <p class="fine foot__note">
@@ -866,7 +863,7 @@
   /* PLACEHOLDER — paste the real Formspree form ID here, and in the
      <form action> attribute above, before launch. */
   var FORMSPREE_ENDPOINT = 'https://formspree.io/f/xrpbgnna';
-  var SUPPORT_EMAIL = 'support@YOUR-DOMAIN-HERE';
+  var SUPPORT_EMAIL = 'support@rellony.com';
 
   /* ---------------------------------------------------------------- */
   /* The one motion moment: the sample finding resolves its status,    */
