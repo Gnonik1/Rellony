@@ -253,23 +253,28 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
 }
 
 .wordmark {
-  /* inline-flex + min-height so the link itself is a 44px target; the glyphs
-     are only ~22px tall and the bare <a> box was that tall too */
+  /* inline-flex + min-height so the link itself is a 44px target; the logo is
+     40px tall, so the min-height, not the image, is what sets the box */
   display: inline-flex; align-items: center; min-height: 2.75rem;
-  font-family: var(--display);
-  font-weight: 700;
-  font-size: clamp(1.625rem, 0.6vw + 1.4rem, 2.125rem);
-  letter-spacing: -0.035em;
   text-decoration: none;
-  /* olive, not near-black — the wordmark is part of the palette */
   color: var(--olive-ink);
   line-height: 1;
   /* room for the press wash to land as a pill rather than a tight box round
-     the glyphs; the matching negative margin keeps the mark where it was */
+     the mark; the matching negative margin keeps the logo where it was */
   padding-inline: 0.5rem; margin-inline: -0.5rem; border-radius: 999px;
   transition: background-color 0.12s ease, transform 0.09s ease;
 }
 .wordmark:active { background: var(--press-paper); }
+
+/* The lockup carries the name; below 30rem there is no room for it beside the
+   nav, so the bare mark stands in. Both <img> carry alt="Rellony", so the link
+   keeps its accessible name whichever one is showing. */
+.wm-full { height: 40px; width: auto; display: block; }
+.wm-mark { display: none; height: 34px; width: auto; }
+@media (max-width: 30rem) {
+  .wm-full { display: none; }
+  .wm-mark { display: block; }
+}
 
 .coverage-chip {
   font-size: 0.75rem; font-weight: 500;
@@ -793,21 +798,28 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
 
 .lockup { display: flex; flex-direction: column; align-items: center; gap: 1.6rem; }
 
-/* The mark has to win against the sign-off under it: bigger, tighter,
-   brighter, and set in the display face while the sign-off drops to the
-   text face at a smaller size in sage. */
+/* The mark has to win against the sign-off under it: bigger and brighter,
+   the logo itself against a sign-off that drops to the text face at a
+   smaller size in sage. */
 .lockup__mark {
   position: relative;
   display: inline-block;
-  font-family: var(--display); font-weight: 700;
+  /* LOAD-BEARING. The logo is sized in em against this, so the clamp is what
+     still scales the footer mark across breakpoints. Do not drop it because
+     there is no longer any text here to size. */
   font-size: clamp(2.5rem, 3.2vw + 1.1rem, 4.25rem);
-  letter-spacing: -0.04em; line-height: 1;
+  line-height: 1;
   color: var(--bone); text-decoration: none;
   /* the inline padding is the press wash's room; the negative margin keeps
      the mark optically centred exactly where it was */
   padding: 0 0.75rem 0.4rem; margin-inline: -0.75rem; border-radius: 14px;
   transition: background-color 0.12s ease, transform 0.09s ease;
 }
+/* 1.3em sets the lockup's cap height on the Archivo cap height that used to
+   be here, so the wordmark keeps its old size at every breakpoint. display:
+   block so there is no inline baseline gap under it, and the box the hover
+   rule underlines is the image itself. */
+.lockup__mark img { height: 1.3em; width: auto; display: block; }
 /* hover draws the same hairline the headline does */
 .lockup__mark::after {
   content: ""; position: absolute; left: 0.75rem; right: 0.75rem; bottom: 0;
@@ -969,7 +981,6 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
      On a phone all three land on or near the first screen, so the header
      instance goes. */
   .site-head .coverage-chip { display: none; }
-  .wordmark { font-size: 1.375rem; }
   .site-nav { gap: 0; flex-wrap: nowrap; }
   .site-nav a { font-size: 0.8125rem; padding: 0.4rem 0.5rem; }
 

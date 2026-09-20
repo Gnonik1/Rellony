@@ -16,9 +16,10 @@
      @ids further down. Search this file for rellony.com to find them all. -->
 <link rel="canonical" href="https://rellony.com/">
 
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="icon" href="favicon.png" type="image/png" sizes="180x180">
-<link rel="apple-touch-icon" href="favicon.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
 <!-- Open Graph / social. og:image MUST be absolute — scrapers ignore
      relative paths. DOMAIN: switches with the real domain (see above). -->
@@ -94,7 +95,7 @@
       "email": "support@rellony.com",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://rellony.com/favicon.png",
+        "url": "https://rellony.com/apple-touch-icon.png",
         "width": 180,
         "height": 180
       },
@@ -160,7 +161,12 @@
 
 <header class="site-head" id="top">
   <div class="shell site-head__inner">
-    <a class="wordmark" href="/">Rellony</a>
+    <a class="wordmark" href="/">
+      <img class="wm-full" src="/rellony-lockup.svg" alt="Rellony"
+           width="141" height="40">
+      <img class="wm-mark" src="/rellony-mark-gradient.svg" alt="Rellony"
+           width="24" height="34">
+    </a>
     <span class="coverage-chip">Currently England only</span>
     <nav class="site-nav" aria-label="Site">
       <a href="#finding">Sample finding</a>
@@ -824,7 +830,7 @@
   <div class="shell">
 
     <div class="lockup">
-      <a class="lockup__mark" href="#top">Rellony</a>
+      <a class="lockup__mark" href="#top"><img src="/rellony-lockup-reversed.svg" alt="Rellony"></a>
       <p class="signoff">
         <span>Rely on the evidence</span>
         <span>Know before you commit</span>
