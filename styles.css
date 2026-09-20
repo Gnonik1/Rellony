@@ -270,17 +270,31 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
    where the name genuinely will not fit. Both <img> carry alt="Rellony", so
    the link keeps its accessible name whichever one is showing. */
 .wm-full { height: 40px; width: auto; display: block; }
-.wm-mark { display: none; height: 34px; width: auto; }
 
-/* Where the name gives up. 24rem = 384px, measured rather than picked.
-   A 40px lockup is 141.2px wide, and the bar must also carry 8px of flex gap,
-   40px of gutter and 16px of clear space before the nav, so the widest nav of
-   any page decides this. That is /terms/ at 176.72px ("Check a property"
-   117.3 + "Privacy" 59.42), which runs out at 381.9px. Home is far roomier
-   once the sample link drops out below 26.5rem — its remaining two items are
-   112.17px, which would hold the name down to 317.4px — but one breakpoint
-   serves all three pages, so the tightest page sets it. */
-@media (max-width: 24rem) {
+/* 32px, matching .wm-full's phone height, and that is the whole point rather
+   than a coincidence. Inside the lockup the mark spans the full SVG height:
+   both files carry a 303-unit viewBox and the mark's three paths sit at
+   identical coordinates in each, so at a 32px lockup the mark is already
+   drawn 32px tall. Setting the standalone mark to 32px means the 22.25rem
+   breakpoint only takes the NAME away — the mark itself does not move or
+   resize across the boundary. 28px or 34px would make it jump. If .wm-full's
+   phone height ever changes, change this with it. */
+.wm-mark { display: none; height: 32px; width: auto; }
+
+/* Where the name gives up. 22.25rem = 356px, measured rather than picked,
+   and it moved down from 24rem because the lockup itself got smaller below
+   40rem (see the height rule in the phone block).
+   A 32px lockup is 113.0px wide (viewBox 1070x303, so 3.5314:1), and the bar
+   must also carry 8px of flex gap, 40px of gutter and 16px of clear space
+   before the nav, so the widest nav of any page decides this. That is /terms/
+   at 176.72px ("Check a property" 117.3 + "Privacy" 59.42), which runs out
+   at 353.7px; 22.25rem is the next quarter-rem step clear of that, and it
+   leaves 18.3px of clear space at the narrowest width that still shows the
+   name. Home is far roomier once the sample link drops out below 26.5rem —
+   its remaining two items are 112.17px, which would hold the name down to
+   289.2px — but ONE breakpoint serves all three pages, so the tightest page
+   sets it. Do not split this per page. */
+@media (max-width: 22.25rem) {
   .wm-full { display: none; }
   .wm-mark { display: block; }
 }
@@ -1009,6 +1023,16 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   .site-head .coverage-chip { display: none; }
   .site-nav { gap: 0; flex-wrap: nowrap; }
   .site-nav a { font-size: 0.8125rem; padding: 0.4rem 0.5rem; }
+
+  /* The nav drops to 13px here, so a 40px lockup left the logo shouting over
+     it: cap heights 22.44px against 9.07px, a ratio of 2.47. 32px brings the
+     lockup cap to 17.95px and the ratio to 1.98, near enough the 2.0 the bar
+     wants. Sized against the nav, then checked against the narrowest phone:
+     at 360px on /terms/ (the widest two-item nav at 176.72px) a 32px lockup
+     is 113.0px wide and still leaves 22.3px of clear space beyond the 8px
+     flex gap, against the 16px minimum. Above this breakpoint the nav goes
+     back to 15px and the lockup back to its full 40px. */
+  .wm-full { height: 32px; }
 
   /* --- supporting text steps down --- */
   .hint,
