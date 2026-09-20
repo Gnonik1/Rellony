@@ -1059,19 +1059,20 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   .panel__head h2 { font-size: 1.125rem; }
 
   /* --- the form panel: less padding, tighter between field groups --- */
-  .panel { padding: 1.15rem 1rem; }
-  .panel__head { padding-bottom: 0.8rem; margin-bottom: 1rem; }
+  .panel { padding: 0.9rem 1rem; }
+  .panel__head { padding-bottom: 0.6rem; margin-bottom: 0.75rem; }
   .field { margin-bottom: 0.8rem; }
   .field-group { margin-bottom: 0.8rem; }
-  .hint { margin-bottom: 0.4rem; }
+  .hint { margin-bottom: 0.3rem; }
   .chips { gap: 0.35rem; }
   .pre-submit { margin-top: 0.9rem; }
   .consent-check { margin: 0.7rem 0 0.9rem; }
   .btn-note { margin-top: 0.6rem; }
 
   /* --- record trails: shorter cells, tighter stack --- */
-  .trail { padding: 1.1rem 1rem; }
-  .trail__no { margin-bottom: 0.35rem; }
+  .trail { padding: 0.9rem 1rem; }
+  .trail__no { margin-bottom: 0.25rem; }
+  .trail h3 { margin-bottom: 0.3rem; }
   .checked__grid { gap: 0.5rem; }
 
   /* --- the two checklists go flat --- */
@@ -1090,11 +1091,122 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   .limits li::before { top: 1.2em; }
 
   /* --- sections give back some vertical run --- */
-  .hero { padding-block: 2rem 2.25rem; }
+  .hero { padding-block: 1.5rem 2.25rem; }
   .checked { padding-block: 2.5rem; }
   .record-section { padding-block: 2.5rem; }
-  .ev-col { padding: 1.1rem 1rem; }
-  .finding__claim { padding: 1.1rem 1rem; }
+
+  /* --- the run-up to the address field ---------------------------------
+     Measured at 390x844 the address input started 748px down, which put the
+     fold through the middle of the submit button: the one thing a visitor
+     can do on arrival was never wholly on the first screen. Every value in
+     this group is a gap between two pieces of text, not the text itself —
+     nothing is removed, reordered or set smaller than it already was. The
+     hero reads at desktop density because it has the width for it; on a
+     phone the same gaps are simply further apart than the column needs.
+     Above 40rem the original values stand untouched. */
+  .h1-rule { margin: 0.85rem 0 1rem; }
+  .coverage-line { margin-top: 1.05rem; padding-top: 0.8rem; }
+  .price { margin-top: 0.9rem; }
+  .price .fine { margin-top: 0.3rem; }
+  /* --hero-gap is 2rem here; single-column, that is the space between the
+     price fine print and the top of the panel, not a column gutter. */
+  .hero__grid { gap: 1.25rem; }
+
+  /* --- the example finding: same text, less air around it --------------
+     Three stacked evidence cells plus the claim head carry eight blocks of
+     vertical padding on a phone. Trimming each one keeps every word and
+     every rule line, and keeps the 1.45-ish line height inside the copy. */
+  .ev-col { padding: 0.85rem 1rem; }
+  .finding__claim { padding: 0.85rem 1rem; row-gap: 0.7rem; }
+  .finding__claim-text .label { margin-bottom: 0.25rem; }
+  .ev-col h3 { margin-bottom: 0.4rem; }
+
+  /* --- how it works: the band and the step rhythm -----------------------
+     Two stacked columns on a phone, and the vertical rhythm between them
+     was set for the side-by-side layout above 56rem, where the eye crosses
+     a gutter rather than running down a single column. Nothing below drops
+     a word, a rule line or a step number; the band keeps its 1.75rem inline
+     padding so the text measure is untouched. Desktop is unchanged. */
+  .twocol { padding-block: 1.5rem 2.25rem; }
+  .twocol__band { padding-block: 1.4rem; }
+  .twocol h2 { margin-bottom: 1rem; }
+  .twocol__grid { gap: 1.75rem; }
+  /* the hairline between steps stays; only the air either side of it goes.
+     .steps li:last-child still zeroes its own, so the list ends flush. */
+  .steps li { padding-bottom: 0.9rem; margin-bottom: 0.9rem; }
+
+  /* --- footer: the same parts, closer together --------------------------
+     619px of footer is three-quarters of a phone screen for a block that
+     is a logo, a sign-off, a line of about-text, four links, an address
+     and a disclaimer. Every value here is a gap. The lockup mark is not
+     touched — its clamp is load-bearing for the logo's size, and the logo
+     is the one thing in here that should not move.
+
+     The link list goes two-up. It already wrapped to two rows at every
+     phone width, but ragged: 3 + 1 at 390, leaving "Terms of Service"
+     alone on a line. A 2 x 2 grid is the same two rows and the same
+     height, arranged. max-content columns keep each label on one line —
+     the widest pair is 233px against 320px of shell at 360. */
+  .site-foot { padding-block: 2rem 1.75rem; }
+  .lockup { gap: 1.1rem; }
+  .foot__row { margin-top: 1.5rem; padding-top: 1.1rem; gap: 0.9rem; }
+  .foot__about { gap: 0.7rem; }
+  .foot__links {
+    display: grid; grid-template-columns: repeat(2, max-content);
+    justify-content: center;
+  }
+  .foot__note { margin-top: 1.25rem; }
+
+  /* The footer address was the last control under the 44px minimum: an
+     inline link 18px tall, sized by nothing but its own text. Vertical
+     padding on a NON-REPLACED INLINE box does not enter the line box, so
+     it grows the hit area and moves nothing — the vertical twin of the
+     trick .site-nav a and .foot__links a already use horizontally. No
+     cancelling negative margin is needed here, because vertical margins
+     on an inline box have no effect either.
+
+     Uneven on purpose. There is a 44px link pill 16.4px above and only
+     prose below, so the target takes 12px up and 16px down: 46px tall with
+     4.4px clear above and 6.4px clear below, rather than 2.4px above from
+     splitting it evenly.
+
+     Whole pixels on purpose too. At 0.7rem the padding is 11.2px, and the
+     fractional padding box made Chrome rasterise the line 0.17px lower —
+     no layout moved, but the glyph antialiasing changed, which is a
+     visible-to-a-differ change for no reason. 0.75rem is 12px flat and
+     the render is pixel-identical to having no padding at all.
+
+     background-clip is what keeps the padding invisible. An inline box
+     paints its background across its padding, so without it the :active
+     wash would grow from 18px to 45px — measured, before this line existed.
+     Clipping to the content box holds the wash on the text.
+
+     The :active repeat is load-bearing, not duplication. The press rule
+     further up sets `background:`, the SHORTHAND, and a background
+     shorthand resets background-clip to border-box along with everything
+     else it does not name. Without restating the clip at equal specificity
+     the wash goes back to 45px the moment the link is held.
+
+     Hover is a colour change with no background, and on a phone its
+     (hover: hover) and (pointer: fine) query does not match at all. */
+  .foot__contact a { padding-block: 0.75rem 1rem; background-clip: content-box; }
+  /* The radii are restated because clipping to the content box shrinks
+     them: a corner radius is reduced by the padding on that side, so the
+     press rule's flat 3px became 3px across and 0 down — square corners,
+     108 differing pixels against the old render. Written per corner and
+     per axis, 3px horizontal stays 3px, and 15px/19px vertical come back
+     to 3px after the 12px and 16px paddings are taken off. Measured at
+     zero differing pixels, pressed and unpressed, at 390, 375 and 360. */
+  .foot__contact a:active {
+    background-clip: content-box;
+    border-radius: 3px 3px 3px 3px / 15px 15px 19px 19px;
+  }
+
+  /* --- the finding legend: three rows, closer together ------------------
+     It stays one column. Two-up was measured and cannot fit: each label
+     needs ~185px against at most 175px of column at 390 and 160 at 360,
+     so all three wrap to two lines and the block grows by 8px. */
+  .legend { row-gap: 0.5rem; padding-top: 0.8rem; }
 
   /* --- controls hold 44px no matter what the density says --- */
   .chip { min-height: 2.75rem; padding: 0.5rem 0.65rem; }
@@ -1107,6 +1219,50 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   .foot__links a,
   .backlink { min-height: 2.75rem; }
   .consent-check input { width: 1.125rem; height: 1.125rem; }
+
+  /* --- the last three targets under 44px, all in the Stage 2 and
+     result views, none of them inline ---------------------------------
+
+     The .foot__contact trick does not transfer here. It works only
+     because that link is a non-replaced INLINE box, where vertical
+     padding grows the hit area and stays out of the line box. All three
+     of these compute to something else, so padding alone would add real
+     height: 25.2px on the consent, 72px across the three .linkish
+     instances, 26px on the source link.
+
+     .consent-check label is a flex item, so it is blockified to block.
+     It takes the padding and the 25.2px anyway, because it is a legal
+     consent and this is the only approach that keeps the two links
+     inside the sentence tappable: padding grows the label own box while
+     the links stay in flow at their text height, so a tap above or
+     below the sentence toggles the box and a tap on the link text
+     follows the link. An overlay would have covered both links. The
+     checkbox takes the same 13px on its margin so it keeps its 1.6px
+     offset from the first line of the sentence.
+
+     .linkish is a <button> and .result__source an inline-block anchor.
+     Chrome will not honour display: inline on a button — it stays
+     inline-block and the padding lands on the line box — so both use
+     the pattern already in this file for .consent-check input: an
+     absolutely positioned pseudo-element that enlarges the hit area and
+     occupies no space. Both have text-only content, nothing to occlude.
+
+     .linkish leans downward rather than centring. The Continue button
+     sits 13.6px above it, and a centred 44px band would leave 2px
+     between the two. 7px up and 17px down keeps 6.6px clear of Continue
+     and spends the rest on the panel padding below, where nothing is
+     clickable.
+
+     Whole pixels throughout, and neither of the two carries an :active
+     background for a background shorthand to reset. */
+  .consent-check label { padding-block: 13px; }
+  .consent-check input { margin-top: calc(0.1rem + 13px); }
+
+  .linkish { position: relative; }
+  .linkish::after { content: ""; position: absolute; inset: -7px 0 -17px; }
+
+  .result__source { position: relative; }
+  .result__source::after { content: ""; position: absolute; inset: -13px 0; }
 }
 
 /* ==========================================================================
