@@ -1300,7 +1300,7 @@
   var ADDRESS_HINT_ID = 'address-hint';
   var CHECK_ERROR_ID  = 'check-error';
 
-  /* The three stopping outcomes, worded. Placeholders pending approval.
+  /* The three stopping outcomes, worded.
 
      None of the three names a nationality, deliberately. The postcode
      FORMAT they are about is UK-wide, and this field accepts a Scottish or
@@ -1310,16 +1310,48 @@
      be wrong in the other direction. "A postcode" is true either way, and
      that is all any of these say.
 
+     MSG_NO_POSTCODE says "a valid postcode" rather than "a postcode"
+     because this one state covers two situations that the code cannot
+     tell apart: an address with no postcode in it at all, and an address
+     carrying an attempt that the pattern does not accept — "SW1A 2A",
+     say. Both reach extractPostcode() and come back null. "We need a
+     postcode" is plainly wrong in the second case, where the visitor is
+     looking at a field that visibly contains one. "A valid postcode" is
+     true in both. Telling them apart would need a fuzzy near-miss
+     heuristic, and a heuristic loose enough to catch "SW1A 2A" is loose
+     enough to call "45A High Street" or "A40" a failed postcode and show
+     the wrong message. Deliberately not attempted.
+
+     It is also one sentence, not two. The hint immediately above the
+     field already says the postcode is required, so a second sentence
+     repeating that only made the block two lines.
+
      MSG_LOOKUP_FAILED belongs to a state that was never specified — it is
      the fifth, and it exists because the other four cannot absorb it. It
      must not say "we couldn't find that postcode", which would blame the
      visitor for our outage, and it must not open Stage 2, because the
-     address is still unplaced. So it owns the failure and asks for a
-     retry. Treat this one as a holding position: the wording, and whether
-     a retry is even the right offer, are still open. */
-  var MSG_NO_POSTCODE  = 'We need a postcode to check this address. It’s on the listing.';
-  var MSG_NOT_FOUND    = 'We couldn’t find that postcode. Check it against the listing and try again.';
-  var MSG_LOOKUP_FAILED = 'We couldn’t run the check just now. Please try again in a moment.';
+     address is still unplaced. It now offers a way through rather than
+     only a retry, which is why it is built as nodes: the support address
+     is a real mailto link. See showCheckError for how that reaches a
+     screen reader. */
+  var MSG_NO_POSTCODE = 'We need a valid postcode to check this address.';
+  var MSG_NOT_FOUND   = 'We couldn’t find that postcode. Check it against the listing and try again.';
+
+  /* Built rather than assigned, because it carries a link and the element's
+     text is otherwise written with textContent. SUPPORT_EMAIL is the single
+     source for the address — see the constant at the top of this script. */
+  function MSG_LOOKUP_FAILED(node) {
+    node.appendChild(document.createTextNode(
+      'We couldn’t run the check just now. Try again in a moment, or email '));
+
+    var mail = document.createElement('a');
+    mail.href = 'mailto:' + SUPPORT_EMAIL;
+    mail.textContent = SUPPORT_EMAIL;
+    node.appendChild(mail);
+
+    node.appendChild(document.createTextNode(
+      ' and we’ll check the address for you.'));
+  }
 
   var errorEl      = document.getElementById('form-error');
   var notifyError  = document.getElementById('notify-error');
@@ -1677,15 +1709,28 @@
   /* role="alert" — with focus landing on the described field in the     */
   /* same turn, an alert would announce the same sentence a second time. */
   /*                                                                     */
+  /* The lookup-failed message carries a mailto link, and an accessible  */
+  /* description is flattened to text: the link is READ OUT but cannot   */
+  /* be followed from inside the announcement. That is not a dead end.   */
+  /* #check-error sits between the address field and the Check button in */
+  /* source order, and nothing here is aria-hidden, so the link is the   */
+  /* very next thing a Tab reaches from the field the visitor was just   */
+  /* put into, and it appears in a screen reader's links list like any   */
+  /* other. Keep that order if this block ever moves.                    */
+  /*                                                                     */
   /* The caret goes to the END of what was typed, never select-all: the  */
   /* address is nearly right and is being corrected, not replaced.       */
   /* restart() selects instead, because there the whole address is       */
   /* going.                                                              */
   /* ------------------------------------------------------------------ */
+  /* `message` is a sentence, or — where it carries a link — a function that
+     writes the nodes into the emptied element. */
   function showCheckError(message) {
     if (!checkError) { return; }
 
-    checkError.textContent = message;
+    checkError.textContent = '';
+    if (typeof message === 'function') { message(checkError); }
+    else { checkError.textContent = message; }
     checkError.hidden = false;
 
     if (addressField) {

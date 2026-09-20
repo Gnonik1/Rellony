@@ -221,6 +221,7 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
    these alphas it reads as a press rather than a box dropped on the words. */
 .doc a:active,
 .consent-docs a:active,
+.form-error a:active,
 .foot__note a:active { background: var(--press-paper); border-radius: 3px; }
 .foot__contact a:active { background: var(--press-olive); border-radius: 3px; }
 
@@ -633,6 +634,13 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   border-radius: 0 var(--r-input) var(--r-input) 0;
   font-size: 0.9375rem; color: var(--paper-ink);
 }
+
+/* The support address in the lookup-failed message is a real link, so it
+   inherits the ink colour rather than the error red — it is a way out of
+   the error, not part of the complaint. `nowrap` because an email address
+   broken across two lines at @ or . stops looking like an address, and
+   because a wrapped link would put its tap area on two separate rows. */
+.form-error a { color: var(--paper-ink); white-space: nowrap; }
 
 /* --- confirmation state (inside the paper panel) --- */
 .confirm { max-width: 34rem; }
@@ -1325,6 +1333,14 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
      engine's touch adjustment having eaten the other 2. Identical at 390,
      375 and 360. Do not reduce that margin without re-running the sweep. */
   .consent-docs a { padding-block: 13px; }
+
+  /* Same trick, same reason, for the support address in the lookup-failed
+     message. This one is easier: it sits mid-paragraph inside the error
+     block's own 12px padding, so its 13px overhang lands on the block's
+     other text lines and its padding rather than on a neighbouring
+     control. Verified against the input above and the Check button below
+     at 390, 375 and 360. */
+  .form-error a { padding-block: 13px; }
 
   .linkish { position: relative; }
   .linkish::after { content: ""; position: absolute; inset: -7px 0 -17px; }
