@@ -266,12 +266,21 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
 }
 .wordmark:active { background: var(--press-paper); }
 
-/* The lockup carries the name; below 30rem there is no room for it beside the
-   nav, so the bare mark stands in. Both <img> carry alt="Rellony", so the link
-   keeps its accessible name whichever one is showing. */
+/* The lockup carries the name at one fixed size; the bare mark only stands in
+   where the name genuinely will not fit. Both <img> carry alt="Rellony", so
+   the link keeps its accessible name whichever one is showing. */
 .wm-full { height: 40px; width: auto; display: block; }
 .wm-mark { display: none; height: 34px; width: auto; }
-@media (max-width: 30rem) {
+
+/* Where the name gives up. 24rem = 384px, measured rather than picked.
+   A 40px lockup is 141.2px wide, and the bar must also carry 8px of flex gap,
+   40px of gutter and 16px of clear space before the nav, so the widest nav of
+   any page decides this. That is /terms/ at 176.72px ("Check a property"
+   117.3 + "Privacy" 59.42), which runs out at 381.9px. Home is far roomier
+   once the sample link drops out below 26.5rem — its remaining two items are
+   112.17px, which would hold the name down to 317.4px — but one breakpoint
+   serves all three pages, so the tightest page sets it. */
+@media (max-width: 24rem) {
   .wm-full { display: none; }
   .wm-mark { display: block; }
 }
@@ -293,6 +302,19 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
      while only the background fades. No state drops below AA. */
   transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.09s ease;
 }
+
+/* 26.5rem = 424px, measured. With all three items the nav is 217.28px, and a
+   40px lockup is 141.2px; add 8px of flex gap, 16px of clear space and 40px
+   of gutter and the bar needs 422.5px. Below that something has to give, and
+   the sample link gives before the company name does: it is an in-page anchor
+   to a section you can still reach by scrolling, and it comes back above this
+   width. display: none takes it out of the tab order AND off the
+   accessibility tree by itself — do not pile aria-hidden or tabindex on top,
+   which would only risk the two disagreeing. */
+@media (max-width: 26.5rem) {
+  .site-head .site-nav a[href="#finding"] { display: none; }
+}
+
 /* the hover has to be readable as feedback on a light bar, so it takes a
    real tint plus a boundary — a 5% wash alone was invisible.
 
@@ -369,7 +391,11 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
   font-family: var(--display); font-weight: 700;
   font-size: clamp(1.5rem, 1.6vw + 0.9rem, 2.5rem); letter-spacing: -0.03em;
 }
-.price__unit { font-weight: 500; color: var(--sage); margin-left: 0.4rem; }
+/* "one-time, per property" is one phrase and has to read as one. Without the
+   nowrap the hero line breaks inside it on a phone, stranding "property" on a
+   line of its own. The line still breaks BEFORE the unit, in the space
+   between it and the figure, which is where the break belongs. */
+.price__unit { font-weight: 500; color: var(--sage); margin-left: 0.4rem; white-space: nowrap; }
 .price .fine { margin-top: 0.4rem; max-width: 62ch; }
 
 /* ==========================================================================
@@ -443,7 +469,7 @@ select:invalid { color: var(--paper-hint); }
 .field-group { border: 0; margin: 0 0 1.15rem; padding: 0; }
 
 .chips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.45rem; }
-@media (max-width: 24rem) { .chips { grid-template-columns: 1fr; } }
+@media (max-width: 20rem) { .chips { grid-template-columns: 1fr; } }
 .chip {
   display: flex; align-items: center; gap: 0.5rem;
   min-height: 2.875rem; padding: 0.5rem 0.75rem;
