@@ -1002,10 +1002,11 @@
   /*   - it ignores taps that landed on or inside a form control, a    */
   /*     label, a button or a link. Those either move focus themselves */
   /*     or depend on where focus is, and blurring first would fight   */
-  /*     them. The consent sentence is exactly this case: its label    */
-  /*     carries a 13px padded hit area and two links inside the       */
-  /*     sentence, and all three are covered by the label/anchor part  */
-  /*     of this test, so the tap reaches them untouched.              */
+  /*     them. The consent block is exactly this case: the sentence is */
+  /*     a label with a 13px padded hit area, and the two document     */
+  /*     links sit on their own line below it. Both are covered by the */
+  /*     label/anchor part of this test, so the taps reach them        */
+  /*     untouched.                                                    */
   /*                                                                   */
   /* Bubble phase, so anything that wants to stop this can.            */
   /* ---------------------------------------------------------------- */
@@ -1088,8 +1089,13 @@
   /* Outward code, then inward code, tolerating any or no space between.
      Matches the LAST occurrence in the string, because an address puts its
      postcode at the end and a street name can occasionally look like an
-     outward code. Anything that matches the shape but is not a real
-     postcode simply fails the lookup and resolves to "unresolved". */
+     outward code.
+
+     Returning null is the "no_postcode" state: nothing postcode-shaped was
+     in the address, so no request is made. Something that matches the shape
+     but is not a real postcode does reach the lookup, which 404s it into
+     "not_found". Those two and "lookup_failed" all stop in Stage 1; only
+     "in_coverage" and "outside_coverage" go on. */
   function extractPostcode(input) {
     var re = /\b(?:gir\s*0aa|[a-z]{1,2}\d[a-z\d]?\s*\d[a-z]{2})\b/gi;
     var match, last = null;
