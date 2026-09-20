@@ -239,10 +239,37 @@
 
             <div class="field">
               <label for="address">Property address</label>
-              <span class="hint" id="address-hint">Street, town and postcode, as it appears on the listing</span>
+              <span class="hint" id="address-hint">Street, town and postcode — the postcode is required</span>
               <input type="text" id="address" name="property_address"
                      autocomplete="street-address"
                      aria-describedby="address-hint" required>
+
+              <!-- ------------------------------------------------------------
+                   The one place Stage 1 reports a failure.
+
+                   Three of the five check outcomes end here rather than
+                   opening Stage 2: no postcode in the address, a postcode the
+                   record does not hold, and a lookup that never answered. An
+                   address we cannot place must not become an enquiry — it
+                   would put a visitor through the whole questionnaire about a
+                   property nobody can locate, and land us with an enquiry we
+                   cannot research.
+
+                   It sits INSIDE the field block, directly under the input,
+                   because that is the field it is about and the field focus
+                   returns to. Under the button — where #form-error sits in
+                   Stage 2 — it would be below the fold and behind the
+                   keyboard on a phone at the moment it appeared.
+
+                   NO role="alert" here, deliberately, and it is the one
+                   difference from #form-error and #notify-error. This message
+                   is announced by being the address field's description while
+                   it is on screen, and focus is moved into that field the
+                   moment it appears. Carrying role="alert" as well would
+                   announce the same sentence twice. The script owns both the
+                   text and the aria-describedby wiring — see showCheckError.
+                   ------------------------------------------------------------ -->
+              <p class="form-error" id="check-error" hidden></p>
             </div>
 
             <button type="submit" class="btn" id="check-btn">Check this property</button>
@@ -413,7 +440,11 @@
                both in the markup keeps the copy reviewable in the HTML. -->
           <div class="panel__head">
             <h2 id="enquiry-head-nojs">Check a property</h2>
-            <h2 id="enquiry-head-js" hidden>What will you run there?</h2>
+            <!-- tabindex="-1" so the script can put focus here when Stage 2 is
+                 revealed: the heading names the stage a screen reader has just
+                 been moved to, and unlike a form control it opens nothing. It
+                 is never in the tab order. See the focus note in the script. -->
+            <h2 id="enquiry-head-js" tabindex="-1" hidden>What will you run there?</h2>
             <p class="fine" id="enquiry-sub-nojs">Takes about a minute. Nothing is charged at this stage.</p>
             <p class="fine" id="enquiry-sub-js" hidden>What you intend to operate decides which records matter.</p>
           </div>
@@ -421,15 +452,6 @@
           <p class="stage-echo" id="enquiry-echo" hidden>
             <span class="stage-echo__label">Property</span>
             <span class="stage-echo__value" id="enquiry-address"></span>
-          </p>
-
-          <!-- Shown only when no postcode could be read out of the address. A
-               lookup that fails or times out lands on this same stage silently,
-               with this hint hidden — there is no point telling a visitor about
-               a network problem they can do nothing about. -->
-          <p class="stage-hint" id="unresolved-hint" hidden>
-            We couldn’t read a postcode from that address. Including one gives an instant
-            coverage check — without it, a person confirms coverage when they review this.
           </p>
 
           <!-- Carried from Stage 1, populated from the normalized check object.
@@ -532,14 +554,35 @@
             confirming whether we can prepare a report and what it will cost.
           </p>
 
+          <!-- ----------------------------------------------------------------
+               The consent sentence is unchanged, word for word. What changed is
+               that it no longer contains the two links.
+
+               They used to sit inside the label, and at 375 and 360 the
+               sentence wraps so that "Privacy Policy" landed on the LAST line.
+               The label carries 13px of padding below its text as its tap
+               target, and a tap in that strip resolved to the link rather than
+               the checkbox once the engine's touch adjustment had had its say —
+               a legal consent that could open a document instead of ticking.
+
+               So the label is now link-free from edge to edge: every pixel of
+               it, padding included, toggles the box and nothing else. The two
+               documents are reachable from their own line below, where they
+               are ordinary links with nothing overlapping them.
+               ---------------------------------------------------------------- -->
           <div class="consent-check">
             <input type="checkbox" id="consent" name="consent"
                    value="Agreed to Terms of Service and Privacy Policy" required>
             <label for="consent">
-              I agree to the <a href="/terms/">Terms of Service</a> and
-              <a href="/privacy/">Privacy Policy</a>
+              I agree to the Terms of Service and Privacy Policy
             </label>
           </div>
+
+          <!-- The separator is decorative and aria-hidden, so this reads as two
+               links and not as a sentence with a stray character in it. -->
+          <p class="consent-docs">
+            <a href="/terms/">Terms of Service</a><span class="consent-docs__sep" aria-hidden="true">·</span><a href="/privacy/">Privacy Policy</a>
+          </p>
 
           <button type="submit" class="btn" id="submit-btn">Request a check</button>
 
@@ -843,9 +886,12 @@
         <span class="coverage-chip">Currently England only</span>
       </div>
 
+      <!-- Legal pages only. The two in-page anchors that used to sit here,
+           "Check a property" and "Sample finding", both pointed at sections of
+           this same page, and the check already has a full-width button
+           immediately above this footer. What is left are the only two
+           destinations in this list you cannot reach by scrolling. -->
       <ul class="foot__links">
-        <li><a href="#check">Check a property</a></li>
-        <li><a href="#finding">Sample finding</a></li>
         <li><a href="/privacy/">Privacy Policy</a></li>
         <li><a href="/terms/">Terms of Service</a></li>
       </ul>
@@ -922,9 +968,65 @@
     });
   }
 
-  /* Links inside the consent label must navigate, not toggle the box. */
-  Array.prototype.forEach.call(document.querySelectorAll('.consent-check a'), function (a) {
-    a.addEventListener('click', function (e) { e.stopPropagation(); });
+  /* There was a handler here that stopped clicks on the two consent links
+     from propagating to the label and toggling the checkbox. The links are
+     no longer inside the label — they have their own line below it — so a
+     click on one cannot reach the label at all and there is nothing left to
+     stop. See the consent block in the markup above. */
+
+  /* ---------------------------------------------------------------- */
+  /* Dismissing the keyboard.                                          */
+  /*                                                                   */
+  /* iOS keeps the software keyboard up until something takes focus    */
+  /* away from the field, and tapping ordinary page content does not   */
+  /* do that: a tap on a <p> or a panel background is not a tap on     */
+  /* anything focusable, so the field stays focused and the keyboard   */
+  /* stays over the bottom third of the page. This gives the page the  */
+  /* dismissal the platform does not.                                  */
+  /*                                                                   */
+  /* pointerdown, not click. Safari only synthesises click events for  */
+  /* non-interactive elements when they carry cursor: pointer (or an   */
+  /* onclick attribute), so a click listener here would need that CSS  */
+  /* hack applied across the page to fire at all. pointerdown is       */
+  /* delivered regardless, and it is also the earlier event, so the    */
+  /* keyboard starts closing as the finger lands.                      */
+  /*                                                                   */
+  /* Two conditions, both narrow on purpose:                           */
+  /*                                                                   */
+  /*   - it only ever blurs a field. If the active element is not an   */
+  /*     INPUT, TEXTAREA or SELECT there is no keyboard to put away    */
+  /*     and nothing is touched — a focused button or link keeps its   */
+  /*     focus, which matters for keyboard users, who never generate   */
+  /*     pointer events anyway.                                        */
+  /*                                                                   */
+  /*   - it ignores taps that landed on or inside a form control, a    */
+  /*     label, a button or a link. Those either move focus themselves */
+  /*     or depend on where focus is, and blurring first would fight   */
+  /*     them. The consent sentence is exactly this case: its label    */
+  /*     carries a 13px padded hit area and two links inside the       */
+  /*     sentence, and all three are covered by the label/anchor part  */
+  /*     of this test, so the tap reaches them untouched.              */
+  /*                                                                   */
+  /* Bubble phase, so anything that wants to stop this can.            */
+  /* ---------------------------------------------------------------- */
+  var KEEPS_FOCUS = 'input, textarea, select, label, button, a';
+
+  document.addEventListener('pointerdown', function (event) {
+    var active = document.activeElement;
+    if (!active) { return; }
+
+    var tag = active.tagName;
+    if (tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT') { return; }
+
+    var target = event.target;
+    /* A pointer event can land on a node with no closest() — a text node
+       in some engines, or the document itself. Nothing focusable is
+       inside those, so they count as outside. */
+    if (target && typeof target.closest === 'function' && target.closest(KEEPS_FOCUS)) {
+      return;
+    }
+
+    active.blur();
   });
 
   /* ================================================================== */
@@ -934,21 +1036,37 @@
   /* outside world. It always resolves — never rejects — to one          */
   /* normalized object:                                                  */
   /*                                                                     */
-  /*   { status: "in_coverage" | "outside_coverage" | "unresolved",      */
+  /*   { status: "in_coverage" | "outside_coverage"                      */
+  /*             | "no_postcode" | "not_found" | "lookup_failed",         */
   /*     postcode, country, region, localAuthority, lat, lng }           */
   /*                                                                     */
   /* The render functions below read only that object and never touch a  */
   /* response body, so when these checks move behind our own backend the */
   /* UI does not change: only the body of this one function does.        */
   /*                                                                     */
-  /* "unresolved" is deliberately one status covering three different    */
-  /* causes — no postcode in the address, a postcode the record does not */
-  /* know, and a lookup that failed or timed out. All three lead to the  */
-  /* same place: Stage 2, silently. The visitor is never shown an error  */
-  /* about an availability check they did not ask for. The `postcode`    */
-  /* field is what distinguishes them for the one bit of UI that cares:  */
-  /* it is null only when nothing postcode-shaped was in the address, so */
-  /* the "include a postcode" hint appears exactly when it is useful.    */
+  /* These five are the whole state machine, and exactly one of them is  */
+  /* the answer to any address typed into Stage 1:                       */
+  /*                                                                     */
+  /*   in_coverage      the record places it, and we cover it            */
+  /*   outside_coverage the record places it, and we do not              */
+  /*   no_postcode      nothing postcode-shaped was in the address, so   */
+  /*                    there was nothing to look up                     */
+  /*   not_found        the shape was there and the record ANSWERED that */
+  /*                    it does not hold that postcode — a 404, which is */
+  /*                    a fact about the postcode, usually a typo        */
+  /*   lookup_failed    we never got an answer we can trust — offline,   */
+  /*                    timed out, blocked, 5xx, unparseable body        */
+  /*                                                                     */
+  /* The last three used to be one status, "unresolved", and all three   */
+  /* fell through to Stage 2. They are separated because they are not    */
+  /* the same thing and must not be worded as though they were: two of   */
+  /* them are about the address the visitor typed, and the third is      */
+  /* about us. What they now have in common is only that none of them    */
+  /* opens Stage 2 — an address we cannot place never becomes an         */
+  /* enquiry.                                                            */
+  /*                                                                     */
+  /* Keeping not_found and lookup_failed apart is the reason fetchJSON   */
+  /* below reports WHY it has no body rather than just returning null.   */
   /* ================================================================== */
 
   var POSTCODES_API     = 'https://api.postcodes.io/postcodes/';
@@ -989,9 +1107,11 @@
     return { status: 'unavailable', name: null, reference: null, documentationUrl: null };
   }
 
-  function unresolved(postcode) {
+  /* Every non-coverage outcome, carrying the postcode when there was
+     one to carry. No coverage facts, because none were established. */
+  function failed(status, postcode) {
     return {
-      status: 'unresolved',
+      status: status,
       postcode: postcode || null,
       country: null,
       region: null,
@@ -1002,24 +1122,52 @@
     };
   }
 
-  /* One timed fetch for both lookups. Resolves to the parsed body, or to
-     null for every failure mode there is — network error, non-200, bad
-     JSON, timeout, or no fetch in this engine. Callers decide what null
-     means for them; neither of them treats it as an error worth showing. */
+  /* One timed fetch for both lookups. It never rejects, and it never just
+     says "no body" — it says which KIND of no-body, because the difference
+     decides what the visitor is told:
+
+       { ok: true,  body }        a response we can read
+       { ok: false, reason: 'notfound'    }  the server answered 404
+       { ok: false, reason: 'unavailable' }  we have no trustworthy answer
+
+     'notfound' is ONLY ever a 404 — the server was reached, understood the
+     request, and told us it holds no such record. Everything else is
+     'unavailable': offline, DNS failure, CORS rejection, abort, timeout,
+     5xx, 403, a 200 carrying something that will not parse, or an engine
+     with no fetch at all. A thrown fetch is indistinguishable between a
+     dropped connection and a blocked one, and both belong in the same
+     bucket anyway: we did not get an answer.
+
+     This split exists so that an outage is never reported as a fact about
+     the visitor's postcode. Collapsing it back to a single null would put
+     "we couldn't find that postcode" on screen every time our own network
+     hiccups. */
   function fetchJSON(url, timeoutMs) {
-    if (typeof fetch !== 'function' || !(timeoutMs > 0)) { return Promise.resolve(null); }
+    var unavailable = { ok: false, reason: 'unavailable' };
+
+    if (typeof fetch !== 'function' || !(timeoutMs > 0)) {
+      return Promise.resolve(unavailable);
+    }
 
     var controller = null;
     try { controller = new AbortController(); } catch (e) {}
 
     var request = fetch(url, controller ? { signal: controller.signal } : undefined)
-      .then(function (response) { return response.ok ? response.json() : null; })
-      .catch(function () { return null; });
+      .then(function (response) {
+        if (response.status === 404) { return { ok: false, reason: 'notfound' }; }
+        if (!response.ok) { return unavailable; }
+        return response.json().then(
+          function (body) { return { ok: true, body: body }; },
+          function () { return unavailable; }
+        );
+      })
+      /* A rejected fetch is a transport failure, never an answer. */
+      .catch(function () { return unavailable; });
 
     var expiry = new Promise(function (resolve) {
       setTimeout(function () {
         if (controller) { try { controller.abort(); } catch (e) {} }
-        resolve(null);
+        resolve(unavailable);
       }, timeoutMs);
     });
 
@@ -1046,7 +1194,11 @@
               '&longitude=' + encodeURIComponent(lng) +
               PLANNING_FIELDS;
 
-    return fetchJSON(url, timeoutMs).then(function (body) {
+    return fetchJSON(url, timeoutMs).then(function (result) {
+      /* This lookup has no use for the reason: a 404 and an outage both
+         mean the same thing on the result panel, which is that the line
+         comes off. Only the postcode lookup tells the two apart. */
+      var body = result && result.ok ? result.body : null;
       if (!body || !Object.prototype.hasOwnProperty.call(body, 'entities') ||
           !Array.isArray(body.entities)) {
         return conservationUnavailable();
@@ -1072,17 +1224,27 @@
 
   function runPreliminaryCheck(addressString) {
     var postcode = extractPostcode(addressString || '');
-    if (!postcode) { return Promise.resolve(unresolved(null)); }
+
+    /* Nothing postcode-shaped in the address. No request is made: there is
+       nothing to ask about, and the visitor is the only one who can fix it. */
+    if (!postcode) { return Promise.resolve(failed('no_postcode', null)); }
 
     var deadline = Date.now() + TOTAL_BUDGET_MS;
 
     return fetchJSON(POSTCODES_API + encodeURIComponent(postcode), LOOKUP_TIMEOUT_MS)
-      .then(function (body) {
-        /* A 404 is the ordinary answer for a terminated, invalid or unknown
-           postcode, and fetchJSON has already turned it into null. It is not
-           coverage, so it is not a result — it is "unresolved". */
-        var r = body && body.result;
-        if (!r || !r.country) { return unresolved(postcode); }
+      .then(function (result) {
+        /* A 404 is the ordinary answer for a terminated, invalid or
+           mistyped postcode. It is the record telling us it holds no such
+           postcode, which is a fact about the address — not about us. */
+        if (!result.ok) {
+          return failed(result.reason === 'notfound' ? 'not_found' : 'lookup_failed',
+                        postcode);
+        }
+
+        /* A 200 whose body is not the shape we expect is not an answer we
+           can stand behind, so it is our problem, not the visitor's. */
+        var r = result.body && result.body.result;
+        if (!r || !r.country) { return failed('lookup_failed', postcode); }
 
         var check = {
           status: r.country === COVERED_COUNTRY ? 'in_coverage' : 'outside_coverage',
@@ -1131,6 +1293,33 @@
   var continueBtn  = document.getElementById('continue-btn');
   var submitBtn    = document.getElementById('submit-btn');
   var notifyBtn    = document.getElementById('notify-btn');
+
+  /* Stage 1's own error line, and the two ids that take turns describing
+     the address field: its hint alone, or its hint plus the message. */
+  var checkError      = document.getElementById('check-error');
+  var ADDRESS_HINT_ID = 'address-hint';
+  var CHECK_ERROR_ID  = 'check-error';
+
+  /* The three stopping outcomes, worded. Placeholders pending approval.
+
+     None of the three names a nationality, deliberately. The postcode
+     FORMAT they are about is UK-wide, and this field accepts a Scottish or
+     Welsh postcode happily: it resolves, and the visitor gets the
+     outside-coverage state, which is a more useful answer than a refusal
+     at the input. Coverage itself is England only, so "UK postcode" would
+     be wrong in the other direction. "A postcode" is true either way, and
+     that is all any of these say.
+
+     MSG_LOOKUP_FAILED belongs to a state that was never specified — it is
+     the fifth, and it exists because the other four cannot absorb it. It
+     must not say "we couldn't find that postcode", which would blame the
+     visitor for our outage, and it must not open Stage 2, because the
+     address is still unplaced. So it owns the failure and asks for a
+     retry. Treat this one as a holding position: the wording, and whether
+     a retry is even the right offer, are still open. */
+  var MSG_NO_POSTCODE  = 'We need a postcode to check this address. It’s on the listing.';
+  var MSG_NOT_FOUND    = 'We couldn’t find that postcode. Check it against the listing and try again.';
+  var MSG_LOOKUP_FAILED = 'We couldn’t run the check just now. Please try again in a moment.';
 
   var errorEl      = document.getElementById('form-error');
   var notifyError  = document.getElementById('notify-error');
@@ -1251,9 +1440,12 @@
     setValue('enquiry-address-input', address);
     setValue('hidden-status', check.status);
 
-    /* Only a resolved check contributes resolved facts. On "unresolved"
-       these stay empty rather than carrying a postcode we could not
-       confirm, which would read as established in the enquiry email. */
+    /* in_coverage is now the ONLY status that reaches this function — the
+       other four stop in Stage 1 and never open this form. The else branch
+       below is kept as the defensive floor: if some future route ever gets
+       here with an unplaced address, the enquiry must not carry a postcode
+       or an authority we never confirmed, because in the email they would
+       read as established fact. */
     if (check.status === 'in_coverage') {
       setValue('hidden-postcode',  check.postcode);
       setValue('hidden-authority', check.localAuthority);
@@ -1288,7 +1480,7 @@
          back and check another, and nothing from the first may survive. */
       setValue('hidden-conservation', '');
       setValue('hidden-conservation-url', '');
-      setValue('hidden-subject', 'Rellony — property check: address unresolved');
+      setValue('hidden-subject', 'Rellony — property check: address not confirmed');
     }
 
     /* Only one echo of the address on screen at a time. After an in-coverage
@@ -1299,14 +1491,59 @@
       echo.hidden = !address || !stageResult.hidden;
     }
 
-    /* The hint is for an address with no postcode in it. A lookup that
-       failed or timed out gets no hint and no error — it just arrives
-       here, which is the silent fallback. */
-    var hint = document.getElementById('unresolved-hint');
-    if (hint) { hint.hidden = !(check.status === 'unresolved' && !check.postcode); }
-
     stageCheck.hidden = true;
+    clearCheckError();
     enquiryForm.hidden = false;
+
+    revealStage2();
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Putting the visitor on the newly revealed stage.                    */
+  /*                                                                     */
+  /* This used to be one line at the end of the Continue handler:        */
+  /*                                                                     */
+  /*     document.getElementById('business-type').focus();               */
+  /*                                                                     */
+  /* which is the right intention and the wrong element. Focusing a      */
+  /* <select> on iOS does not merely mark it — it opens the native       */
+  /* picker wheel. So arriving at Stage 2 on a phone meant a full-height */
+  /* business-type wheel appearing over the form, unasked, before the    */
+  /* visitor had seen the stage they were now on.                        */
+  /*                                                                     */
+  /* The fix is not to drop focus management, which screen readers need  */
+  /* when the page changes under them, but to move it to something that  */
+  /* opens nothing: the stage's own heading, carrying tabindex="-1".     */
+  /* The rule for anything that replaces this: never focus a <select>,   */
+  /* and never focus any control that opens a picker or raises a         */
+  /* keyboard on focus. A heading or a container is always the answer.   */
+  /*                                                                     */
+  /* The scroll takes the whole panel rather than the form, because on   */
+  /* the in-coverage route the confirmed lines are still above the form  */
+  /* and they are the context the visitor just agreed to carry forward.  */
+  /* No `behavior` is passed: omitting it defers to the stylesheet's own  */
+  /* scroll-behavior, which is smooth by default and switched to auto    */
+  /* under prefers-reduced-motion. Passing one here would override that  */
+  /* and animate a scroll for someone who asked us not to. The 5rem of   */
+  /* scroll-padding-top in the stylesheet keeps the panel off the top    */
+  /* edge on arrival.                                                    */
+  /*                                                                     */
+  /* Focus is then taken with preventScroll, so the engine's own jump to */
+  /* the focused heading does not fight the scroll above.                */
+  /* ------------------------------------------------------------------ */
+  function revealStage2() {
+    var heading = document.getElementById('enquiry-head-js');
+    var target  = heading && !heading.hidden ? heading : enquiryForm;
+
+    if (panel && typeof panel.scrollIntoView === 'function') {
+      try { panel.scrollIntoView({ block: 'start' }); }
+      catch (e) { panel.scrollIntoView(); }
+    }
+
+    if (target && typeof target.focus === 'function') {
+      try { target.focus({ preventScroll: true }); }
+      catch (e) { target.focus(); }
+    }
   }
 
   /* ---- Stage 1 outcomes ------------------------------------------- */
@@ -1407,6 +1644,7 @@
     stageOutside.hidden = true;
     enquiryForm.hidden = true;
     stageCheck.hidden = false;
+    clearCheckError();
 
     var box = document.getElementById('result-box');
     if (box) { box.classList.remove('is-compact'); }
@@ -1418,6 +1656,75 @@
     button.addEventListener('click', restart);
   });
 
+  /* ------------------------------------------------------------------ */
+  /* The three Stage 1 outcomes that stop.                               */
+  /*                                                                     */
+  /* no_postcode, not_found and lookup_failed all end here. None of them */
+  /* opens Stage 2 by any route: an address we cannot place must not     */
+  /* become an enquiry, because the visitor would be answering a         */
+  /* questionnaire about a property nobody can locate and we would be    */
+  /* reading an enquiry we cannot research.                              */
+  /*                                                                     */
+  /* The wording differs per outcome and is chosen by the caller. Two of */
+  /* the three are about the address and ask the visitor to fix it; the  */
+  /* third is about us and must never be worded as though the postcode   */
+  /* were at fault.                                                      */
+  /*                                                                     */
+  /* ANNOUNCEMENT: one mechanism, aria-describedby. The message becomes  */
+  /* part of the address field's description and focus is moved into     */
+  /* that field, so a screen reader reads the field, its hint and the    */
+  /* message together on arrival. #check-error deliberately carries no   */
+  /* role="alert" — with focus landing on the described field in the     */
+  /* same turn, an alert would announce the same sentence a second time. */
+  /*                                                                     */
+  /* The caret goes to the END of what was typed, never select-all: the  */
+  /* address is nearly right and is being corrected, not replaced.       */
+  /* restart() selects instead, because there the whole address is       */
+  /* going.                                                              */
+  /* ------------------------------------------------------------------ */
+  function showCheckError(message) {
+    if (!checkError) { return; }
+
+    checkError.textContent = message;
+    checkError.hidden = false;
+
+    if (addressField) {
+      addressField.setAttribute('aria-describedby',
+        ADDRESS_HINT_ID + ' ' + CHECK_ERROR_ID);
+      addressField.setAttribute('aria-invalid', 'true');
+
+      try { addressField.focus({ preventScroll: true }); }
+      catch (e) { addressField.focus(); }
+
+      try {
+        var end = addressField.value.length;
+        addressField.setSelectionRange(end, end);
+      } catch (e) {}
+
+      /* preventScroll above, then the smallest scroll that brings the
+         message into view: focusing the field alone can leave the message
+         below the fold on a short screen. `nearest` leaves the view alone
+         when field and message are already on screen together. */
+      if (typeof checkError.scrollIntoView === 'function') {
+        try { checkError.scrollIntoView({ block: 'nearest' }); }
+        catch (e) {}
+      }
+    }
+  }
+
+  /* Takes the message off screen and puts the field's description back to
+     its own hint. Called wherever Stage 1 starts again. */
+  function clearCheckError() {
+    if (checkError) {
+      checkError.hidden = true;
+      checkError.textContent = '';
+    }
+    if (addressField) {
+      addressField.setAttribute('aria-describedby', ADDRESS_HINT_ID);
+      addressField.removeAttribute('aria-invalid');
+    }
+  }
+
   /* ---- Stage 1 submit --------------------------------------------- */
 
   var checking = false;
@@ -1427,6 +1734,11 @@
 
     if (checking) { return; }
     if (!checkForm.checkValidity()) { checkForm.reportValidity(); return; }
+
+    /* A previous answer to a previous address, put away before this one
+       runs — otherwise a second check appears to have been answered
+       before it has finished. */
+    clearCheckError();
 
     var address = addressField ? addressField.value.trim() : '';
 
@@ -1444,12 +1756,20 @@
 
       lastCheck = check;
 
-      if (check.status === 'outside_coverage') {
-        showOutside(check, address);
-      } else if (check.status === 'in_coverage') {
+      /* The whole of Stage 1, in one place. Every address lands on exactly
+         one of these five, and only the first two go anywhere: Stage 2 is
+         not reachable from the other three by any route. */
+      if (check.status === 'in_coverage') {
         showResult(check, address);
+      } else if (check.status === 'outside_coverage') {
+        showOutside(check, address);
+      } else if (check.status === 'no_postcode') {
+        showCheckError(MSG_NO_POSTCODE);
+      } else if (check.status === 'not_found') {
+        showCheckError(MSG_NOT_FOUND);
       } else {
-        openEnquiry(check, address);
+        /* lookup_failed — ours, not theirs. See the message constants. */
+        showCheckError(MSG_LOOKUP_FAILED);
       }
     });
   });
@@ -1461,11 +1781,16 @@
       var box = document.getElementById('result-box');
       if (box) { box.classList.add('is-compact'); }
 
-      openEnquiry(lastCheck || unresolved(null),
+      /* openEnquiry handles the scroll and the focus for every route into
+         Stage 2. There is deliberately nothing here that focuses a field:
+         this used to end by focusing #business-type, which on iOS opened
+         the native select wheel over the form the moment the stage
+         appeared. See revealStage2. */
+      /* lastCheck is always in_coverage here — this button only exists on
+         the result panel, and only an in-coverage check renders it. The
+         fallback is belt and braces. */
+      openEnquiry(lastCheck || failed('lookup_failed', null),
                   addressField ? addressField.value.trim() : '');
-
-      var businessType = document.getElementById('business-type');
-      if (businessType) { businessType.focus(); }
     });
   }
 

@@ -220,7 +220,7 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
    tight to the text is the ordinary affordance for an inline link, and at
    these alphas it reads as a press rather than a box dropped on the words. */
 .doc a:active,
-.consent-check a:active,
+.consent-docs a:active,
 .foot__note a:active { background: var(--press-paper); border-radius: 3px; }
 .foot__contact a:active { background: var(--press-olive); border-radius: 3px; }
 
@@ -520,7 +520,9 @@ select:invalid { color: var(--paper-hint); }
 
 .consent-check {
   display: flex; align-items: flex-start; gap: 0.65rem;
-  margin: 0.85rem 0 1.15rem;
+  /* no bottom margin: .consent-docs follows immediately and owns the gap
+     down to the submit button */
+  margin: 0.85rem 0 0;
   font-size: 0.875rem; line-height: 1.45; color: var(--paper-soft);
 }
 .consent-check input {
@@ -555,7 +557,32 @@ select:invalid { color: var(--paper-hint); }
   background-repeat: no-repeat;
 }
 .consent-check label { cursor: pointer; }
-.consent-check a { color: var(--paper-ink); }
+
+/* --- the two documents the consent sentence names ----------------------
+   Their own line, under the sentence rather than inside it. The sentence
+   is a legal consent and its whole box has to toggle the checkbox; links
+   sitting in it competed with that (see the tap-target block below).
+
+   The separator is the middot this page already uses to join facts on one
+   line — the result panel's summary sets postcode, authority and country
+   with the same " · ". There was no existing pair-of-links-with-a-middot
+   to copy, so the glyph comes from there and the link treatment is the
+   ordinary inline one the legal pages and the footer note use.
+
+   Indented to sit under the sentence rather than under the checkbox: the
+   1.125rem box plus the 0.65rem flex gap is exactly what .consent-check
+   puts before its label. */
+.consent-docs {
+  margin: 1.25rem 0 1.15rem;
+  padding-left: calc(1.125rem + 0.65rem);
+  font-size: 0.875rem; line-height: 1.45;
+}
+.consent-docs a { color: var(--paper-ink); }
+.consent-docs__sep {
+  /* not padding on the links: they carry a vertical-only hit area and a
+     horizontal pad would put the two targets edge to edge */
+  margin: 0 0.55rem; color: var(--paper-soft);
+}
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center;
@@ -1105,7 +1132,25 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
      phone the same gaps are simply further apart than the column needs.
      Above 40rem the original values stand untouched. */
   .h1-rule { margin: 0.85rem 0 1rem; }
-  .coverage-line { margin-top: 1.05rem; padding-top: 0.8rem; }
+
+  /* The coverage line is the tallest single thing in the hero for the amount
+     it says, but not for the reason it looks. At 390px it is 68.17px, and
+     54.37px of that is TEXT: the sentence does not fit the 350px column and
+     sets on TWO lines at the inherited 1.6. It cannot be made to fit — at
+     17px the sentence measures 358.66px against 334px of usable width once
+     the dot and its gap are taken out, so it wraps at every phone width, and
+     the wording and the size are both fixed.
+
+     So the three things here are the only ones going: the gap above the
+     hairline, the gap below it, and the leading. The hairline itself stays —
+     it is the divider between the promise above and the coverage statement
+     below, and it is the reason this line reads as a qualifier rather than
+     another sentence of the lede. 1.45 is the leading this stylesheet
+     already uses for compact secondary text (.hint, .pre-submit,
+     .consent-check); this line is a two-line label, not running prose, and
+     1.6 was buying it nothing. 16.3px comes back, 11.2px of it space and
+     5.1px leading. Above 40rem every original value stands. */
+  .coverage-line { margin-top: 0.6rem; padding-top: 0.55rem; line-height: 1.45; }
   .price { margin-top: 0.9rem; }
   .price .fine { margin-top: 0.3rem; }
   /* --hero-gap is 2rem here; single-column, that is the space between the
@@ -1232,13 +1277,20 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
 
      .consent-check label is a flex item, so it is blockified to block.
      It takes the padding and the 25.2px anyway, because it is a legal
-     consent and this is the only approach that keeps the two links
-     inside the sentence tappable: padding grows the label own box while
-     the links stay in flow at their text height, so a tap above or
-     below the sentence toggles the box and a tap on the link text
-     follows the link. An overlay would have covered both links. The
-     checkbox takes the same 13px on its margin so it keeps its 1.6px
-     offset from the first line of the sentence.
+     consent. It no longer has to share that box with anything: the two
+     document links have moved to their own line below (.consent-docs),
+     so every pixel of the label, padding included, toggles the box.
+
+     That move replaced an arrangement where the links sat inside the
+     sentence at their text height, relying on a tap landing on the words
+     to follow the link and a tap above or below them to toggle. It held
+     at 390, where the sentence is one line. At 375 and 360 it wraps and
+     "Privacy Policy" takes the LAST line, which put a link directly
+     above the 13px strip under the sentence — and the engine's touch
+     adjustment reaches about 9px, so taps meant for the checkbox opened
+     the document instead. Nothing inside the label now, nothing to
+     adjust to. The checkbox takes the same 13px on its margin so it
+     keeps its 1.6px offset from the first line of the sentence.
 
      .linkish is a <button> and .result__source an inline-block anchor.
      Chrome will not honour display: inline on a button — it stays
@@ -1257,6 +1309,22 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
      background for a background shorthand to reset. */
   .consent-check label { padding-block: 13px; }
   .consent-check input { margin-top: calc(0.1rem + 13px); }
+
+  /* The document links are non-replaced INLINE boxes with text-only
+     content, which is exactly the case the .foot__contact trick is for:
+     vertical padding grows the hit area and stays out of the line box, so
+     the row costs no extra height. 13px each way over an 18.85px line is
+     44.85px.
+
+     That hit area overhangs 13px upward, so the margin above this row has
+     to clear the label's own box by more than 13px or the two would
+     overlap and the strip would be ambiguous all over again. The 1.25rem
+     on .consent-docs is 20px, which leaves 8px of daylight between the
+     bottom of the label's box and the top of these — and in a tap sweep
+     the first pixel that reaches a link is 6px below the label box, the
+     engine's touch adjustment having eaten the other 2. Identical at 390,
+     375 and 360. Do not reduce that margin without re-running the sweep. */
+  .consent-docs a { padding-block: 13px; }
 
   .linkish { position: relative; }
   .linkish::after { content: ""; position: absolute; inset: -7px 0 -17px; }
@@ -1392,13 +1460,11 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
 }
 .stage-echo__value { font-size: 0.9375rem; color: var(--paper-ink); overflow-wrap: anywhere; }
 
-.stage-hint {
-  padding: 0.75rem 0.9rem; margin-bottom: 1.15rem;
-  border-left: 3px solid var(--line-paper-firm);
-  background: var(--paper-wash);
-  border-radius: 0 var(--r-input) var(--r-input) 0;
-  font-size: 0.875rem; line-height: 1.45; color: var(--paper-soft);
-}
+/* .stage-hint, .stage-choice and .stage-choice__alt were the "continue
+   without a postcode" branch. Stage 1 no longer offers a way past a check it
+   could not complete, so the branch and its three rules are gone; what Stage
+   1 has instead is #check-error, which uses .form-error like the other two
+   forms on this page. */
 
 /* --- buttons that are not waiting on a form ----------------------------- */
 /* The readiness rule lights a button from its own form s validity, so a
