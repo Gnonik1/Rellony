@@ -235,7 +235,13 @@
 
           <form id="check-form" novalidate>
 
-            <div class="field" id="address-field">
+            <!-- tabindex="-1" so the script can put focus on the BLOCK rather
+                 than the input when the mode is switched by a finger: on iOS a
+                 programmatic focus of a text input raises the keyboard over the
+                 form. The block is not editable, so focusing it moves a screen
+                 reader onto the new question without opening anything. Never in
+                 the tab order. See setLinkMode. -->
+            <div class="field" id="address-field" tabindex="-1">
               <label for="address">Property address</label>
               <span class="hint" id="address-hint">Street, town and postcode — the postcode is required</span>
               <input type="text" id="address" name="property_address"
@@ -293,10 +299,10 @@
                  swap; see setLinkMode.
                  ------------------------------------------------------------ -->
             <p class="mode-switch" id="to-link-mode">
-              <button type="button" class="linkish" id="to-link-btn">No exact address on the listing? Paste the listing link instead</button>
+              <button type="button" class="linkish" id="to-link-btn">No exact address? Paste the listing link</button>
             </p>
 
-            <div class="field" id="listing-url-field" hidden>
+            <div class="field" id="listing-url-field" tabindex="-1" hidden>
               <label for="listing-url">Listing link</label>
               <span class="hint" id="listing-url-hint">Paste the full web address of the listing page.</span>
               <input type="url" id="listing-url"
@@ -734,20 +740,24 @@
         </p>
       </div>
 
-      <p class="demo-label">Example finding — illustration of our report format</p>
+      <!-- This is finding 2 of the fictional sample report, verbatim, so that
+           the card and the "See a full sample report" link below it tell one
+           story rather than two. Everything in it is fictional except the law
+           it cites. -->
+      <p class="demo-label">Example finding — from our fictional sample report</p>
 
-      <article class="finding" data-status="unverified">
+      <article class="finding" data-status="contradicted">
 
         <div class="finding__claim">
           <div class="finding__claim-text">
             <p class="label">Claim from the listing</p>
-            <q>Extraction planning granted, suitable for full commercial kitchen.</q>
+            <q>Fully licensed restaurant, alcohol licence in place.</q>
           </div>
           <p class="status">
             <span class="status__dot" aria-hidden="true"></span>
             <span class="status__label">
               <span class="status__pending" aria-hidden="true">Checking the record</span>
-              <span class="status__final">No record found</span>
+              <span class="status__final">Contradicted</span>
             </span>
           </p>
         </div>
@@ -756,27 +766,28 @@
           <div class="ev-col">
             <h3>Evidence</h3>
             <p>
-              No planning record granting extraction at this address was found in the
-              sources searched. The address appears only in unrelated neighbour
-              notification records, the most recent
-              <span class="record">18/04417/NEI</span>, dated
-              <span class="record">09 Nov 2018</span>.
+              The council’s licensing register lists premises licence
+              <span class="record">FIC/24/01234/PREM</span>, granted
+              <span class="record">14 Jun 2024</span> to a company. Companies House shows that
+              company was dissolved on <span class="record">26 May 2026</span>. No transfer or
+              interim authority notice appears on the register since.
             </p>
           </div>
           <div class="ev-col">
             <h3>Interpretation</h3>
             <p>
-              This does not establish that no permission exists — a consent can predate the
-              searchable record, or sit under a different address format. It does mean the
-              claim is <strong>currently unsupported by any record we could find</strong>.
+              A company’s premises licence lapses when the company is dissolved, unless within
+              28 days someone applies to transfer it or gives an interim authority notice.
+              None appears on the register, so unless one was made and not yet published,
+              <strong>the licence has lapsed</strong>, even though the register still shows it as current.
             </p>
           </div>
           <div class="ev-col">
             <h3>Action</h3>
             <p>
-              Ask the landlord or agent for the planning reference and the decision notice
-              in writing, <strong>before</strong> the extraction claim influences what you
-              are willing to pay.
+              Ask the agent for proof of a transfer or interim authority notice
+              <strong>before</strong> you agree the premium. If there is none, plan for a new
+              premises licence before opening with alcohol.
             </p>
           </div>
         </div>
@@ -961,7 +972,16 @@
   <div class="shell">
 
     <div class="lockup">
-      <a class="lockup__mark" href="#top"><img src="/rellony-lockup-reversed.svg" alt="Rellony"></a>
+      <!-- width/height carry the aspect ratio, which this SVG does not state
+           in a width or height of its own — only in viewBox="0 0 1070 303".
+           Without them the browser has no ratio to work with until the file
+           arrives, and `height: 1.3em; width: auto` in the stylesheet resolves
+           to a zero-width box until then, so the footer reflows as the logo
+           lands. These are the rendered size at the phone breakpoint, rounded,
+           which is also what the header lockup does; the stylesheet still owns
+           the real size, so nothing here changes what is drawn. -->
+      <a class="lockup__mark" href="#top"><img src="/rellony-lockup-reversed.svg" alt="Rellony"
+           width="184" height="52"></a>
       <p class="signoff">
         <span>Rely on the evidence</span>
         <span>Know before you commit</span>
@@ -1445,9 +1465,11 @@
   /* ================================================================== */
   var MODES = {
     address: { input: addressField, error: checkError,
-               hintId: ADDRESS_HINT_ID, errorId: CHECK_ERROR_ID },
+               hintId: ADDRESS_HINT_ID, errorId: CHECK_ERROR_ID,
+               anchor: addressBlock },
     link:    { input: listingField, error: listingError,
-               hintId: 'listing-url-hint', errorId: 'listing-error' }
+               hintId: 'listing-url-hint', errorId: 'listing-error',
+               anchor: listingBlock }
   };
   var MODE_NAMES = ['address', 'link'];
   var mode = 'address';
@@ -2019,11 +2041,13 @@
   /* ------------------------------------------------------------------ */
   /* The way through, appended to all three address-mode messages. A control
      rather than a sentence, so it is built as a node. Its own announcement
-     behaviour is covered in the block above. */
+     behaviour is covered in the block above, and it is wired through
+     wireModeSwitch like the other two switches so a finger does not raise the
+     keyboard on it either. */
   function appendLinkOffer(node) {
     var button = el('button', 'linkish', 'Paste the listing link instead');
     button.type = 'button';
-    button.addEventListener('click', function () { setLinkMode(true); });
+    wireModeSwitch(button, true);
     node.appendChild(button);
   }
 
@@ -2085,6 +2109,100 @@
     }
   }
 
+  /* focus(), with the engine's own scroll suppressed. The pattern appeared
+     several times before this one; callers that want a scroll ask for it. */
+  function focusQuietly(node) {
+    if (!node || typeof node.focus !== 'function') { return; }
+    try { node.focus({ preventScroll: true }); }
+    catch (e) { node.focus(); }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* HOW WAS THAT BUTTON ACTIVATED?                                      */
+  /*                                                                     */
+  /* A finger and a Tab-then-Enter want opposite things from a mode       */
+  /* switch, and the click event alone does not say which happened. So a  */
+  /* pointerdown on the switch records its pointerType, and the click     */
+  /* that follows reads it back.                                          */
+  /*                                                                     */
+  /* A click with no pointerdown before it did not come from a pointer at */
+  /* all: that is Enter or Space on the focused button, where             */
+  /* event.detail is 0 — which is also the fallback for an engine that    */
+  /* has no pointer events to record in the first place.                  */
+  /*                                                                     */
+  /* The reading is time-boxed because a pointerdown that never becomes a */
+  /* click — a finger that slid off the button — would otherwise leave a  */
+  /* stale "touch" behind for the next keyboard activation to read. The   */
+  /* click handler also clears it as soon as it has read it.              */
+  /* ------------------------------------------------------------------ */
+  var POINTER_MEMORY_MS = 700;
+  var lastPointer = { type: null, at: 0 };
+
+  function rememberPointer(event) {
+    lastPointer = { type: event.pointerType || 'mouse', at: Date.now() };
+  }
+
+  function forgetPointer() {
+    lastPointer = { type: null, at: 0 };
+  }
+
+  function activationKind(event) {
+    var fresh = lastPointer.type &&
+                (Date.now() - lastPointer.at) < POINTER_MEMORY_MS;
+
+    if (fresh) {
+      return (lastPointer.type === 'touch' || lastPointer.type === 'pen')
+        ? 'touch' : 'mouse';
+    }
+    /* No pointerdown reached us. detail === 0 is an activation the engine did
+       not generate from a pointer, so it is the keyboard; anything else here
+       is an engine without pointer events at all, where a mouse is the safe
+       guess because it is the one that keeps the older behaviour. */
+    return (event && event.detail === 0) ? 'keyboard' : 'mouse';
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* The smallest scroll that puts the whole of Stage 1's question on     */
+  /* screen: the label, the field, and the button that acts on it.        */
+  /*                                                                     */
+  /* scrollIntoView on any one of the three can leave the other two off   */
+  /* screen — `nearest` on the field alone leaves the button under the    */
+  /* fold on a short viewport, which is the state this exists to avoid.   */
+  /* So the three are measured as one block, and the page moves by the    */
+  /* least that fits it, or aligns to its top where the block is taller   */
+  /* than the viewport.                                                   */
+  /*                                                                     */
+  /* No `behavior` is passed, deliberately: that defers to the            */
+  /* stylesheet's own scroll-behavior, which is smooth by default and     */
+  /* auto under prefers-reduced-motion. Passing one here would animate a  */
+  /* scroll for someone who asked us not to.                              */
+  /* ------------------------------------------------------------------ */
+  function revealStage1Question() {
+    var block = activeMode().anchor;
+    if (!block || typeof block.getBoundingClientRect !== 'function') { return; }
+    if (typeof window.scrollBy !== 'function') { return; }
+
+    var view = window.innerHeight || document.documentElement.clientHeight || 0;
+    if (!view) { return; }
+
+    var top    = block.getBoundingClientRect().top;
+    var bottom = checkBtn
+      ? checkBtn.getBoundingClientRect().bottom
+      : block.getBoundingClientRect().bottom;
+
+    var margin = 12;
+    var delta  = 0;
+
+    if (bottom - top > view - margin * 2) { delta = top - margin; }
+    else if (bottom > view - margin)      { delta = bottom - (view - margin); }
+    else if (top < margin)                { delta = top - margin; }
+
+    if (!delta) { return; }
+
+    try { window.scrollBy({ top: delta, left: 0 }); }
+    catch (e) { window.scrollBy(0, delta); }
+  }
+
   /* ------------------------------------------------------------------ */
   /* Switching Stage 1 between its two modes.                            */
   /*                                                                     */
@@ -2096,13 +2214,30 @@
   /* waiting for. reportValidity has the same problem from the other      */
   /* side, being unable to point at a control that is not rendered.       */
   /*                                                                     */
-  /* Focus moves to the field that has just appeared, because that is     */
-  /* the control the visitor asked for — and a screen reader would        */
-  /* otherwise be left on a button that has just hidden itself. The       */
-  /* scroll is the same pattern as showCheckError: preventScroll, then    */
-  /* `nearest`, which does nothing when the field is already in view.     */
+  /* WHERE FOCUS GOES depends on how the switch was activated, because    */
+  /* the two cases want opposite things.                                  */
+  /*                                                                     */
+  /*   A FINGER, or a pen. Focus goes to the new field's BLOCK, which     */
+  /*   carries tabindex="-1" and is not editable, and the page scrolls by */
+  /*   the least that shows the label, the field and the button together. */
+  /*   Focusing the input is what this used to do, and on iOS any         */
+  /*   programmatic focus of a text input inside a tap handler raises the */
+  /*   keyboard — which then covered the label and the button, so the     */
+  /*   visitor could not see the field they had just asked for. This is   */
+  /*   the rule already stated above revealStage2: never focus a control  */
+  /*   that opens a picker or raises a keyboard on focus, a container is  */
+  /*   always the answer. The block still moves a screen reader onto the  */
+  /*   new question, which is what the focus was there for.               */
+  /*                                                                     */
+  /*   A KEY OR A MOUSE. Focus goes to the input, exactly as before.      */
+  /*   There is no keyboard to raise, the visitor is about to type, and a */
+  /*   caret in the field is what they asked for.                         */
+  /*                                                                     */
+  /* The error path is deliberately NOT changed with this. There the      */
+  /* visitor is correcting what they typed, so the keyboard is wanted:    */
+  /* see showCheckError, which still focuses its field on every route.    */
   /* ------------------------------------------------------------------ */
-  function setLinkMode(on) {
+  function setLinkMode(on, viaTouch) {
     mode = on ? 'link' : 'address';
     clearCheckError();
 
@@ -2122,10 +2257,15 @@
 
     setCheckLabel();
 
+    if (viaTouch) {
+      focusQuietly(activeMode().anchor);
+      revealStage1Question();
+      return;
+    }
+
     var field = activeMode().input;
     if (field) {
-      try { field.focus({ preventScroll: true }); }
-      catch (e) { field.focus(); }
+      focusQuietly(field);
       if (typeof field.scrollIntoView === 'function') {
         try { field.scrollIntoView({ block: 'nearest' }); }
         catch (e) {}
@@ -2133,12 +2273,21 @@
     }
   }
 
-  if (toLinkBtn) {
-    toLinkBtn.addEventListener('click', function () { setLinkMode(true); });
+  /* One handler shape for all three switches — the two under the fields and
+     the one appended to an error message. Read how it was activated, forget
+     the pointer so the next activation cannot inherit it, then switch. */
+  function wireModeSwitch(button, toLink) {
+    if (!button) { return; }
+    button.addEventListener('pointerdown', rememberPointer);
+    button.addEventListener('click', function (event) {
+      var touch = activationKind(event) === 'touch';
+      forgetPointer();
+      setLinkMode(toLink, touch);
+    });
   }
-  if (toAddressBtn) {
-    toAddressBtn.addEventListener('click', function () { setLinkMode(false); });
-  }
+
+  wireModeSwitch(toLinkBtn, true);
+  wireModeSwitch(toAddressBtn, false);
 
   /* ---- Stage 1 submit --------------------------------------------- */
 
@@ -2402,5 +2551,19 @@
      pass. Nothing here sets a cookie or touches local storage; the Privacy
      page says so in section 02 and names the host in section 05. -->
 <!-- CLOUDFLARE_WEB_ANALYTICS_SNIPPET -->
+
+<script>
+  /* iOS Safari applies :active to a tapped element only on a page that has a
+     touch listener somewhere. Without this one line the designed press states
+     in the header and the footer — the pill wash and the 0.97 scale — never
+     appear on an iPhone, and a tap just cuts to the next page. The home page
+     happened to have a listener already, the keyboard-dismiss handler, which
+     is why it was the only page where the presses worked.
+
+     It does nothing, stores nothing and sends nothing. passive: true so it can
+     never hold up a scroll. Identical on all six pages, and placed after the
+     analytics marker so that line stays byte-identical too. */
+  document.addEventListener('touchstart', function () {}, { passive: true });
+</script>
 </body>
 </html>

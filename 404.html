@@ -67,7 +67,16 @@
 <footer class="site-foot">
   <div class="shell">
     <div class="lockup">
-      <a class="lockup__mark" href="#top"><img src="/rellony-lockup-reversed.svg" alt="Rellony"></a>
+      <!-- width/height carry the aspect ratio, which this SVG does not state
+           in a width or height of its own — only in viewBox="0 0 1070 303".
+           Without them the browser has no ratio to work with until the file
+           arrives, and `height: 1.3em; width: auto` in the stylesheet resolves
+           to a zero-width box until then, so the footer reflows as the logo
+           lands. These are the rendered size at the phone breakpoint, rounded,
+           which is also what the header lockup does; the stylesheet still owns
+           the real size, so nothing here changes what is drawn. -->
+      <a class="lockup__mark" href="#top"><img src="/rellony-lockup-reversed.svg" alt="Rellony"
+           width="184" height="52"></a>
       <p class="signoff">
         <span>Rely on the evidence</span>
         <span>Know before you commit</span>
@@ -99,5 +108,19 @@
      pass. Nothing here sets a cookie or touches local storage; the Privacy
      page says so in section 02 and names the host in section 05. -->
 <!-- CLOUDFLARE_WEB_ANALYTICS_SNIPPET -->
+
+<script>
+  /* iOS Safari applies :active to a tapped element only on a page that has a
+     touch listener somewhere. Without this one line the designed press states
+     in the header and the footer — the pill wash and the 0.97 scale — never
+     appear on an iPhone, and a tap just cuts to the next page. The home page
+     happened to have a listener already, the keyboard-dismiss handler, which
+     is why it was the only page where the presses worked.
+
+     It does nothing, stores nothing and sends nothing. passive: true so it can
+     never hold up a scroll. Identical on all six pages, and placed after the
+     analytics marker so that line stays byte-identical too. */
+  document.addEventListener('touchstart', function () {}, { passive: true });
+</script>
 </body>
 </html>

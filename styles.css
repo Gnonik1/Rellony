@@ -333,6 +333,21 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
    behind (hover: hover): iOS applies :hover on tap and holds it until you
    tap elsewhere, which left this tint stuck on the last link touched long
    after the finger had gone. Keyboard focus keeps the full treatment. */
+/* The page you are already on, marked quietly and permanently. It has to read
+   as a state without competing with the press, so it takes the hover wash and
+   the press keeps the darker one: --paper-wash-firm against --press-paper is
+   0.707 against 0.650 in luminance, with the label at 12.53:1 on either.
+
+   SPECIFICITY: this and .site-nav a:active are both (0,2,1), so the press only
+   wins by sitting after this rule. Keep that order if either one moves.
+
+   The footer omits the current page from its list instead, which is why there
+   is no matching rule for .foot__links. */
+.site-nav a[aria-current="page"] {
+  background: var(--paper-wash-firm);
+  color: var(--paper-ink);
+}
+
 .site-nav a:focus-visible {
   color: var(--paper-ink);
   background: var(--paper-wash-firm);
@@ -424,6 +439,15 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
 .panel .fine { color: var(--paper-soft); }
 
 .field { margin-bottom: 1.15rem; }
+
+/* The two Stage 1 field blocks carry tabindex="-1" so the script can put focus
+   on the BLOCK rather than the input when a finger switches mode — on iOS a
+   programmatic focus of a text input raises the keyboard over the form. See
+   setLinkMode. Focus lands there programmatically and never by Tab, so there is
+   no ring to draw: :focus-visible would not match it anyway, and this says so
+   outright rather than leaving it to the engine's heuristic. */
+.field[tabindex]:focus,
+.field[tabindex]:focus-visible { outline: none; }
 .field > label,
 .field-group > legend {
   display: block; font-size: 0.875rem; font-weight: 600;
@@ -484,6 +508,15 @@ select:invalid { color: var(--paper-hint); }
 
 .chips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.45rem; }
 @media (max-width: 20rem) { .chips { grid-template-columns: 1fr; } }
+
+/* At 320px "Download sample (PDF)" needs 189.3px and the 1.5rem of side
+   padding leaves it 176px, so it takes a second line — and the two buttons in
+   a .doc__cta stop matching in height, which is the thing that makes them read
+   as a pair. Tighter sides give it 196px and buy back the 13.3px. 360px and
+   wider has 216px and never needed this. */
+@media (max-width: 20rem) {
+  .doc__cta .btn { padding-inline: 0.875rem; }
+}
 .chip {
   display: flex; align-items: center; gap: 0.5rem;
   min-height: 2.875rem; padding: 0.5rem 0.75rem;
@@ -586,6 +619,11 @@ select:invalid { color: var(--paper-hint); }
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center;
+  /* justify-content centres the label as a BOX. A label that wraps is a single
+     anonymous flex item holding two lines, and the lines inside that box align
+     by text-align, which a button inherits as left from the page. So a
+     one-line label looked centred and a wrapped one did not. */
+  text-align: center;
   width: 100%; min-height: 3.25rem;
   font: inherit; font-size: 1.0625rem; font-weight: 600;
   color: var(--vellum); background: var(--base);
@@ -748,6 +786,22 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
 .finding[data-status="unverified"] .status__dot {
   background: var(--unverified-paper);
   box-shadow: inset 0 0 0 1.5px var(--unverified-paper);
+}
+
+/* Contradicted, which is what the sample card on the home page now shows. The
+   pair mirrors the unverified one above: the dot fills and the final label
+   takes the same ink. --contradicted-paper is #96241A, 7.26:1 on the vellum
+   card, and the label needs its own rule because .status__final carries the
+   unverified colour as its default.
+
+   Both are (0,3,0), below the (0,4,0) reveal rules further down, so the dot
+   still starts hollow and the label still starts hidden under motion-ok. */
+.finding[data-status="contradicted"] .status__dot {
+  background: var(--contradicted-paper);
+  box-shadow: inset 0 0 0 1.5px var(--contradicted-paper);
+}
+.finding[data-status="contradicted"] .status__final {
+  color: var(--contradicted-paper);
 }
 
 /* Reads as a key, not as a sentence: the dots sit in their own aligned
@@ -1036,6 +1090,15 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
 .doc a.btn,
 .doc a.btn:hover,
 .doc a.btn:active { color: var(--vellum); }
+
+/* The same trap again, one class deeper. The rule above is (0,2,1), so
+   .btn--secondary's own colour at (0,1,0) loses to it and the outlined button
+   would be handed vellum text on a vellum page — invisible, which is the exact
+   failure the rule above was added to fix. This takes it back at (0,3,1), in
+   all three states, and must stay below the rule above. */
+.doc a.btn.btn--secondary,
+.doc a.btn.btn--secondary:hover,
+.doc a.btn.btn--secondary:active { color: var(--base); }
 
 /* A hostname or other technical string in the body of a document page. It
    takes the record face, and it is allowed to break mid-string: at 320px the
@@ -1449,12 +1512,23 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
    which is 44.8px. The 7px up has the field's own 1.15rem of bottom margin
    to land in. The 17px down must stay off the Check button, and the 1.15rem
    below is 18.4px of clearance: do not shorten it without re-checking where
-   the button's edge falls. */
+   the button's edge falls.
+
+   Both labels fit one line at 360px and wider. Below that the longer one
+   wraps, which only makes the band taller — the button box grows with the
+   second line and the 17px is measured from the bottom of it either way. */
 .mode-switch {
   margin: 0 0 1.15rem;
   font-size: 0.8125rem; line-height: 1.6;
   color: var(--paper-soft);
 }
+
+/* A button is text-align: center by default. Both labels inherited that, and
+   because the long one filled the line it read as centred while the short one
+   shrank to its text and sat at the left — one control, apparently aligned two
+   different ways depending on which mode you were in. Left for both, which is
+   where the field labels above them start too. */
+.mode-switch .linkish { text-align: left; }
 
 /* The listing-link offer, appended to a Stage 1 error message. It takes its
    own line rather than running on from the sentence: it is a second thing to
@@ -1627,6 +1701,51 @@ form:valid .btn[aria-busy="true"] { opacity: 0.6; cursor: progress; }
 }
 .btn--inline:active { background: var(--btn-press); border-color: var(--btn-press); }
 
+/* --- the outlined secondary ------------------------------------------- */
+/* Two buttons side by side have to be told apart before they are read, and a
+   second filled pill cannot do that. This is the same pill at the same height,
+   drawn as an outline instead of a fill: box-sizing is border-box everywhere
+   here, so the 1.5px border costs nothing in height against the primary's 1px.
+
+   1.5px rather than 1px because the outline is carrying the whole shape; at
+   1px it reads as a disabled primary rather than a second kind of button.
+
+   Contrast, text --base on what is behind it: 8.04:1 on vellum at rest,
+   6.54:1 over the hover wash, 6.04:1 over the press wash.
+
+   ORDER: these three must stay AFTER the .btn--inline rules above. The
+   download button carries btn, btn--inline and btn--secondary together, and
+   .btn--inline:hover / :active are (0,2,0) exactly like these, so the only
+   thing deciding which fill wins is which comes later in the file. */
+.btn--secondary {
+  background: transparent;
+  border-color: var(--base);
+  color: var(--base);
+  /* The outline wants more weight than the primary's 1px, and border-width
+     cannot give it. Chrome FLOORS border-width to whole CSS pixels, so a
+     1.5px border paints exactly like 1px — measured, 2px of total box width
+     against 4px for a 2px border, identical at dpr 1 and 2. A real 2px border
+     does render, but it adds 2px to this button and the two then no longer
+     match in height, which is the other half of what this has to get right.
+
+     An inset ring has neither problem: it is clipped to the padding box, it
+     follows the 999px radius, and a box-shadow never takes part in layout, so
+     the heights stay identical in every engine. Read together with the 1px
+     border it is the 2px-ish outline the filled primary cannot be mistaken
+     for. */
+  box-shadow: inset 0 0 0 1px var(--base);
+}
+@media (hover: hover) and (pointer: fine) {
+  .btn--secondary:hover {
+    background: var(--paper-wash-firm);
+    border-color: var(--base);
+  }
+}
+.btn--secondary:active {
+  background: var(--press-paper);
+  border-color: var(--base);
+}
+
 @media (max-width: 40rem) {
   .deliver { padding-block: 0 2.5rem; }
   .deliver__band { padding: 1.25rem 1rem; }
@@ -1643,6 +1762,28 @@ form:valid .btn[aria-busy="true"] { opacity: 0.6; cursor: progress; }
   .result__note { padding: 0.85rem 0.9rem; margin-bottom: 1.15rem; }
   .btn--inline { width: 100%; }
 }
+
+/* ==========================================================================
+   Page transitions
+
+   Cross-document view transitions, as pure progressive enhancement. The page
+   cross-fades on navigation and the header is carried across rather than
+   redrawn, so moving between the six pages reads as one site rather than six
+   documents. Engines without support ignore both rules and navigate as before.
+
+   The opt-in sits inside the no-preference query on purpose: under
+   prefers-reduced-motion: reduce it is never declared at all, so navigation
+   stays instant. view-transition-name outside the query is inert without it.
+
+   site-head is the only name on the page. Two elements sharing one name make
+   the engine abandon the whole transition, so do not reuse it.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+}
+
+.site-head { view-transition-name: site-head; }
 
 /* ==========================================================================
    Reduced motion — the H1 rule renders static, nothing animates
