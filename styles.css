@@ -318,17 +318,13 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
   transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.09s ease;
 }
 
-/* 26.5rem = 424px, measured. With all three items the nav is 217.28px, and a
-   40px lockup is 141.2px; add 8px of flex gap, 16px of clear space and 40px
-   of gutter and the bar needs 422.5px. Below that something has to give, and
-   the sample link gives before the company name does: it is an in-page anchor
-   to a section you can still reach by scrolling, and it comes back above this
-   width. display: none takes it out of the tab order AND off the
-   accessibility tree by itself — do not pile aria-hidden or tabindex on top,
-   which would only risk the two disagreeing. */
-@media (max-width: 26.5rem) {
-  .site-head .site-nav a[href="#finding"] { display: none; }
-}
+/* A rule here used to hide the header's "Sample finding" link below 26.5rem
+   (424px), where a three-item nav plus the lockup wanted 422.5px of a bar
+   that did not have it. The header nav is now the same two items on every
+   page, Sample report and About, and the in-page anchor it hid is gone with
+   it — so there is nothing left to drop and nothing to drop it below. Both
+   items fit at 360px with room over; the measurement they are checked
+   against is in the lockup note in the phone block below. */
 
 /* the hover has to be readable as feedback on a light bar, so it takes a
    real tint plus a boundary — a 5% wash alone was invisible.
@@ -438,6 +434,7 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
 
 input[type="text"],
 input[type="email"],
+input[type="url"],
 select,
 textarea {
   width: 100%; min-height: 3rem;
@@ -454,12 +451,14 @@ input::placeholder, textarea::placeholder { color: var(--paper-hint); }
 @media (hover: hover) and (pointer: fine) {
   input[type="text"]:hover,
   input[type="email"]:hover,
+  input[type="url"]:hover,
   select:hover,
   textarea:hover { border-color: var(--paper-soft); }
 }
 
 input[type="text"]:focus,
 input[type="email"]:focus,
+input[type="url"]:focus,
 select:focus,
 textarea:focus {
   outline: none;
@@ -773,6 +772,14 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
 .dot-unverified   { background: var(--unverified); }
 .dot-contradicted { background: var(--contradicted); }
 
+/* The route from the illustrated finding to the full sample report. It is the
+   same quiet pill link as .backlink — same colours, same 44px box, same press
+   wash, and already in that class's touch-callout and transform lists —
+   pointing forward instead of back, so it reuses the class and this fixes
+   only the margins. */
+.legend-link { margin-top: 1.1rem; }
+.legend-link .backlink { margin-bottom: 0; }
+
 .record-section__foot { margin-top: 1.25rem; color: var(--sage); max-width: var(--measure); }
 
 /* --- the one motion moment --- */
@@ -1018,6 +1025,24 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
 .doc dd { margin: 0.25rem 0 0; }
 .doc a { color: var(--paper-ink); overflow-wrap: anywhere; }
 
+/* A button link on a document page. The rule above is (0,1,1), and both .btn
+   and .btn--inline are (0,1,0), so the ink colour meant for body prose won on
+   the button whatever order the rules sat in: near-black on the olive fill at
+   1.92:1, falling to 1.34:1 once pressed. This puts the button's own colour
+   back, at (0,2,1), above the prose rule — 8.04:1 at rest, 9.51:1 on hover and
+   11.5:1 on press. :hover and :active are named explicitly because
+   .btn--inline darkens the fill for both, and without them the prose colour
+   would come back with each state. */
+.doc a.btn,
+.doc a.btn:hover,
+.doc a.btn:active { color: var(--vellum); }
+
+/* A hostname or other technical string in the body of a document page. It
+   takes the record face, and it is allowed to break mid-string: at 320px the
+   measure inside the paper band is narrower than a 29-character hostname, and
+   an unbreakable word would otherwise run past the band's padding. */
+.doc code { font-family: var(--record); font-size: 0.9em; overflow-wrap: anywhere; }
+
 /* The invoice wording, quoted verbatim in Terms 06 so it can be checked
    against the invoice itself. A quiet inset, not a pull quote. */
 .doc blockquote {
@@ -1026,6 +1051,23 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   border-left: 2px solid var(--line-paper-firm);
 }
 .doc blockquote p { color: var(--paper-ink); }
+
+/* The About and sample-report pages carry no "Last updated" line — that is a
+   legal-page thing, and inventing a date for a page that does not need one
+   would be worse than the gap it closes. The opening paragraph takes the 2rem
+   that .doc__updated was holding open under the h1 instead. */
+.doc__lede {
+  font-size: 1.0625rem; line-height: 1.55;
+  color: var(--paper-soft); margin: 0.9rem 0 2rem;
+}
+
+/* One or two buttons closing a document page. .btn--inline is already sized
+   for the paper band, so this only spaces the row — and lets a second button
+   drop below the first on a phone, where .btn--inline goes full width. */
+.doc__cta {
+  display: flex; flex-wrap: wrap; gap: 0.75rem;
+  margin: clamp(1.5rem, 3vw, 2.25rem) 0 0;
+}
 
 
 /* ==========================================================================
@@ -1063,10 +1105,13 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
      it: cap heights 22.44px against 9.07px, a ratio of 2.47. 32px brings the
      lockup cap to 17.95px and the ratio to 1.98, near enough the 2.0 the bar
      wants. Sized against the nav, then checked against the narrowest phone:
-     at 360px on /terms/ (the widest two-item nav at 176.72px) a 32px lockup
-     is 113.0px wide and still leaves 22.3px of clear space beyond the 8px
-     flex gap, against the 16px minimum. Above this breakpoint the nav goes
-     back to 15px and the lockup back to its full 40px. */
+     at 360px the widest two-item nav was /terms/ at 176.72px, where a 32px
+     lockup is 113.0px wide and still leaves 22.3px of clear space beyond the
+     8px flex gap, against the 16px minimum. The nav is now the same two items
+     on every page — Sample report and About — and at 18 characters of label
+     against that case's 23 it is narrower still, so the clearance only grows.
+     Above this breakpoint the nav goes back to 15px and the lockup back to
+     its full 40px. */
   .wm-full { height: 32px; }
 
   /* --- supporting text steps down --- */
@@ -1265,6 +1310,7 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   .chip { min-height: 2.75rem; padding: 0.5rem 0.65rem; }
   input[type="text"],
   input[type="email"],
+  input[type="url"],
   select,
   textarea { min-height: 2.75rem; }
   .btn { min-height: 3rem; }
@@ -1392,6 +1438,38 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   .linkish:hover { color: var(--paper-ink); }
 }
 .linkish:active { color: var(--paper-ink); }
+
+/* --- Stage 1: the two ways to answer it --------------------------------- */
+/* The switch between the address and the listing link. One of these lines is
+   on screen at a time, directly under whichever field is in play.
+
+   The margins here are tap geometry, not spacing. .linkish takes its 44px
+   from an absolutely positioned pseudo-element leaning downward — 7px up and
+   17px down, see the phone block above — over a 20.8px line at this size,
+   which is 44.8px. The 7px up has the field's own 1.15rem of bottom margin
+   to land in. The 17px down must stay off the Check button, and the 1.15rem
+   below is 18.4px of clearance: do not shorten it without re-checking where
+   the button's edge falls. */
+.mode-switch {
+  margin: 0 0 1.15rem;
+  font-size: 0.8125rem; line-height: 1.6;
+  color: var(--paper-soft);
+}
+
+/* The listing-link offer, appended to a Stage 1 error message. It takes its
+   own line rather than running on from the sentence: it is a second thing to
+   do rather than part of the complaint, and its 44px band needs somewhere to
+   sit that is not on top of something else.
+
+   1.25rem above it, which is the 20px .consent-docs uses and for the same
+   reason. The lookup-failed message carries a mailto link whose own 13px band
+   reaches down into this gap, and two tap bands overlapping is exactly the
+   ambiguity that moved the consent links onto their own line. 20px against a
+   7px upward lean keeps the two clear of each other.
+
+   Downward, the 17px lands on the error block's own 0.75rem of padding and
+   the 1.15rem the field carries below it, so it reaches nothing clickable. */
+.form-error .linkish { display: block; margin-top: 1.25rem; }
 
 /* --- the preliminary check result -------------------------------------- */
 .result { max-width: 34rem; }

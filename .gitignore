@@ -7,6 +7,14 @@ techspec.pdf
 collaboration.pdf
 *.pdf
 
+# …except the sample report, which is a published asset: it is served at
+# /sample-report/rellony-sample-report.pdf and linked from /sample-report/.
+# The blanket *.pdf above exists to keep the internal spec and the
+# collaboration plan out of the repo, and this one file is meant to be public.
+# The negation works because no parent directory of it is excluded — unlike
+# docs/, where a re-include would be ignored.
+!sample-report/rellony-sample-report.pdf
+
 # OS / editor noise
 .DS_Store
 Thumbs.db

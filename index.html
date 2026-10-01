@@ -8,7 +8,7 @@
 <!-- Keep this under ~155 characters or Google truncates it mid-sentence.
      It has to carry "hospitality property due diligence" and "England" for
      search intent, so trim the record list before either of those. -->
-<meta name="description" content="Hospitality property due diligence in England: planning, food hygiene, licensing and insolvency records checked against the agent’s listing. From £49.">
+<meta name="description" content="Hospitality property due diligence in England: planning, food hygiene, licensing and insolvency records checked against the agent’s listing. £49–£99.">
 <meta name="robots" content="index, follow">
 
 <!-- DOMAIN: rellony.com, live over HTTPS. Every absolute URL on this page
@@ -70,19 +70,18 @@
      copy on this site imply coverage beyond England — including the SEO
      title and meta description above.
 
-     Phase 0 is a human-in-the-loop concierge MVP: this page collects an
-     enquiry and nothing else. There is no database, no API, no payment
-     integration, and no automated availability gate. A person reviews each
-     submission by hand and replies by email.
+     This page collects an enquiry and nothing else. There is no database, no
+     API of our own, no payment integration and no availability gate: the two
+     record lookups in the script at the foot of this file are the only
+     network calls it makes besides the form post.
      ========================================================================== -->
 
 <!-- Structured data. DOMAIN: the @ids and URLs below point at rellony.com
      (see above), and "email" is the live support address, which now has a
-     mailbox behind it. Deliberately conservative: it states only
-     what is already true on this page and in the Terms — England-only
-     coverage, a £49–£99 one-time price range, and a service prepared by a
-     person. No aggregateRating, no review markup, no opening hours, and no
-     claims the concierge MVP cannot honour. -->
+     mailbox behind it. Deliberately conservative: it states only what is
+     already true on this page and in the Terms — England-only coverage and a
+     £49–£99 one-time price range. No aggregateRating, no review markup, no
+     opening hours, and no claims this service cannot honour. -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -112,7 +111,7 @@
       "name": "Hospitality property due-diligence report",
       "serviceType": "Property due diligence",
       "url": "https://rellony.com/",
-      "description": "A report on a specific hospitality property that sets what official and public records show — planning history, food hygiene inspections, licensing and corporate insolvency — against the claims made in the listing, with each finding marked confirmed, unverified or contradicted.",
+      "description": "A report on a specific hospitality property that sets what official and public records show — planning history, food hygiene inspections, licensing and corporate insolvency — against the claims made in the listing, with each finding marked confirmed, no independent record found, or contradicted.",
       "provider": { "@id": "https://rellony.com/#organization" },
       "areaServed": {
         "@type": "AdministrativeArea",
@@ -169,9 +168,8 @@
     </a>
     <span class="coverage-chip">Currently England only</span>
     <nav class="site-nav" aria-label="Site">
-      <a href="#finding">Sample finding</a>
-      <a href="/privacy/">Privacy</a>
-      <a href="/terms/">Terms</a>
+      <a href="/sample-report/">Sample report</a>
+      <a href="/about/">About</a>
     </nav>
   </div>
 </header>
@@ -195,8 +193,8 @@
 
         <div class="price">
           <p>
-            <span class="price__figure">Reports from £49</span>
-            <span class="price__unit">one-time, per property</span>
+            <span class="price__figure">£49–£99</span>
+            <span class="price__unit">per property, one-time</span>
           </p>
           <p class="fine">
             The exact price is confirmed after the preliminary check, based on the records
@@ -232,12 +230,12 @@
 
           <div class="panel__head">
             <h2>Check a property</h2>
-            <p class="fine">Start with the address. Nothing is charged, and nothing is sent at this step.</p>
+            <p class="fine">Start with the address or the listing link. Nothing is charged, and nothing is sent at this step.</p>
           </div>
 
           <form id="check-form" novalidate>
 
-            <div class="field">
+            <div class="field" id="address-field">
               <label for="address">Property address</label>
               <span class="hint" id="address-hint">Street, town and postcode — the postcode is required</span>
               <input type="text" id="address" name="property_address"
@@ -255,6 +253,12 @@
                    property nobody can locate, and land us with an enquiry we
                    cannot research.
 
+                   All three now also offer the listing link, which is the
+                   one way past this block. That is a different route into
+                   Stage 2, not a way around the rule above: the address is
+                   still unplaced and still goes nowhere. See the mode note
+                   below, and MODES in the script.
+
                    It sits INSIDE the field block, directly under the input,
                    because that is the field it is about and the field focus
                    returns to. Under the button — where #form-error sits in
@@ -271,6 +275,45 @@
                    ------------------------------------------------------------ -->
               <p class="form-error" id="check-error" hidden></p>
             </div>
+
+            <!-- ------------------------------------------------------------
+                 LINK MODE — the second way to start Stage 1.
+
+                 Stage 1 needs a full postcode, and a business-for-sale
+                 listing often withholds the exact address on purpose. Without
+                 this, an ad visitor who has only the listing page gets as far
+                 as this field and stops: Stage 2 has its own listing-link
+                 field, but it sits behind a postcode they do not have.
+
+                 Two fields, one on screen at a time, and only the one in
+                 play carries `required` — the readiness rule reads each
+                 form's own validity, so a required field left behind a
+                 hidden block would dim the Check button for good with
+                 nothing on screen to explain it. The script owns the
+                 swap; see setLinkMode.
+                 ------------------------------------------------------------ -->
+            <p class="mode-switch" id="to-link-mode">
+              <button type="button" class="linkish" id="to-link-btn">No exact address on the listing? Paste the listing link instead</button>
+            </p>
+
+            <div class="field" id="listing-url-field" hidden>
+              <label for="listing-url">Listing link</label>
+              <span class="hint" id="listing-url-hint">Paste the full web address of the listing page.</span>
+              <input type="url" id="listing-url"
+                     inputmode="url" autocomplete="url"
+                     aria-describedby="listing-url-hint">
+
+              <!-- Link mode's own error line, under its own field, for the
+                   same reasons #check-error sits under the address: it is the
+                   field the message is about and the field focus returns to,
+                   and under the button it would be behind the keyboard on a
+                   phone. No role="alert" here either — see showCheckError. -->
+              <p class="form-error" id="listing-error" hidden></p>
+            </div>
+
+            <p class="mode-switch" id="to-address-mode" hidden>
+              <button type="button" class="linkish" id="to-address-btn">Enter an address instead</button>
+            </p>
 
             <button type="submit" class="btn" id="check-btn">Check this property</button>
 
@@ -449,8 +492,13 @@
             <p class="fine" id="enquiry-sub-js" hidden>What you intend to operate decides which records matter.</p>
           </div>
 
+          <!-- The label is written by the script, because what this echoes
+               depends on which way Stage 1 was answered: a property address,
+               or the listing link. Either way the value is set with
+               textContent and is never an anchor — it is a URL a stranger
+               pasted, and this page does not invite a click on it. -->
           <p class="stage-echo" id="enquiry-echo" hidden>
-            <span class="stage-echo__label">Property</span>
+            <span class="stage-echo__label" id="enquiry-echo-label">Property</span>
             <span class="stage-echo__value" id="enquiry-address"></span>
           </p>
 
@@ -466,6 +514,38 @@
           <input type="hidden" name="coordinates" id="hidden-coords">
           <input type="hidden" name="conservation_area" id="hidden-conservation">
           <input type="hidden" name="conservation_area_source" id="hidden-conservation-url">
+
+          <!-- The listing link, when Stage 1 was answered with one instead of
+               an address. Empty on every other route, and cleared on each
+               entry to this form, so a link pasted for one property can never
+               travel with an enquiry about the next. -->
+          <input type="hidden" name="listing_url" id="listing-url-hidden">
+
+          <!-- ----------------------------------------------------------------
+               AD SOURCE — which advert the visitor arrived on.
+
+               Filled on load from the query string and from nothing else. No
+               cookie, no localStorage, no sessionStorage: this page stores
+               nothing on anybody's device, and the cost of that is accepted —
+               a visitor who lands on an advert, leaves, and comes back by
+               typing the address is simply not attributed.
+
+               Empty is the ordinary state. Someone arriving from a search
+               result or a bookmark has none of these and the fields travel
+               empty rather than carrying a guess. See readAdSource in the
+               script at the foot of this file.
+               ---------------------------------------------------------------- -->
+          <input type="hidden" name="utm_source">
+          <input type="hidden" name="utm_medium">
+          <input type="hidden" name="utm_campaign">
+          <input type="hidden" name="utm_term">
+          <input type="hidden" name="utm_content">
+          <input type="hidden" name="gclid">
+          <input type="hidden" name="ad_group">
+          <input type="hidden" name="ad_keyword">
+          <input type="hidden" name="ad_matchtype">
+          <input type="hidden" name="landing_path">
+
           <input type="hidden" name="_subject" id="hidden-subject" value="Rellony — property check request">
 
           <!-- The address itself. With JS this is filled from Stage 1 and
@@ -479,6 +559,14 @@
                    autocomplete="street-address"
                    aria-describedby="enquiry-address-hint" required>
           </div>
+
+          <!-- LINK MODE only. Nothing was placed on that route — no postcode,
+               no authority, no country — so this says so once, above the first
+               question, rather than leaving the visitor to discover it in our
+               reply. The script shows and hides it; see openEnquiry. -->
+          <p class="fine" id="listing-england-note" hidden>
+            We’ll confirm the address — and that it is in England — when we reply.
+          </p>
 
           <div class="field">
             <label for="business-type">Business type</label>
@@ -586,7 +674,7 @@
 
           <button type="submit" class="btn" id="submit-btn">Request a check</button>
 
-          <p class="btn-note">Nothing is charged here. Reports from £49.</p>
+          <p class="btn-note">Nothing is charged here. Reports £49–£99.</p>
 
           <p class="form-error" id="form-error" hidden role="alert"></p>
 
@@ -659,7 +747,7 @@
             <span class="status__dot" aria-hidden="true"></span>
             <span class="status__label">
               <span class="status__pending" aria-hidden="true">Checking the record</span>
-              <span class="status__final">Unverified</span>
+              <span class="status__final">No record found</span>
             </span>
           </p>
         </div>
@@ -699,6 +787,10 @@
         <span><i class="dot-confirmed"></i> Confirmed by a primary record</span>
         <span><i class="dot-unverified"></i> No independent record found</span>
         <span><i class="dot-contradicted"></i> Record contradicts the claim</span>
+      </p>
+
+      <p class="legend-link">
+        <a class="backlink" href="/sample-report/">See a full sample report <span aria-hidden="true">→</span></a>
       </p>
 
       <p class="record-section__foot">
@@ -791,9 +883,9 @@
             <div>
               <h3>We confirm scope and price</h3>
               <p>
-                A person reviews the property and comes back within 1 business day with
-                what we can cover and what it costs. If you want to go ahead, we send a
-                PayPal invoice by email; nothing is charged on this site.
+                We review the property and come back within 1 business day with what we
+                can cover and what it costs. If you want to go ahead, we send a PayPal
+                invoice by email; nothing is charged on this site.
               </p>
             </div>
           </li>
@@ -801,8 +893,8 @@
             <div>
               <h3>You get the evidence</h3>
               <p>
-                A sourced report showing what’s confirmed, what’s unsupported, what
-                contradicts the listing, and what to ask before you sign.
+                A sourced report showing what’s confirmed, where no independent record
+                was found, what contradicts the listing, and what to ask before you sign.
               </p>
             </div>
           </li>
@@ -823,10 +915,6 @@
           <li>
             It reflects <strong>the public record as it stood</strong> when the report was
             prepared. Records change, and gaps in them are reported as gaps.
-          </li>
-          <li>
-            Early access: reports are currently prepared by <strong>a person</strong>
-            working through our evidence-checking process, not by an automated system.
           </li>
         </ul>
       </div>
@@ -852,7 +940,7 @@
       <ul class="deliver__list">
         <li>A source for every finding — the record it came from, not our word for it</li>
         <li>What is confirmed</li>
-        <li>What could not be verified</li>
+        <li>Where no independent record was found</li>
         <li>What contradicts the listing</li>
         <li>The questions to put to the agent or landlord</li>
         <li>The documents to request</li>
@@ -886,12 +974,14 @@
         <span class="coverage-chip">Currently England only</span>
       </div>
 
-      <!-- Legal pages only. The two in-page anchors that used to sit here,
-           "Check a property" and "Sample finding", both pointed at sections of
-           this same page, and the check already has a full-width button
-           immediately above this footer. What is left are the only two
-           destinations in this list you cannot reach by scrolling. -->
+      <!-- Pages only, no in-page anchors. "Check a property" and "Sample
+           finding" both used to sit here and both pointed at sections of this
+           same page, which you can reach by scrolling — and the check already
+           has a full-width button immediately above this footer. Everything
+           left in this list is somewhere else. -->
       <ul class="foot__links">
+        <li><a href="/about/">About</a></li>
+        <li><a href="/sample-report/">Sample report</a></li>
         <li><a href="/privacy/">Privacy Policy</a></li>
         <li><a href="/terms/">Terms of Service</a></li>
       </ul>
@@ -1068,6 +1158,12 @@
   /*                                                                     */
   /* Keeping not_found and lookup_failed apart is the reason fetchJSON   */
   /* below reports WHY it has no body rather than just returning null.   */
+  /*                                                                     */
+  /* "listing_link" is a sixth status and is NOT part of this machine —   */
+  /* it never comes out of this function. It is what Stage 1 records when */
+  /* it was answered with a listing link instead of an address, in which  */
+  /* case there is nothing to place, this function is never called, and   */
+  /* no lookup is made. See MODES further down.                          */
   /* ================================================================== */
 
   var POSTCODES_API     = 'https://api.postcodes.io/postcodes/';
@@ -1113,8 +1209,9 @@
     return { status: 'unavailable', name: null, reference: null, documentationUrl: null };
   }
 
-  /* Every non-coverage outcome, carrying the postcode when there was
-     one to carry. No coverage facts, because none were established. */
+  /* Every outcome that established no coverage facts, carrying the postcode
+     when there was one to carry. The listing-link route uses it too: nothing
+     was looked up there, so there is nothing for it to carry. */
   function failed(status, postcode) {
     return {
       status: status,
@@ -1296,6 +1393,16 @@
 
   var addressField = document.getElementById('address');
   var checkBtn     = document.getElementById('check-btn');
+
+  /* Link mode's half of Stage 1 — see MODES below. */
+  var addressBlock  = document.getElementById('address-field');
+  var listingField  = document.getElementById('listing-url');
+  var listingBlock  = document.getElementById('listing-url-field');
+  var listingError  = document.getElementById('listing-error');
+  var toLinkLine    = document.getElementById('to-link-mode');
+  var toAddressLine = document.getElementById('to-address-mode');
+  var toLinkBtn     = document.getElementById('to-link-btn');
+  var toAddressBtn  = document.getElementById('to-address-btn');
   var continueBtn  = document.getElementById('continue-btn');
   var submitBtn    = document.getElementById('submit-btn');
   var notifyBtn    = document.getElementById('notify-btn');
@@ -1305,6 +1412,59 @@
   var checkError      = document.getElementById('check-error');
   var ADDRESS_HINT_ID = 'address-hint';
   var CHECK_ERROR_ID  = 'check-error';
+
+  /* ================================================================== */
+  /* STAGE 1 HAS TWO MODES, and each one owns a field and an error line. */
+  /*                                                                     */
+  /* ADDRESS mode is the original: a full address, resolved against the   */
+  /* postcode record, with the five outcomes described further down.      */
+  /*                                                                     */
+  /* LINK mode takes the listing's own page address instead. It exists    */
+  /* because Stage 1 needs a full postcode and a business-for-sale        */
+  /* listing often withholds the exact address on purpose, so a visitor   */
+  /* arriving from an advert could otherwise reach this field and stop —  */
+  /* Stage 2 has its own listing-link field, but it sits behind a         */
+  /* postcode they do not have.                                          */
+  /*                                                                     */
+  /* LINK mode deliberately relaxes the rule stated throughout this file, */
+  /* that an address we cannot place must not become an enquiry. On this  */
+  /* route nothing is placed at all: no postcode, no authority, no        */
+  /* country, and neither lookup is called. What makes that acceptable    */
+  /* here, and only here, is that the visitor has handed us a page we can */
+  /* read in place of an address, and Stage 2 says in as many words that  */
+  /* the address — and that it is in England — is confirmed when we       */
+  /* reply. An address we TRIED to place and could not still stops in     */
+  /* Stage 1. This is a second way in, not a way around that.            */
+  /*                                                                     */
+  /* Each mode carries its own error element under its own field, because */
+  /* every reason #check-error sits where it does holds for the link      */
+  /* error too: it is the field the message is about and the field focus  */
+  /* returns to, and under the button it would be behind the keyboard on  */
+  /* a phone. Neither carries role="alert", for the same reason           */
+  /* #check-error never did — see showCheckError.                        */
+  /* ================================================================== */
+  var MODES = {
+    address: { input: addressField, error: checkError,
+               hintId: ADDRESS_HINT_ID, errorId: CHECK_ERROR_ID },
+    link:    { input: listingField, error: listingError,
+               hintId: 'listing-url-hint', errorId: 'listing-error' }
+  };
+  var MODE_NAMES = ['address', 'link'];
+  var mode = 'address';
+
+  function activeMode() { return MODES[mode]; }
+
+  /* Stage 1's button names what it is about to do, and that is not the same
+     thing in the two modes: address mode runs a check and reports one of five
+     outcomes, link mode runs nothing at all and simply opens Stage 2. "Check
+     this property" would be a promise link mode does not keep. The label lives
+     here rather than at each call site so the three routes that change mode —
+     both switch buttons and data-restart — cannot disagree about it. */
+  var CHECK_LABELS = { address: 'Check this property', link: 'Continue' };
+
+  function setCheckLabel() {
+    if (checkBtn) { checkBtn.textContent = CHECK_LABELS[mode]; }
+  }
 
   /* The three stopping outcomes, worded.
 
@@ -1342,6 +1502,11 @@
      screen reader. */
   var MSG_NO_POSTCODE = 'We need a valid postcode to check this address.';
   var MSG_NOT_FOUND   = 'We couldn’t find that postcode. Check it against the listing and try again.';
+
+  /* Link mode's one failure. safeHttpUrl is the gate; this names what the
+     gate wants rather than what it rejected, because "starting with
+     https://" is the part a pasted address is usually missing. */
+  var MSG_BAD_LINK    = 'Please paste the full link to the listing, starting with https://';
 
   /* Built rather than assigned, because it carries a link and the element's
      text is otherwise written with textContent. SUPPORT_EMAIL is the single
@@ -1470,20 +1635,106 @@
     return node;
   }
 
+  /* ================================================================== */
+  /* AD SOURCE                                                           */
+  /*                                                                     */
+  /* Which advert, campaign and search term a visitor arrived on, carried */
+  /* into the enquiry so the ads test can be read afterwards. Taken from  */
+  /* the query string on load and from nowhere else.                     */
+  /*                                                                     */
+  /* NO cookie, NO localStorage, NO sessionStorage. This page stores      */
+  /* nothing on a visitor's device, and that is not traded away for       */
+  /* attribution: someone who lands on an advert, leaves, and comes back  */
+  /* by typing the address is not attributed, because attributing them    */
+  /* would mean keeping something between visits.                        */
+  /*                                                                     */
+  /* The fields are found by NAME, which is the one place in this script  */
+  /* that departs from setValue(). The name is what Formspree receives    */
+  /* and what the table below maps onto, so giving them ids as well would */
+  /* duplicate all ten for an id and a name to drift apart later.        */
+  /*                                                                     */
+  /* Empty is the ordinary state and is left alone. A visitor from a      */
+  /* search result or a bookmark has none of these.                      */
+  /* ================================================================== */
+
+  /* [ query parameter, form field ] — Google's names on the left, ours on the
+     right. utm_* and gclid match on both sides; adgroup, keyword and
+     matchtype arrive from the campaign's Final URL suffix and are renamed so
+     the enquiry email reads as English. */
+  var AD_SOURCE_FIELDS = [
+    ['utm_source',   'utm_source'],
+    ['utm_medium',   'utm_medium'],
+    ['utm_campaign', 'utm_campaign'],
+    ['utm_term',     'utm_term'],
+    ['utm_content',  'utm_content'],
+    ['gclid',        'gclid'],
+    ['adgroup',      'ad_group'],
+    ['keyword',      'ad_keyword'],
+    ['matchtype',    'ad_matchtype']
+  ];
+
+  /* A cap, because every one of these arrives from a URL anyone can edit and
+     ends up in an email. 200 characters is longer than any real keyword or
+     campaign name and short enough that a padded one cannot bury the rest of
+     the enquiry under it. */
+  var AD_VALUE_MAX = 200;
+
+  (function readAdSource() {
+    /* .value, and nothing else. Nothing in this block writes to storage of
+       any kind — see the note above. */
+    function setField(name, value) {
+      var node = enquiryForm.querySelector('input[name="' + name + '"]');
+      if (node) { node.value = String(value).slice(0, AD_VALUE_MAX); }
+    }
+
+    /* The page landed on. Not a query parameter, so it is set whether or not
+       there are any. */
+    setField('landing_path', location.pathname);
+
+    if (typeof URLSearchParams !== 'function') { return; }
+
+    var params;
+    try { params = new URLSearchParams(location.search); }
+    catch (e) { return; }
+
+    for (var i = 0; i < AD_SOURCE_FIELDS.length; i++) {
+      var value = params.get(AD_SOURCE_FIELDS[i][0]);
+      if (value) { setField(AD_SOURCE_FIELDS[i][1], value); }
+    }
+  })();
+
   var lastCheck = null;
 
   /* ---- Stage 2 ---------------------------------------------------- */
 
-  function openEnquiry(check, address) {
-    setValue('enquiry-address-input', address);
-    setValue('hidden-status', check.status);
+  function openEnquiry(check, address, listingUrl) {
+    /* The listing-link route. Nothing was placed on it, so every field that
+       would carry a resolved fact is left empty and the link stands in for
+       the address throughout this form. */
+    var isLink = check.status === 'listing_link';
 
-    /* in_coverage is now the ONLY status that reaches this function — the
-       other four stop in Stage 1 and never open this form. The else branch
-       below is kept as the defensive floor: if some future route ever gets
-       here with an unplaced address, the enquiry must not carry a postcode
-       or an authority we never confirmed, because in the email they would
-       read as established fact. */
+    setValue('enquiry-address-input', isLink ? '' : address);
+    setValue('hidden-status', check.status);
+    setValue('listing-url-hidden', isLink ? listingUrl : '');
+
+    /* With JS this field is hidden and filled from Stage 1, so `required` is
+       what makes sure it was. On the listing-link route there is no address
+       to fill it with — the link is what identifies the property — and a
+       hidden required field left empty would hold this form invalid for
+       good: the button dimmed, submit blocked, and nothing on screen to
+       explain either. The no-JS path never reaches link mode, so the
+       attribute in the markup is left as it is for that case. */
+    var addressInput = document.getElementById('enquiry-address-input');
+    if (addressInput) {
+      if (isLink) { addressInput.removeAttribute('required'); }
+      else        { addressInput.setAttribute('required', ''); }
+    }
+
+    /* in_coverage and listing_link are the only two statuses that reach this
+       function — the other four stop in Stage 1 and never open this form.
+       The else branch carries listing_link and stands as the defensive floor
+       besides: an enquiry must not carry a postcode or an authority we never
+       confirmed, because in the email they would read as established fact. */
     if (check.status === 'in_coverage') {
       setValue('hidden-postcode',  check.postcode);
       setValue('hidden-authority', check.localAuthority);
@@ -1514,20 +1765,40 @@
         'Rellony — property check: ' +
         (check.localAuthority ? check.localAuthority + ' ' : '') + check.postcode);
     } else {
-      /* Cleared rather than left alone: a visitor can check one address, go
-         back and check another, and nothing from the first may survive. */
+      /* Cleared rather than left alone, and ALL of them, not just the two
+         below: a visitor can resolve one address, go back, and arrive here a
+         second time by the listing-link route, where nothing is looked up
+         and nothing would otherwise overwrite what the first address left.
+         A postcode or an authority from a different property reads as
+         established fact in the enquiry email. */
+      setValue('hidden-postcode', '');
+      setValue('hidden-authority', '');
+      setValue('hidden-country', '');
+      setValue('hidden-region', '');
+      setValue('hidden-coords', '');
       setValue('hidden-conservation', '');
       setValue('hidden-conservation-url', '');
-      setValue('hidden-subject', 'Rellony — property check: address not confirmed');
+      setValue('hidden-subject', isLink
+        ? 'Rellony — property check: listing link'
+        : 'Rellony — property check: address not confirmed');
     }
 
-    /* Only one echo of the address on screen at a time. After an in-coverage
-       check the result block is carrying it, so this one stays down. */
+    /* Only one echo on screen at a time. After an in-coverage check the
+       result block is carrying the address, so this one stays down. On the
+       listing-link route there is no result block, and the link is the only
+       thing identifying the property, so it is always shown — as text, via
+       setText, never as an anchor. */
     var echo = document.getElementById('enquiry-echo');
     if (echo) {
-      setText('enquiry-address', address);
-      echo.hidden = !address || !stageResult.hidden;
+      setText('enquiry-echo-label', isLink ? 'Listing link' : 'Property');
+      setText('enquiry-address', isLink ? listingUrl : address);
+      echo.hidden = isLink ? !listingUrl : (!address || !stageResult.hidden);
     }
+
+    /* The one thing Stage 1 did not establish on this route, said once and
+       above the first question. */
+    var englandNote = document.getElementById('listing-england-note');
+    if (englandNote) { englandNote.hidden = !isLink; }
 
     stageCheck.hidden = true;
     clearCheckError();
@@ -1687,7 +1958,14 @@
     var box = document.getElementById('result-box');
     if (box) { box.classList.remove('is-compact'); }
 
-    if (addressField) { addressField.focus(); addressField.select(); }
+    /* Back to the address whichever mode Stage 1 was left in — this button
+       says "Check a different address", and that is what it now offers.
+       setLinkMode moves the focus, so only the selection is left to do: the
+       whole address is going, which is why this selects where
+       showCheckError puts the caret at the end instead. */
+    setLinkMode(false);
+
+    if (addressField) { addressField.select(); }
   }
 
   Array.prototype.forEach.call(document.querySelectorAll('[data-restart]'), function (button) {
@@ -1698,10 +1976,15 @@
   /* The three Stage 1 outcomes that stop.                               */
   /*                                                                     */
   /* no_postcode, not_found and lookup_failed all end here. None of them */
-  /* opens Stage 2 by any route: an address we cannot place must not     */
-  /* become an enquiry, because the visitor would be answering a         */
-  /* questionnaire about a property nobody can locate and we would be    */
+  /* carries the typed address into Stage 2: an address we cannot place  */
+  /* must not become an enquiry, because the visitor would be answering  */
+  /* a questionnaire about a property nobody can locate and we would be  */
   /* reading an enquiry we cannot research.                              */
+  /*                                                                     */
+  /* What all three now offer is the listing link, as a button appended  */
+  /* to the message. It switches Stage 1 to link mode and leaves the     */
+  /* unplaced address behind rather than carrying it forward, so the     */
+  /* rule above still holds. See MODES.                                  */
   /*                                                                     */
   /* The wording differs per outcome and is chosen by the caller. Two of */
   /* the three are about the address and ask the visitor to fix it; the  */
@@ -1724,56 +2007,137 @@
   /* put into, and it appears in a screen reader's links list like any   */
   /* other. Keep that order if this block ever moves.                    */
   /*                                                                     */
+  /* The listing-link button is the same case, and it is appended LAST — */
+  /* after the mailto link in the lookup-failed message — so the order a */
+  /* screen reader reads the description matches the order Tab visits    */
+  /* the two controls inside it.                                         */
+  /*                                                                     */
   /* The caret goes to the END of what was typed, never select-all: the  */
   /* address is nearly right and is being corrected, not replaced.       */
   /* restart() selects instead, because there the whole address is       */
   /* going.                                                              */
   /* ------------------------------------------------------------------ */
+  /* The way through, appended to all three address-mode messages. A control
+     rather than a sentence, so it is built as a node. Its own announcement
+     behaviour is covered in the block above. */
+  function appendLinkOffer(node) {
+    var button = el('button', 'linkish', 'Paste the listing link instead');
+    button.type = 'button';
+    button.addEventListener('click', function () { setLinkMode(true); });
+    node.appendChild(button);
+  }
+
   /* `message` is a sentence, or — where it carries a link — a function that
-     writes the nodes into the emptied element. */
-  function showCheckError(message) {
-    if (!checkError) { return; }
+     writes the nodes into the emptied element. `offerLink` appends the
+     listing-link button after it. Both land in whichever mode's error
+     element is currently in play, and focus follows to that mode's field. */
+  function showCheckError(message, offerLink) {
+    var current = activeMode();
+    var node    = current.error;
+    var field   = current.input;
+    if (!node) { return; }
 
-    checkError.textContent = '';
-    if (typeof message === 'function') { message(checkError); }
-    else { checkError.textContent = message; }
-    checkError.hidden = false;
+    node.textContent = '';
+    if (typeof message === 'function') { message(node); }
+    else { node.appendChild(document.createTextNode(message)); }
+    if (offerLink) { appendLinkOffer(node); }
+    node.hidden = false;
 
-    if (addressField) {
-      addressField.setAttribute('aria-describedby',
-        ADDRESS_HINT_ID + ' ' + CHECK_ERROR_ID);
-      addressField.setAttribute('aria-invalid', 'true');
+    if (field) {
+      field.setAttribute('aria-describedby',
+        current.hintId + ' ' + current.errorId);
+      field.setAttribute('aria-invalid', 'true');
 
-      try { addressField.focus({ preventScroll: true }); }
-      catch (e) { addressField.focus(); }
+      try { field.focus({ preventScroll: true }); }
+      catch (e) { field.focus(); }
 
       try {
-        var end = addressField.value.length;
-        addressField.setSelectionRange(end, end);
+        var end = field.value.length;
+        field.setSelectionRange(end, end);
       } catch (e) {}
 
       /* preventScroll above, then the smallest scroll that brings the
          message into view: focusing the field alone can leave the message
          below the fold on a short screen. `nearest` leaves the view alone
          when field and message are already on screen together. */
-      if (typeof checkError.scrollIntoView === 'function') {
-        try { checkError.scrollIntoView({ block: 'nearest' }); }
+      if (typeof node.scrollIntoView === 'function') {
+        try { node.scrollIntoView({ block: 'nearest' }); }
         catch (e) {}
       }
     }
   }
 
-  /* Takes the message off screen and puts the field's description back to
-     its own hint. Called wherever Stage 1 starts again. */
+  /* Takes the message off screen and puts each field's description back to
+     its own hint. Both modes, not just the active one: a message is cleared
+     when Stage 1 starts again and when it changes mode, and in the second
+     case the stale one belongs to the field that just went away. */
   function clearCheckError() {
-    if (checkError) {
-      checkError.hidden = true;
-      checkError.textContent = '';
+    for (var i = 0; i < MODE_NAMES.length; i++) {
+      var m = MODES[MODE_NAMES[i]];
+      if (m.error) {
+        m.error.hidden = true;
+        m.error.textContent = '';
+      }
+      if (m.input) {
+        m.input.setAttribute('aria-describedby', m.hintId);
+        m.input.removeAttribute('aria-invalid');
+      }
     }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Switching Stage 1 between its two modes.                            */
+  /*                                                                     */
+  /* One field on screen at a time, and only that field carries           */
+  /* `required`. That is not tidiness: the readiness rule lights the      */
+  /* Check button from this form's live validity, so a required field      */
+  /* left behind a hidden block would hold the form invalid for good —    */
+  /* the button dimmed, and nothing on screen to explain what it is       */
+  /* waiting for. reportValidity has the same problem from the other      */
+  /* side, being unable to point at a control that is not rendered.       */
+  /*                                                                     */
+  /* Focus moves to the field that has just appeared, because that is     */
+  /* the control the visitor asked for — and a screen reader would        */
+  /* otherwise be left on a button that has just hidden itself. The       */
+  /* scroll is the same pattern as showCheckError: preventScroll, then    */
+  /* `nearest`, which does nothing when the field is already in view.     */
+  /* ------------------------------------------------------------------ */
+  function setLinkMode(on) {
+    mode = on ? 'link' : 'address';
+    clearCheckError();
+
+    if (addressBlock)  { addressBlock.hidden  = on; }
+    if (listingBlock)  { listingBlock.hidden  = !on; }
+    if (toLinkLine)    { toLinkLine.hidden    = on; }
+    if (toAddressLine) { toAddressLine.hidden = !on; }
+
     if (addressField) {
-      addressField.setAttribute('aria-describedby', ADDRESS_HINT_ID);
-      addressField.removeAttribute('aria-invalid');
+      if (on) { addressField.removeAttribute('required'); }
+      else    { addressField.setAttribute('required', ''); }
     }
+    if (listingField) {
+      if (on) { listingField.setAttribute('required', ''); }
+      else    { listingField.removeAttribute('required'); }
+    }
+
+    setCheckLabel();
+
+    var field = activeMode().input;
+    if (field) {
+      try { field.focus({ preventScroll: true }); }
+      catch (e) { field.focus(); }
+      if (typeof field.scrollIntoView === 'function') {
+        try { field.scrollIntoView({ block: 'nearest' }); }
+        catch (e) {}
+      }
+    }
+  }
+
+  if (toLinkBtn) {
+    toLinkBtn.addEventListener('click', function () { setLinkMode(true); });
+  }
+  if (toAddressBtn) {
+    toAddressBtn.addEventListener('click', function () { setLinkMode(false); });
   }
 
   /* ---- Stage 1 submit --------------------------------------------- */
@@ -1784,6 +2148,34 @@
     event.preventDefault();
 
     if (checking) { return; }
+
+    /* ------------------------------------------------------------------
+       LINK MODE. Nothing is looked up: there is no address to place, so
+       neither the postcode nor the conservation lookup is called, and
+       Stage 2 opens directly — the same destination continueBtn reaches,
+       by a different route.
+
+       safeHttpUrl is the gate, the same one a URL arriving from a public
+       record has to pass before it reaches an href. Anything that is not
+       plain http(s) is not a link we will carry into an enquiry, and a
+       javascript: URL above all.
+
+       Our own message rather than reportValidity's: the native bubble for
+       type="url" cannot say which part of what was pasted is missing, and
+       this one does. The attribute is still there, because it is what the
+       readiness rule and the phone keyboard read.
+       ------------------------------------------------------------------ */
+    if (mode === 'link') {
+      clearCheckError();
+
+      var listingUrl = safeHttpUrl(listingField ? listingField.value : null);
+      if (!listingUrl) { showCheckError(MSG_BAD_LINK); return; }
+
+      lastCheck = failed('listing_link', null);
+      openEnquiry(lastCheck, '', listingUrl);
+      return;
+    }
+
     if (!checkForm.checkValidity()) { checkForm.reportValidity(); return; }
 
     /* A previous answer to a previous address, put away before this one
@@ -1795,7 +2187,10 @@
 
     /* The loading state is a label swap on a button that stays focusable —
        a `disabled` button drops focus in some engines, which would strand
-       a keyboard user mid-check. A flag guards against a double submit. */
+       a keyboard user mid-check. A flag guards against a double submit.
+
+       Address mode only. Link mode returned above with no lookup to wait on,
+       so "Checking…" never appears on it. */
     checking = true;
     checkBtn.setAttribute('aria-busy', 'true');
     checkBtn.textContent = 'Checking…';
@@ -1803,7 +2198,10 @@
     runPreliminaryCheck(address).then(function (check) {
       checking = false;
       checkBtn.removeAttribute('aria-busy');
-      checkBtn.textContent = 'Check this property';
+      /* Through setCheckLabel rather than a literal, so the label has one
+         definition and not two. Only address mode gets here, but a second
+         copy of the string is exactly how the two would drift apart. */
+      setCheckLabel();
 
       lastCheck = check;
 
@@ -1815,12 +2213,12 @@
       } else if (check.status === 'outside_coverage') {
         showOutside(check, address);
       } else if (check.status === 'no_postcode') {
-        showCheckError(MSG_NO_POSTCODE);
+        showCheckError(MSG_NO_POSTCODE, true);
       } else if (check.status === 'not_found') {
-        showCheckError(MSG_NOT_FOUND);
+        showCheckError(MSG_NOT_FOUND, true);
       } else {
         /* lookup_failed — ours, not theirs. See the message constants. */
-        showCheckError(MSG_LOOKUP_FAILED);
+        showCheckError(MSG_LOOKUP_FAILED, true);
       }
     });
   });
@@ -1875,7 +2273,8 @@
     box.appendChild(el('p', null,
       'You’ll hear from us within 1 business day — we’ll confirm whether we ' +
       'can prepare a report on this property, what it would cover, and what it will cost. ' +
-      'A person reads every enquiry; there is no automated reply coming.'));
+      'We read every enquiry and reply by email — there is no automatic ' +
+      'confirmation email.'));
 
     box.appendChild(el('p', null,
       'In the meantime, here’s what a finding from one of our checks looks like.'));
@@ -1996,5 +2395,12 @@
 })();
 </script>
 
+<!-- Cookieless page counts. Replace the marker below with the snippet from
+     Cloudflare → Analytics & Logs → Web Analytics → Add a site → rellony.com.
+     The snippet carries a token, and it is the same snippet on every page, so
+     the marker line is byte-identical across all six and can be swapped in one
+     pass. Nothing here sets a cookie or touches local storage; the Privacy
+     page says so in section 02 and names the host in section 05. -->
+<!-- CLOUDFLARE_WEB_ANALYTICS_SNIPPET -->
 </body>
 </html>

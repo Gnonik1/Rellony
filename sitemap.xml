@@ -7,8 +7,15 @@
   <link rel="canonical"> on each page. www and http both redirect to this form,
   so listing anything else here would put a redirect in front of every crawl.
 
-  The home page is the only one worth ranking; the legal pages are listed so
-  they are discoverable and indexed, not because they compete for traffic.
+  The home page is the only one worth ranking. /about/ and /sample-report/ are
+  listed above the legal pages because they are the two the ads test sends
+  people to and the two a search result could usefully land on; the legal pages
+  are here so they are discoverable and indexed, not because they compete for
+  traffic.
+
+  The sample PDF itself is deliberately not listed. It is reached from
+  /sample-report/, which carries the description and the context, and a PDF
+  ranking in place of that page would strand the visitor outside the site.
 
   <priority> and <changefreq> are advisory and Google ignores both. They are
   kept because other crawlers still read them and they cost nothing.
@@ -22,21 +29,35 @@
 
   <url>
     <loc>https://rellony.com/</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-10-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
+    <loc>https://rellony.com/sample-report/</loc>
+    <lastmod>2026-10-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://rellony.com/about/</loc>
+    <lastmod>2026-10-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
     <loc>https://rellony.com/privacy/</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-10-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
 
   <url>
     <loc>https://rellony.com/terms/</loc>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-10-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
