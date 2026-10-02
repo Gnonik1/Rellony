@@ -621,7 +621,7 @@
           </fieldset>
 
           <div class="field">
-            <label for="agent-claims">Listing link or agent claims <span class="muted">(optional)</span></label>
+            <label for="agent-claims"><span id="claims-label">Listing link or agent claims</span> <span class="muted">(optional)</span></label>
             <span class="hint" id="claims-hint">
               Paste the link, or the claims you want checked — “A3 use”, “extraction in
               place”, “late licence”.
@@ -1821,6 +1821,21 @@
        above the first question. */
     var englandNote = document.getElementById('listing-england-note');
     if (englandNote) { englandNote.hidden = !isLink; }
+
+    /* The claims field asks for the link as well, and on the listing-link
+       route the visitor has just given it. All three are written on both
+       routes, never on one: restart() lets a visitor go back and come through
+       the other route, and the first pass's copy would otherwise still be
+       standing. The address-mode copy is the markup's, word for word, so the
+       no-JS form reads the same. */
+    setText('claims-label', isLink ? 'Agent claims' : 'Listing link or agent claims');
+    setText('claims-hint', isLink
+      ? 'Paste any claims from the listing you want checked — “A3\u00a0use”, ' +
+        '“extraction in place”, “late licence”.'
+      : 'Paste the link, or the claims you want checked — “A3 use”, ' +
+        '“extraction in place”, “late licence”.');
+    var claims = document.getElementById('agent-claims');
+    if (claims) { claims.placeholder = isLink ? 'Pasted text' : 'https://… or pasted text'; }
 
     stageCheck.hidden = true;
     clearCheckError();
