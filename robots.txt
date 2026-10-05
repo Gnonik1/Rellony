@@ -1,12 +1,14 @@
 # Rellony — https://rellony.com
 #
 # Everything on this site is public and meant to be found, including the
-# legal pages. An empty Disallow is the original spec's way of saying
-# "nothing is off limits"; it is understood by every crawler, where the
-# later Allow directive is not.
+# legal pages — except /go/. The three pages under it are not content: the
+# home page counts three funnel steps as page views of /go/check-address/,
+# /go/check-link/ and /go/enquiry-sent/, and those pages exist only so that
+# anyone who does land on one is sent straight on to /. They carry noindex
+# as well, and they are not in the sitemap.
 
 User-agent: *
-Disallow:
+Disallow: /go/
 
 # Sitemap discovery. This line is how crawlers actually find the file —
 # there is no <link> element that does it.

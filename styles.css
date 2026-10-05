@@ -405,28 +405,90 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
 
 .hero__lede { max-width: var(--measure); }
 
-.coverage-line {
-  display: flex; align-items: baseline; gap: 0.6rem;
-  margin-top: 1.75rem; padding-top: 1.25rem;
-  border-top: 1px solid var(--line);
-  font-weight: 500; max-width: 46ch;
-}
-.coverage-line::before {
-  content: ""; flex: none; width: 0.4rem; height: 0.4rem;
-  border-radius: 999px; background: var(--sage); transform: translateY(-0.15em);
+/* The line above the H1 that answers the advert. It reuses .eyebrow for its
+   face and weight, and gives up the eyebrow's capitals and tracking: in
+   capitals the sentence is 382px wide at 12px and takes two lines at 390,
+   and in sentence case at 14px it is 295px — one line at 390 and 360, two
+   at 320. Sentence case also reads as the question it is rather than as a
+   section label.
+
+   Bone rather than the eyebrow's sage. Sage is 5.3:1 on flat olive, but the
+   hero is not flat: at the top of the page the ground's light wash and the
+   grain lift it, and sampled from the render behind this line sage
+   averaged 4.64:1 with its worst pixels at 4.48:1. Bone on the same
+   pixels is 6.5:1 at worst. */
+.eyebrow.hero__kicker {
+  font-size: clamp(0.875rem, 0.45vw + 0.7rem, 1.0625rem);
+  letter-spacing: 0; text-transform: none;
+  line-height: 1.35; margin-bottom: 0.9rem;
+  color: var(--bone);
 }
 
+/* One line: the figure and what it buys. A wrapping flex row rather than a
+   line of text, so that where the unit does not fit beside the figure — at
+   320px — it starts its own line flush left instead of carrying the gap in
+   front of it as an indent. The 1.25 is for the line box, which otherwise
+   takes the page's 1.6 from the 24–40px figure and stands 10–14px taller
+   than anything on it. */
 .price { margin-top: 1.5rem; }
+.price p {
+  display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 0.4rem;
+  line-height: 1.25;
+}
 .price__figure {
   font-family: var(--display); font-weight: 700;
   font-size: clamp(1.5rem, 1.6vw + 0.9rem, 2.5rem); letter-spacing: -0.03em;
 }
-/* "one-time, per property" is one phrase and has to read as one. Without the
-   nowrap the hero line breaks inside it on a phone, stranding "property" on a
-   line of its own. The line still breaks BEFORE the unit, in the space
-   between it and the figure, which is where the break belongs. */
-.price__unit { font-weight: 500; color: var(--sage); margin-left: 0.4rem; white-space: nowrap; }
-.price .fine { margin-top: 0.4rem; max-width: 62ch; }
+/* "per property · England only" is one phrase and has to read as one.
+   Without the nowrap the hero line could break inside it on a narrow phone,
+   stranding the end of it on a line of its own. The line still breaks
+   BEFORE the unit, in the space between it and the figure, which is where the
+   break belongs. */
+.price__unit { font-weight: 500; color: var(--sage); white-space: nowrap; }
+
+/* --- FREE FIRST REPORT OFFER --------------------------------------------
+   Distinct from the hero copy around it, but calm: a hairline box in the
+   palette the page already has, with no fill. A fill was the obvious way to
+   lift it and the wrong one — the 6% wash the footer chip uses drops sage
+   to about 4:1 on it (see .site-foot .coverage-chip). Unfilled, and sampled
+   from the render with the page's wash and grain behind it, the sage text
+   averages 4.75:1 and its worst pixels stay at 4.55:1; the bone title and
+   link stay above 6.6:1. The border is decoration, not a boundary anyone
+   has to find, so it takes --line-firm.
+
+   Remove this block with the box when the offer ends. */
+.offer {
+  margin-top: 1.25rem; max-width: 34rem;
+  padding: 0.95rem 1.1rem;
+  border: 1px solid var(--line-firm); border-radius: var(--r-cell);
+}
+.offer p + p { margin-top: 0.3rem; }
+.offer__title { color: var(--bone); line-height: 1.4; }
+.offer__title strong { font-weight: 600; }
+.offer__text { color: var(--sage); font-size: 0.9375rem; line-height: 1.5; }
+/* .fine's size and leading, and it steps down with .fine on a phone */
+.offer__small { color: var(--sage); font-size: 0.8125rem; line-height: 1.5; }
+
+/* The terms link takes its 44px the way .foot__contact a does: vertical
+   padding on a non-replaced inline box grows the hit area and stays out of
+   the line box. That box is as tall as the font's own ascent and descent,
+   not the line-height — 15px at the phone's 12px, 16.3px at 13px — so it
+   takes 15px each way: 45px on a phone, 46.3px above it. 13px measured
+   41px. Upward the band lands on the offer text, which holds no link;
+   downward it runs through the box's own padding and about 4px into the gap
+   above the form panel, where there is nothing to tap. background-clip
+   keeps the press wash on the words rather than across the padding, and
+   the :active repeat is load-bearing for the same reason as on
+   .foot__contact a — see the phone block. The vertical radii are 3px plus
+   the 15px the clip takes off. */
+.offer__small a {
+  color: var(--bone);
+  padding-block: 15px; background-clip: content-box;
+}
+.offer__small a:active {
+  background: var(--press-olive); background-clip: content-box;
+  border-radius: 3px 3px 3px 3px / 18px 18px 18px 18px;
+}
 
 /* ==========================================================================
    Form panel — the sheet you write on
@@ -649,7 +711,17 @@ select:invalid { color: var(--paper-hint); }
    a JS-applied class stale, so a completely filled form kept a dimmed
    button. `:valid` on a <form> cannot go stale; it is recomputed from the
    controls themselves. It is also unaffected by `novalidate`, which only
-   suppresses validation at submit time. */
+   suppresses validation at submit time.
+
+   Stage 1 is the deliberate exception: its Check button is at full
+   strength from the start, by the #check-form rule just below. On a phone
+   the dimmed button read as disabled to cold ad traffic — it was the first
+   control a visitor from an advert saw, before they had typed anything, so
+   the one thing the page wanted them to do looked switched off. The
+   readiness signal was only ever a nicety there: an empty or invalid
+   submit still runs the check and says what is missing, and the press and
+   busy states are untouched. Stage 2 and the waitlist form keep the rule
+   exactly as it was. */
 form:valid .btn { opacity: 1; }
 @media (hover: hover) and (pointer: fine) {
   form:valid .btn:hover { background: var(--btn-hover); border-color: var(--btn-hover); }
@@ -663,10 +735,45 @@ form:valid .btn:active { background: var(--btn-press); border-color: var(--btn-p
 .btn[disabled],
 form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
 
+/* Stage 1 at full strength — see the readiness note above. The :not() keeps
+   it off the busy state, which is set further down at (0,2,0) and would
+   otherwise lose to this rule's id. */
+#check-form .btn:not([aria-busy="true"]) { opacity: 1; }
+
 .btn-note {
   margin-top: 0.85rem; text-align: center;
   font-size: 0.8125rem; line-height: 1.45; color: var(--paper-soft);
 }
+
+/* --- under the Stage 1 button: the price note, and a way to keep reading --
+   Both centred, like the .btn-note they follow, so the three read as one
+   footnote to the button rather than as new questions. */
+.panel__price { margin-top: 0.6rem; text-align: center; }
+.panel__alt { margin-top: 0.4rem; text-align: center; }
+
+/* .backlink is drawn for the olive ground — sage text, a bone press — and
+   sage on vellum is 1.5:1. On the paper panel it takes the panel's own soft
+   ink (5.1:1), firms to full ink under a pointer, and presses with the paper
+   wash every other control on this panel uses. The pill, the scale on press
+   and the touch-callout rules all come from .backlink unchanged.
+
+   One change of layout. Where the panel is narrow — 320px phones, and the
+   desktop column at about 270px — the sentence needs two lines, and as
+   .backlink's inline-flex it wraps inside its own box and strands the arrow
+   at the far right of the first line. As an inline-block the arrow runs on
+   with the words (an nbsp ties it to the last one) and balance evens the
+   lines. 11px of padding on the 21.75px line keeps a one-line box at 44px,
+   and .backlink's own min-height still stands behind it. */
+.panel__alt .backlink {
+  display: inline-block;
+  margin-bottom: 0; padding-block: 0.6875rem;
+  line-height: 1.45; text-wrap: balance;
+  color: var(--paper-soft);
+}
+@media (hover: hover) and (pointer: fine) {
+  .panel__alt .backlink:hover { color: var(--paper-ink); }
+}
+.panel__alt .backlink:active { color: var(--paper-ink); background: var(--press-paper); }
 
 .form-error {
   margin-top: 0.9rem; padding: 0.75rem 0.9rem;
@@ -1207,7 +1314,6 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
 
   /* --- the form panel: less padding, tighter between field groups --- */
   .panel { padding: 0.9rem 1rem; }
-  .panel__head { padding-bottom: 0.6rem; margin-bottom: 0.75rem; }
   .field { margin-bottom: 0.8rem; }
   .field-group { margin-bottom: 0.8rem; }
   .hint { margin-bottom: 0.3rem; }
@@ -1238,44 +1344,53 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   .limits li::before { top: 1.2em; }
 
   /* --- sections give back some vertical run --- */
-  .hero { padding-block: 1.5rem 2.25rem; }
+  .hero { padding-block: 0.625rem 2.25rem; }
   .checked { padding-block: 2.5rem; }
   .record-section { padding-block: 2.5rem; }
 
   /* --- the run-up to the address field ---------------------------------
-     Measured at 390x844 the address input started 748px down, which put the
-     fold through the middle of the submit button: the one thing a visitor
-     can do on arrival was never wholly on the first screen. Every value in
-     this group is a gap between two pieces of text, not the text itself —
-     nothing is removed, reordered or set smaller than it already was. The
-     hero reads at desktop density because it has the width for it; on a
-     phone the same gaps are simply further apart than the column needs.
-     Above 40rem the original values stand untouched. */
-  .h1-rule { margin: 0.85rem 0 1rem; }
+     The first screen on a phone has to carry the answer to the advert, the
+     offer and the form. Measured at 390x664 and 393x660 (an iPhone's visible
+     area in Safari) the kicker, the H1, the offer title, the address field
+     and the whole Check button are all on it: the button's bottom edge is
+     at 650px. At 360x640 the address field is on it and the button ends
+     29px below the fold. The gaps here got the field on; hiding Stage 1's
+     heading, at the end of this group, got the button on.
 
-  /* The coverage line is the tallest single thing in the hero for the amount
-     it says, but not for the reason it looks. At 390px it is 68.17px, and
-     54.37px of that is TEXT: the sentence does not fit the 350px column and
-     sets on TWO lines at the inherited 1.6. It cannot be made to fit — at
-     17px the sentence measures 358.66px against 334px of usable width once
-     the dot and its gap are taken out, so it wraps at every phone width, and
-     the wording and the size are both fixed.
+     Every value below is a gap between pieces of text, except the offer's
+     own type, which is new and set to sizes this sheet already uses on a
+     phone: a 16px title, the field labels' 13px for the body and .fine's
+     12px for the small print. Nothing interactive is smaller. Above 40rem
+     the desktop values stand. */
+  .eyebrow.hero__kicker { margin-bottom: 0.3rem; }
+  .h1-rule { margin: 0.4rem 0 0.5rem; }
+  .price { margin-top: 0.45rem; }
+  .offer { margin-top: 0.5rem; padding: 0.55rem 0.7rem; }
+  .offer p + p { margin-top: 0.2rem; }
+  .offer__title { font-size: 1rem; line-height: 1.35; }
+  .offer__text { font-size: 0.8125rem; line-height: 1.45; }
+  .offer__small { font-size: 0.75rem; line-height: 1.45; }
+  .hero__grid { gap: 0.75rem; }
+  .panel__head { padding-bottom: 0.4rem; margin-bottom: 0.5rem; }
+  .panel__head h2 { margin-bottom: 0.1rem; }
 
-     So the three things here are the only ones going: the gap above the
-     hairline, the gap below it, and the leading. The hairline itself stays —
-     it is the divider between the promise above and the coverage statement
-     below, and it is the reason this line reads as a qualifier rather than
-     another sentence of the lede. 1.45 is the leading this stylesheet
-     already uses for compact secondary text (.hint, .pre-submit,
-     .consent-check); this line is a two-line label, not running prose, and
-     1.6 was buying it nothing. 16.3px comes back, 11.2px of it space and
-     5.1px leading. Above 40rem every original value stands. */
-  .coverage-line { margin-top: 0.6rem; padding-top: 0.55rem; line-height: 1.45; }
-  .price { margin-top: 0.9rem; }
-  .price .fine { margin-top: 0.3rem; }
-  /* --hero-gap is 2rem here; single-column, that is the space between the
-     price fine print and the top of the panel, not a column gutter. */
-  .hero__grid { gap: 1.25rem; }
+  /* Stage 1's heading and subtitle, hidden from sight on a phone and only
+     there. These are the .vh declarations, written out because a class
+     cannot be put on and taken off by a media query — keep the two in step.
+     Screen readers still get both: the heading stays a heading, named
+     "Check a property", in the reading order where it always was.
+
+     On a phone the offer box directly above already says what this panel
+     is for, and the heading and its two-line subtitle were the 72px between
+     the Check button and the first screen: hidden, the button's bottom edge
+     moved from 722px to 650px at 390x664. Stage 2's heading is a different
+     element and is untouched, and above 40rem this one is visible again. */
+  #stage-check .panel__head {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0 0 0 0); clip-path: inset(50%);
+    white-space: nowrap; border: 0;
+  }
 
   /* --- the example finding: same text, less air around it --------------
      Three stacked evidence cells plus the claim head carry eight blocks of
@@ -1488,6 +1603,8 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
 /* --- a text button that reads as a link, not a control ----------------- */
 /* Text for screen readers only — used to say that a link opens in a new tab,
    which sighted users can see from context but nobody else can. */
+/* The same declarations hide Stage 1's panel heading on a phone — see
+   #stage-check .panel__head in the phone block. Keep the two in step. */
 .vh {
   position: absolute; width: 1px; height: 1px;
   padding: 0; margin: -1px; overflow: hidden;

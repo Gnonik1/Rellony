@@ -181,26 +181,43 @@
     <div class="shell hero__grid">
 
       <div class="hero__left">
+        <!-- Answers the advert before the headline does: the ad asks "Found a
+             Restaurant to Let?", and this is the first line a visitor from it
+             reads. Sentence case on purpose — see .hero__kicker. -->
+        <p class="eyebrow hero__kicker">Found a restaurant, café or takeaway listing?</p>
         <h1>Can I open my business here?</h1>
         <span class="h1-rule" aria-hidden="true"></span>
         <p class="lede hero__lede">
-          Before you sign the lease, find out what the records actually say. Rellony checks
-          planning, licensing, food hygiene and company records against what the listing
-          claims.
+          Before you sign, we check what the listing claims against planning, licensing,
+          food hygiene and company records.
         </p>
 
-        <p class="coverage-line">Currently available for properties in England</p>
-
+        <!-- The range stands as it is: never struck through, and never "was" or
+             "normally". There is no sales history behind it, so a comparison
+             price would be one we never charged. -->
         <div class="price">
           <p>
             <span class="price__figure">£49–£99</span>
-            <span class="price__unit">per property, one-time</span>
+            <span class="price__unit">per property · England only</span>
           </p>
-          <p class="fine">
-            The exact price is confirmed after the preliminary check, based on the records
-            available for the property. Nothing is charged until you have agreed it in
-            writing.
-          </p>
+        </div>
+
+        <!-- FREE FIRST REPORT OFFER — remove this box, and every other line
+             marked FREE FIRST REPORT OFFER on this page, after 23:59 UK time on
+             11 October 2026, unless the end date is extended in the Terms
+             first. A free offer that outlives its stated end date is
+             misleading. The others: the price note under the Check button,
+             the .pre-submit line and the Stage 2 button note, step 03 of How
+             it works, and the confirmation message in the script. The clause
+             itself is /terms/#offer.
+
+             role="group" is what lets aria-labelledby name the box: a plain
+             div has no role that can carry a name. A group is announced with
+             its title on the way in and is not a landmark. -->
+        <div class="offer" role="group" aria-labelledby="offer-h">
+          <p class="offer__title" id="offer-h"><strong>Your first report is free until 11&nbsp;October</strong></p>
+          <p class="offer__text">Send us one restaurant, café or takeaway in England. If we can identify the property, the full report costs you nothing, and no payment details are needed.</p>
+          <p class="offer__small">One free report per person. <a href="/terms/#offer">Offer terms</a></p>
         </div>
       </div>
 
@@ -209,16 +226,16 @@
         <!-- ------------------------------------------------------------------
              STAGE 1 — the address, and nothing else.
 
-             This is a SEPARATE <form> from the enquiry further down, and that
-             separation is what keeps the form:valid .btn rule working. That
-             rule reads a button's readiness off its own form's live constraint
-             validity. With both stages inside one form, the Stage 1 button
-             would sit in a form still holding empty required fields — business
-             type, email, consent — so the form could never be :valid and the
-             button would stay dimmed no matter what was typed. Two sibling
-             forms each carry their own validity, so the rule is correct for
-             both, unchanged, and with no JS mirror of validity anywhere. HTML
-             forbids nesting forms, which gives the same answer from the other
+             This is a SEPARATE <form> from the enquiry further down, so each
+             form's live constraint validity describes only its own fields.
+             With both stages inside one form, Stage 1 would sit in a form
+             still holding empty required fields — business type, email,
+             consent — so it could never be valid: the submit check below
+             would refuse every address, and Stage 2's form:valid .btn
+             readiness rule would have nothing true to read. Stage 1's own
+             button no longer takes the readiness rule (styles.css says why),
+             but the separation still does everything else. HTML forbids
+             nesting forms, which gives the same answer from the other
              direction.
 
              This form has no action attribute and never posts. The address is
@@ -228,9 +245,13 @@
              ------------------------------------------------------------------ -->
         <div class="stage" id="stage-check" hidden>
 
+          <!-- Hidden from sight below 40rem, and still read by screen readers:
+               on a phone the offer box above says what this panel is for, and
+               these two lines were what kept the Check button off the first
+               screen. See #stage-check .panel__head in styles.css. -->
           <div class="panel__head">
             <h2>Check a property</h2>
-            <p class="fine">Start with the address or the listing link. Nothing is charged, and nothing is sent at this step.</p>
+            <p class="fine">Start with the address or the listing link. Nothing is charged at this step.</p>
           </div>
 
           <form id="check-form" novalidate>
@@ -292,11 +313,11 @@
                  field, but it sits behind a postcode they do not have.
 
                  Two fields, one on screen at a time, and only the one in
-                 play carries `required` — the readiness rule reads each
+                 play carries `required` — the address check reads this
                  form's own validity, so a required field left behind a
-                 hidden block would dim the Check button for good with
-                 nothing on screen to explain it. The script owns the
-                 swap; see setLinkMode.
+                 hidden block would refuse every check with nothing on
+                 screen to explain it. The script owns the swap; see
+                 setLinkMode.
                  ------------------------------------------------------------ -->
             <p class="mode-switch" id="to-link-mode">
               <button type="button" class="linkish" id="to-link-btn">No exact address? Paste the listing link</button>
@@ -325,7 +346,24 @@
 
             <p class="btn-note">Free, and no email needed for this step.</p>
 
+            <!-- FREE FIRST REPORT OFFER — when the offer ends the first sentence
+                 goes and "any further report" becomes "a report". This used to
+                 sit under the price in the hero, and moved here so the first
+                 screen on a phone could carry the offer and the form instead. -->
+            <p class="fine panel__price">
+              Until 11 October your first report is free. For any further report, the price
+              is confirmed by email before any work starts, and nothing is charged until you
+              have agreed it in writing.
+            </p>
+
           </form>
+
+          <!-- A way to keep reading for someone not ready to type an address.
+               Outside the form, so it sits under everything the form says and
+               its 44px band is nowhere near the Check button's. -->
+          <p class="panel__alt">
+            <a class="backlink" href="/sample-report/">Not ready yet? See a full sample report&nbsp;<span aria-hidden="true">→</span></a>
+          </p>
 
         </div>
 
@@ -643,9 +681,12 @@
             <input type="text" id="company-website" name="_gotcha" tabindex="-1" autocomplete="off">
           </div>
 
+          <!-- FREE FIRST REPORT OFFER — the last sentence goes when the offer
+               ends. -->
           <p class="pre-submit">
-            We’ll review this and get back to you <strong>within 1 business day</strong> —
-            confirming whether we can prepare a report and what it will cost.
+            We’ll review this and get back to you <strong>within 1 business day</strong>,
+            confirming whether we can prepare the report. Until 11 October, your first
+            report is free.
           </p>
 
           <!-- ----------------------------------------------------------------
@@ -680,7 +721,9 @@
 
           <button type="submit" class="btn" id="submit-btn">Request a check</button>
 
-          <p class="btn-note">Nothing is charged here. Reports £49–£99.</p>
+          <!-- FREE FIRST REPORT OFFER — the second sentence goes when the offer
+               ends. -->
+          <p class="btn-note">Nothing is charged here. Your first report is free until 11 October.</p>
 
           <p class="form-error" id="form-error" hidden role="alert"></p>
 
@@ -893,10 +936,13 @@
           <li>
             <div>
               <h3>We confirm scope and price</h3>
+              <!-- FREE FIRST REPORT OFFER — the second sentence goes when the
+                   offer ends, and "a paid report" goes back to "it". -->
               <p>
                 We review the property and come back within 1 business day with what we
-                can cover and what it costs. If you want to go ahead, we send a PayPal
-                invoice by email; nothing is charged on this site.
+                can cover and what it costs. Until 11 October, your first report is free.
+                If you want to go ahead with a paid report, we send a PayPal invoice by
+                email; nothing is charged on this site.
               </p>
             </div>
           </li>
@@ -1565,7 +1611,8 @@
      than one: each form's validity then describes exactly the fields its
      own button is waiting on. The buttons are still never `disabled`, so a
      click on an incomplete form runs the check below and reports what is
-     missing. */
+     missing. Stage 1's button is the one exception to the dimming and is at
+     full strength from the start — the reason is in styles.css. */
 
   function setText(id, value) {
     var node = document.getElementById(id);
@@ -1724,6 +1771,100 @@
       if (value) { setField(AD_SOURCE_FIELDS[i][1], value); }
     }
   })();
+
+  /* ================================================================== */
+  /* FUNNEL COUNTS                                                       */
+  /*                                                                     */
+  /* Three steps of the funnel, counted as page views of three paths     */
+  /* that exist only for that purpose:                                   */
+  /*                                                                     */
+  /*   /go/check-address/  an address check passed the client-side       */
+  /*                       validation, once per attempt, before lookup   */
+  /*   /go/check-link/     a listing link opened Stage 2                 */
+  /*   /go/enquiry-sent/   Formspree confirmed the enquiry               */
+  /*                                                                     */
+  /* The counter is the Cloudflare Web Analytics beacon already on the   */
+  /* page. It counts a same-page change of URL as a page view, so a step */
+  /* is counted by moving the URL to its path for a moment and back.     */
+  /* Nothing new is loaded, no request of our own is made, and nothing   */
+  /* is stored: no cookie, no localStorage, no sessionStorage. The path  */
+  /* is all that goes in the URL — never the address, the link or the    */
+  /* email — and the beacon drops the query string and the hash anyway.  */
+  /*                                                                     */
+  /* HOW, AND WHY NOT pushState. A pushState adds a history entry, so    */
+  /* Back would step through the virtual one before leaving the site,    */
+  /* and pushState followed by replaceState('/') still leaves that extra */
+  /* entry behind. So this never adds an entry at all: it uses           */
+  /* replaceState twice, out to the path and straight back to the exact  */
+  /* URL the visitor was on, query string included, in the same task.    */
+  /* No frame is ever painted on the path, and the address bar shows it  */
+  /* for an instant at most; the page does not reload or scroll; form    */
+  /* state and focus are untouched; and Back does exactly what it did    */
+  /* before, because the history list is the same list.                  */
+  /*                                                                     */
+  /* The beacon watches the URL in one of two ways, and each needs one   */
+  /* thing from us. Both are decided by the same test the beacon uses —  */
+  /* whether window.navigation exists. Checked against beacon.min.js     */
+  /* 2026.9.1; if Cloudflare changes how it watches, the worst case is a */
+  /* step going uncounted or an extra view of /, never a broken page.    */
+  /*                                                                     */
+  /*   NAVIGATION API (Chrome and Edge, and recent Safari and Firefox).  */
+  /*   The beacon listens for `navigate`, which fires synchronously      */
+  /*   inside every replaceState, so the trip out is counted on its own. */
+  /*   The trip back would be counted too, as one more view of the home  */
+  /*   page that never happened. The listener below hides that one event */
+  /*   from it. It is a capture listener, so it runs before the beacon's */
+  /*   at the same target whatever order the two were added in, and it   */
+  /*   only acts while the flag is up, which is only inside the return   */
+  /*   call.                                                             */
+  /*                                                                     */
+  /*   HISTORY API ONLY (older Safari and Firefox). The beacon wraps     */
+  /*   pushState and listens for popstate, and does not see replaceState */
+  /*   at all. So while the URL is on the path, a popstate is dispatched */
+  /*   for it to read; the trip back is invisible to it already. In this */
+  /*   mode the beacon ignores a change to the URL it last counted, so   */
+  /*   two address checks in a row on one page load count as one.        */
+  /*                                                                     */
+  /* The beacon sends its page view synchronously, inside the handler,   */
+  /* before control returns here, so the URL can go straight back. If    */
+  /* the beacon is blocked or not yet loaded, the round trip is still    */
+  /* harmless and simply goes uncounted. Nobody is ever on one of the    */
+  /* paths long enough to reload or copy it, but anyone who does open    */
+  /* one gets a tiny page that sends them on to / — see /go/.            */
+  /* ================================================================== */
+  var FUNNEL_CHECK_ADDRESS = '/go/check-address/';
+  var FUNNEL_CHECK_LINK    = '/go/check-link/';
+  var FUNNEL_ENQUIRY_SENT  = '/go/enquiry-sent/';
+
+  var hasNavigationApi = !!(window.navigation &&
+    typeof window.navigation.addEventListener === 'function');
+  var returningFromStep = false;
+
+  if (hasNavigationApi) {
+    window.navigation.addEventListener('navigate', function (event) {
+      if (returningFromStep) { event.stopImmediatePropagation(); }
+    }, true);
+  }
+
+  function countStep(path) {
+    if (!window.history || typeof history.replaceState !== 'function') { return; }
+
+    var here  = location.pathname + location.search + location.hash;
+    var state = history.state;
+
+    try {
+      history.replaceState(state, '', path);
+      if (!hasNavigationApi && typeof PopStateEvent === 'function') {
+        window.dispatchEvent(new PopStateEvent('popstate', { state: state }));
+      }
+    } catch (e) {
+      /* Nothing to undo beyond the URL, which the finally block puts back. */
+    } finally {
+      returningFromStep = true;
+      try { history.replaceState(state, '', here); } catch (e) {}
+      returningFromStep = false;
+    }
+  }
 
   var lastCheck = null;
 
@@ -2222,12 +2363,12 @@
   /* Switching Stage 1 between its two modes.                            */
   /*                                                                     */
   /* One field on screen at a time, and only that field carries           */
-  /* `required`. That is not tidiness: the readiness rule lights the      */
-  /* Check button from this form's live validity, so a required field      */
-  /* left behind a hidden block would hold the form invalid for good —    */
-  /* the button dimmed, and nothing on screen to explain what it is       */
-  /* waiting for. reportValidity has the same problem from the other      */
-  /* side, being unable to point at a control that is not rendered.       */
+  /* `required`. That is not tidiness: the address check reads this       */
+  /* form's live validity before it runs, so a required field left behind */
+  /* a hidden block would hold the form invalid for good — every check    */
+  /* refused, and nothing on screen to explain what it is waiting for.    */
+  /* reportValidity cannot help, being unable to point at a control that  */
+  /* is not rendered.                                                     */
   /*                                                                     */
   /* WHERE FOCUS GOES depends on how the switch was activated, because    */
   /* the two cases want opposite things.                                  */
@@ -2337,6 +2478,7 @@
 
       lastCheck = failed('listing_link', null);
       openEnquiry(lastCheck, '', listingUrl);
+      countStep(FUNNEL_CHECK_LINK);
       return;
     }
 
@@ -2348,6 +2490,10 @@
     clearCheckError();
 
     var address = addressField ? addressField.value.trim() : '';
+
+    /* Past validation and past the double-submit guard, and before the
+       lookup: one count per attempt, whatever the lookup then says. */
+    countStep(FUNNEL_CHECK_ADDRESS);
 
     /* The loading state is a label swap on a button that stays focusable —
        a `disabled` button drops focus in some engines, which would strand
@@ -2434,9 +2580,12 @@
     heading.appendChild(document.createTextNode(' now'));
     box.appendChild(heading);
 
+    /* FREE FIRST REPORT OFFER — when the offer ends, "and, if it is your
+       first, that it is free" goes back to "and what it will cost". */
     box.appendChild(el('p', null,
       'You’ll hear from us within 1 business day — we’ll confirm whether we ' +
-      'can prepare a report on this property, what it would cover, and what it will cost. ' +
+      'can prepare a report on this property, what it would cover, and, if it is ' +
+      'your first, that it is free. ' +
       'We read every enquiry and reply by email — there is no automatic ' +
       'confirmation email.'));
 
@@ -2489,6 +2638,9 @@
       .then(function (response) {
         if (response.ok) {
           showConfirmation(address);
+          /* Here and nowhere else: the honeypot path above shows the same
+             confirmation, and a bot is not a step in the funnel. */
+          countStep(FUNNEL_ENQUIRY_SENT);
         } else {
           showError('Something went wrong sending that. Please try again, or email us ' +
                     'directly at ' + SUPPORT_EMAIL + '.');

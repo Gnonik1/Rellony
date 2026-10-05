@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rellony</title>
+
+<!-- /go/enquiry-sent/ is not a page anyone is meant to see. The home page counts
+     one step of its funnel as a page view of this path, by moving its own
+     URL here and straight back without loading anything (see FUNNEL COUNTS
+     in /index.html). This file exists only so that anyone who does arrive
+     here, from a reload or a copied address, lands on the home page.
+
+     noindex, and robots.txt disallows /go/ as well. No analytics snippet,
+     deliberately: a visit here must not be counted as the step itself. No
+     stylesheet, fonts or anything else to load — the background colour is
+     the home page's olive, so the moment before the redirect does not flash
+     white. -->
+<meta name="robots" content="noindex">
+<meta http-equiv="refresh" content="0; url=/">
+<script>location.replace('/');</script>
+<style>html { background: #454B37; color: #F0EFE3; font-family: system-ui, sans-serif; }</style>
+</head>
+<body>
+<p><a href="/" style="color: inherit">Continue to Rellony</a></p>
+</body>
+</html>
