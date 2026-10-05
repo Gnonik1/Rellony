@@ -38,6 +38,14 @@
   --paper-soft:  #6B6659;
   --paper-hint:  #736F62;
 
+  /* --- FREE FIRST REPORT OFFER: the card in the hero ---
+     The card's gradient runs between these two, top to bottom. paper-ink is
+     10.6:1 on the top stop and 7.95:1 on the bottom one, and the chip's text
+     is the top stop on paper-ink, 10.6:1. Both tokens go when the offer
+     does. */
+  --offer-top:    #F0C467;
+  --offer-bottom: #DDA642;
+
   /* status — on the olive ground */
   --confirmed:    #6FD2A6;
   --unverified:   #F2BE70;
@@ -447,27 +455,82 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
 .price__unit { font-weight: 500; color: var(--sage); white-space: nowrap; }
 
 /* --- FREE FIRST REPORT OFFER --------------------------------------------
-   Distinct from the hero copy around it, but calm: a hairline box in the
-   palette the page already has, with no fill. A fill was the obvious way to
-   lift it and the wrong one — the 6% wash the footer chip uses drops sage
-   to about 4:1 on it (see .site-foot .coverage-chip). Unfilled, and sampled
-   from the render with the page's wash and grain behind it, the sage text
-   averages 4.75:1 and its worst pixels stay at 4.55:1; the bone title and
-   link stay above 6.6:1. The border is decoration, not a boundary anyone
-   has to find, so it takes --line-firm.
+   A card rather than a box: a warm gradient, a hairline edge, a top-lit
+   inset highlight and a soft drop shadow, at the form panel's 14px radius.
+   Everything on it is paper ink — 7.95:1 on the darker, bottom stop, which
+   is the worst case anywhere on the card — and the focus ring takes paper
+   ink too, because the page's bone ring is under 2:1 on amber.
 
-   Remove this block with the box when the offer ends. */
+   Two deliberate exceptions to the rules at the top of this file, both for
+   as long as the offer runs: it has a drop shadow, where the page otherwise
+   gets its depth from material alone, and its amber has chroma that is not
+   a status (--unverified is an amber as well). It is a card of words rather
+   than a dot or a status label, and it goes when the offer does.
+
+   It is not a control and is not clickable, so it has no hover or press of
+   its own; only the Offer terms link inside it presses.
+
+   Remove this block, and the two tokens, with the card when the offer
+   ends. */
 .offer {
+  position: relative; isolation: isolate;
   margin-top: 1.25rem; max-width: 34rem;
   padding: 0.95rem 1.1rem;
-  border: 1px solid var(--line-firm); border-radius: var(--r-cell);
+  color: var(--paper-ink);
+  background: linear-gradient(160deg, var(--offer-top) 0%, var(--offer-bottom) 100%);
+  border: 1px solid rgba(28, 26, 21, 0.08);
+  border-radius: var(--r-paper);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 1px 2px rgba(0, 0, 0, 0.18),
+    0 14px 32px -10px rgba(0, 0, 0, 0.45);
 }
+/* The words sit above the shimmer layer below, so the sheen passes behind
+   them and never washes the ink out mid-sweep. */
+.offer > * { position: relative; z-index: 1; }
+.offer :focus-visible { outline-color: var(--paper-ink); }
 .offer p + p { margin-top: 0.3rem; }
-.offer__title { color: var(--bone); line-height: 1.4; }
+
+/* The title and its chip share a line wherever they fit, and the chip
+   drops under the title only where they do not. With the long date the
+   pair needs 312px, which the card has from 24rem (384px) up; below that
+   the short date brings it to 279px, which holds down to about 344px —
+   360px phones included. Centred on each other, not on a baseline: the
+   chip is a pill, and a pill sits on the middle of the line. */
+.offer__title {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem 0.5rem;
+  line-height: 1.4;
+}
 .offer__title strong { font-weight: 600; }
-.offer__text { color: var(--sage); font-size: 0.9375rem; line-height: 1.5; }
+/* 1.4 here keeps the pill, at 21.4px, no taller than the title's own line
+   on a phone (21.6px), so it never makes that line taller either. */
+.offer__chip {
+  flex: none; white-space: nowrap;
+  padding: 3px 8px; border-radius: 999px;
+  background: var(--paper-ink); color: var(--offer-top);
+  font-size: 0.6875rem; font-weight: 600; line-height: 1.4;
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+
+/* The chip's date, twice. The long span is what a screen reader reads at
+   every width; the short one is only ever seen, never read (aria-hidden),
+   and only below 24rem, where it is what keeps the chip on the title's
+   line. There the long one is hidden from sight with the .vh declarations
+   — written out, as a media query cannot add a class — so it is still
+   read: the card's accessible name ends "Ends 11 October" at every width. */
+.offer__chip-short { display: none; }
+@media (max-width: 23.99rem) {
+  .offer__chip-long {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0 0 0 0); clip-path: inset(50%);
+    white-space: nowrap; border: 0;
+  }
+  .offer__chip-short { display: inline; }
+}
+.offer__text { font-size: 0.9375rem; line-height: 1.5; }
 /* .fine's size and leading, and it steps down with .fine on a phone */
-.offer__small { color: var(--sage); font-size: 0.8125rem; line-height: 1.5; }
+.offer__small { font-size: 0.8125rem; line-height: 1.5; }
 
 /* The terms link takes its 44px the way .foot__contact a does: vertical
    padding on a non-replaced inline box grows the hit area and stays out of
@@ -475,26 +538,61 @@ a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px
    not the line-height — 15px at the phone's 12px, 16.3px at 13px — so it
    takes 15px each way: 45px on a phone, 46.3px above it. 13px measured
    41px. Upward the band lands on the offer text, which holds no link;
-   downward it runs through the box's own padding and about 4px into the gap
+   downward it runs through the card's own padding and a few px into the gap
    above the form panel, where there is nothing to tap. background-clip
-   keeps the press wash on the words rather than across the padding, and
-   the :active repeat is load-bearing for the same reason as on
-   .foot__contact a — see the phone block. The vertical radii are 3px plus
-   the 15px the clip takes off. */
+   keeps the press on the words rather than across the padding, and the
+   :active repeat is load-bearing for the same reason as on .foot__contact a
+   — see the phone block. The vertical radii are 3px plus the 15px the clip
+   takes off. The press is a step darker than the bottom stop: 6.9:1. */
 .offer__small a {
-  color: var(--bone);
+  color: var(--paper-ink); text-decoration: underline;
   padding-block: 15px; background-clip: content-box;
 }
 .offer__small a:active {
-  background: var(--press-olive); background-clip: content-box;
+  background: #D2993A; background-clip: content-box;
   border-radius: 3px 3px 3px 3px / 18px 18px 18px 18px;
+}
+
+/* One sweep of light across the card, once, after the page has settled —
+   and only for people who have not asked for less motion.
+
+   Clipped by the card, but not by overflow: hidden on the card. That would
+   also clip the terms link's 44px band and its focus ring, both of which
+   run a few px past the card's bottom edge on a phone. So the layer clips
+   itself: it is the card's own border box, at the card's radius, and the
+   light moves inside it as a background three times the card's width,
+   from wholly off the left edge to wholly off the right. Behind the words
+   (see .offer > * above), never in the way of a tap, and no loop. */
+@media (prefers-reduced-motion: no-preference) {
+  .offer::after {
+    content: "";
+    position: absolute; inset: -1px; z-index: 0;
+    border-radius: inherit;
+    background: linear-gradient(110deg, transparent 40%, rgba(255, 255, 255, 0.35) 50%, transparent 60%) no-repeat;
+    background-size: 300% 100%;
+    background-position: 100% 0;
+    animation: offer-shimmer 1.4s ease-in-out 0.7s 1 both;
+    pointer-events: none;
+  }
+  @keyframes offer-shimmer {
+    from { background-position: 100% 0; }
+    to   { background-position: 0% 0; }
+  }
 }
 
 /* ==========================================================================
    Form panel — the sheet you write on
    ========================================================================== */
 
+/* position: relative is for paint order and nothing else. The offer card
+   above is positioned (its shimmer layer needs it), and a positioned box's
+   shadow paints over any later sibling that is not — on a phone that was
+   the top 20px of this sheet, greyed by the card's drop shadow. Positioned
+   too, and later in the source, the panel paints over the shadow instead.
+   z-index stays auto, so no stacking context is made and nothing inside
+   the panel stacks or clips any differently. */
 .panel {
+  position: relative;
   background: var(--vellum);
   color: var(--paper-ink);
   border-radius: var(--r-paper);
@@ -745,10 +843,9 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   font-size: 0.8125rem; line-height: 1.45; color: var(--paper-soft);
 }
 
-/* --- under the Stage 1 button: the price note, and a way to keep reading --
-   Both centred, like the .btn-note they follow, so the three read as one
-   footnote to the button rather than as new questions. */
-.panel__price { margin-top: 0.6rem; text-align: center; }
+/* --- under the Stage 1 button: a way to keep reading ---------------------
+   Centred, like the .btn-note above it, so the two read as one footnote to
+   the button rather than as a new question. */
 .panel__alt { margin-top: 0.4rem; text-align: center; }
 
 /* .backlink is drawn for the olive ground — sage text, a bone press — and
@@ -1353,8 +1450,8 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
      offer and the form. Measured at 390x664 and 393x660 (an iPhone's visible
      area in Safari) the kicker, the H1, the offer title, the address field
      and the whole Check button are all on it: the button's bottom edge is
-     at 650px. At 360x640 the address field is on it and the button ends
-     29px below the fold. The gaps here got the field on; hiding Stage 1's
+     at 648px. At 360x640 the address field is on it and the button ends
+     27px below the fold. The gaps here got the field on; hiding Stage 1's
      heading, at the end of this group, got the button on.
 
      Every value below is a gap between pieces of text, except the offer's
@@ -1604,7 +1701,8 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
 /* Text for screen readers only — used to say that a link opens in a new tab,
    which sighted users can see from context but nobody else can. */
 /* The same declarations hide Stage 1's panel heading on a phone — see
-   #stage-check .panel__head in the phone block. Keep the two in step. */
+   #stage-check .panel__head in the phone block — and the offer chip's long
+   date below 24rem (.offer__chip-long). Keep the three in step. */
 .vh {
   position: absolute; width: 1px; height: 1px;
   padding: 0; margin: -1px; overflow: hidden;

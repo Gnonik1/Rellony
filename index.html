@@ -206,18 +206,18 @@
              marked FREE FIRST REPORT OFFER on this page, after 23:59 UK time on
              11 October 2026, unless the end date is extended in the Terms
              first. A free offer that outlives its stated end date is
-             misleading. The others: the price note under the Check button,
-             the .pre-submit line and the Stage 2 button note, step 03 of How
-             it works, and the confirmation message in the script. The clause
-             itself is /terms/#offer.
+             misleading. The others: the .pre-submit line and the Stage 2
+             button note, step 03 of How it works, the confirmation message in
+             the script, and the .offer block in styles.css. The clause itself
+             is /terms/#offer.
 
              role="group" is what lets aria-labelledby name the box: a plain
              div has no role that can carry a name. A group is announced with
              its title on the way in and is not a landmark. -->
         <div class="offer" role="group" aria-labelledby="offer-h">
-          <p class="offer__title" id="offer-h"><strong>Your first report is free until 11&nbsp;October</strong></p>
-          <p class="offer__text">Send us one restaurant, café or takeaway in England. If we can identify the property, the full report costs you nothing, and no payment details are needed.</p>
-          <p class="offer__small">One free report per person. <a href="/terms/#offer">Offer terms</a></p>
+          <p class="offer__title" id="offer-h"><strong>Your first report is on us</strong> <span class="offer__chip"><span class="offer__chip-long">Ends 11&nbsp;October</span><span class="offer__chip-short" aria-hidden="true">Ends 11&nbsp;Oct</span></span></p>
+          <p class="offer__text">Send us one restaurant, café or takeaway in England. If we can identify the property, the full report is free of charge — no payment details needed.</p>
+          <p class="offer__small">One per person <span aria-hidden="true">·</span> <a href="/terms/#offer">Offer terms</a></p>
         </div>
       </div>
 
@@ -345,16 +345,6 @@
             <button type="submit" class="btn" id="check-btn">Check this property</button>
 
             <p class="btn-note">Free, and no email needed for this step.</p>
-
-            <!-- FREE FIRST REPORT OFFER — when the offer ends the first sentence
-                 goes and "any further report" becomes "a report". This used to
-                 sit under the price in the hero, and moved here so the first
-                 screen on a phone could carry the offer and the form instead. -->
-            <p class="fine panel__price">
-              Until 11 October your first report is free. For any further report, the price
-              is confirmed by email before any work starts, and nothing is charged until you
-              have agreed it in writing.
-            </p>
 
           </form>
 
