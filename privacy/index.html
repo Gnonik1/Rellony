@@ -33,9 +33,12 @@
 <link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- Typefaces are served from /fonts/ (the @font-face rules open styles.css).
+     Preload only the two latin files the first screen renders: the body
+     face (IBM Plex Sans) and the h1 face (Archivo). crossorigin is required
+     even on the same origin, or the browser downloads each file twice. -->
+<link rel="preload" href="/fonts/ibm-plex-sans-400-600-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/archivo-600-700-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/styles.css">
 
 <!-- COVERAGE: England only. The statutory references on this page (UK GDPR,
@@ -69,7 +72,7 @@
 
       <div class="doc__band paper">
       <h1>Privacy Policy</h1>
-      <p class="doc__updated">Last updated 5 October 2026</p>
+      <p class="doc__updated">Last updated 6 October 2026</p>
 
 
       <p>
@@ -168,9 +171,9 @@
         We do not use advertising trackers, analytics cookies or third-party pixels on this
         site. We count page visits with Cloudflare Web Analytics, which does not use cookies
         or local storage. If you prefer not to be counted, you can block
-        <code>static.cloudflareinsights.com</code> in your browser, or email us. The site
-        loads its typefaces from Google Fonts, which means your browser requests those font
-        files from Google when the page loads.
+        <code>static.cloudflareinsights.com</code> in your browser, or email us. The site’s
+        typefaces are served from this website itself, so loading a page sends no request
+        to Google or any other font provider.
       </p>
 
       <h2><span class="sec">03</span> How reports are prepared, and automated decisions</h2>
