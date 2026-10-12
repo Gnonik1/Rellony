@@ -204,24 +204,6 @@
             <span class="price__unit">per property · England only</span>
           </p>
         </div>
-
-        <!-- FREE FIRST REPORT OFFER — remove this box, and every other line
-             marked FREE FIRST REPORT OFFER on this page, after 23:59 UK time on
-             11 October 2026, unless the end date is extended in the Terms
-             first. A free offer that outlives its stated end date is
-             misleading. The others: the .pre-submit line and the Stage 2
-             button note, step 03 of How it works, the confirmation message in
-             the script, and the .offer block in styles.css. The clause itself
-             is /terms/#offer.
-
-             role="group" is what lets aria-labelledby name the box: a plain
-             div has no role that can carry a name. A group is announced with
-             its title on the way in and is not a landmark. -->
-        <div class="offer" role="group" aria-labelledby="offer-h">
-          <p class="offer__title" id="offer-h"><strong>Your first report is on us</strong> <span class="offer__chip"><span class="offer__chip-long">Ends 11&nbsp;October</span><span class="offer__chip-short" aria-hidden="true">Ends 11&nbsp;Oct</span></span></p>
-          <p class="offer__text">Send us one restaurant, café or takeaway in England. If we can identify the property, the full report is free of charge — no payment details needed.</p>
-          <p class="offer__small">One per person <span aria-hidden="true">·</span> <a href="/terms/#offer">Offer terms</a></p>
-        </div>
       </div>
 
       <div class="panel" id="check">
@@ -248,10 +230,6 @@
              ------------------------------------------------------------------ -->
         <div class="stage" id="stage-check" hidden>
 
-          <!-- Hidden from sight below 40rem, and still read by screen readers:
-               on a phone the offer box above says what this panel is for, and
-               these two lines were what kept the Check button off the first
-               screen. See #stage-check .panel__head in styles.css. -->
           <div class="panel__head">
             <h2>Check a property</h2>
             <p class="fine">Start with the address or the listing link. Nothing is charged at this step.</p>
@@ -674,12 +652,9 @@
             <input type="text" id="company-website" name="_gotcha" tabindex="-1" autocomplete="off">
           </div>
 
-          <!-- FREE FIRST REPORT OFFER — the last sentence goes when the offer
-               ends. -->
           <p class="pre-submit">
             We’ll review this and get back to you <strong>within 1 business day</strong>,
-            confirming whether we can prepare the report. Until 11 October, your first
-            report is free.
+            confirming whether we can prepare the report.
           </p>
 
           <!-- ----------------------------------------------------------------
@@ -714,9 +689,7 @@
 
           <button type="submit" class="btn" id="submit-btn">Request a check</button>
 
-          <!-- FREE FIRST REPORT OFFER — the second sentence goes when the offer
-               ends. -->
-          <p class="btn-note">Nothing is charged here. Your first report is free until 11 October.</p>
+          <p class="btn-note">Nothing is charged here.</p>
 
           <p class="form-error" id="form-error" hidden role="alert"></p>
 
@@ -929,13 +902,10 @@
           <li>
             <div>
               <h3>We confirm scope and price</h3>
-              <!-- FREE FIRST REPORT OFFER — the second sentence goes when the
-                   offer ends, and "a paid report" goes back to "it". -->
               <p>
                 We review the property and come back within 1 business day with what we
-                can cover and what it costs. Until 11 October, your first report is free.
-                If you want to go ahead with a paid report, we send a PayPal invoice by
-                email; nothing is charged on this site.
+                can cover and what it costs. If you want to go ahead with it, we send a
+                PayPal invoice by email; nothing is charged on this site.
               </p>
             </div>
           </li>
@@ -2573,12 +2543,9 @@
     heading.appendChild(document.createTextNode(' now'));
     box.appendChild(heading);
 
-    /* FREE FIRST REPORT OFFER — when the offer ends, "and, if it is your
-       first, that it is free" goes back to "and what it will cost". */
     box.appendChild(el('p', null,
       'You’ll hear from us within 1 business day — we’ll confirm whether we ' +
-      'can prepare a report on this property, what it would cover, and, if it is ' +
-      'your first, that it is free. ' +
+      'can prepare a report on this property, what it would cover, and what it will cost. ' +
       'We read every enquiry and reply by email — there is no automatic ' +
       'confirmation email.'));
 
