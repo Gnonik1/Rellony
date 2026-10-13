@@ -2,6 +2,23 @@
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
+<!-- Rellony Rescue's printed address: rellony.com/r/CODE. GitHub Pages has no
+     page there, so it serves this one, and this script sends the visitor on
+     to the personal page, /r/?c=CODE. It runs before anything else
+     on the page, and while it does the page stays blank, so "Page not found"
+     never flashes. A letter's code is 4 or 5 letters and numbers, in any case;
+     /r/ itself checks it. When this script redirects, the analytics snippet at
+     the end of the page doesn't load: the code in the address never reaches a
+     third party. -->
+<script>
+  (function () {
+    var m = /^\/r\/([A-Za-z0-9]{4,5})\/?$/.exec(location.pathname);
+    if (!m) return;
+    window.__rxRedirect = true;
+    document.documentElement.style.visibility = 'hidden';
+    location.replace('/r/?c=' + m[1].toUpperCase());
+  })();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Page not found — Rellony</title>
 
@@ -104,13 +121,25 @@
   </div>
 </footer>
 
-<!-- Cookieless page counts from Cloudflare Web Analytics; the snippet below
-     comes from Cloudflare → Web Analytics → rellony.com → Manage site.
-     The snippet carries a token, and it is the same snippet on every page, so
-     the marker line is byte-identical across all six and can be swapped in one
-     pass. Nothing here sets a cookie or touches local storage; the Privacy
-     page says so in section 02 and names the host in section 05. -->
-<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "a429948714cd49e0b8efdce61ac86242"}'></script><!-- End Cloudflare Web Analytics -->
+<!-- Cookieless page counts from Cloudflare Web Analytics; the snippet comes
+     from Cloudflare → Web Analytics → rellony.com → Manage site. Nothing here
+     sets a cookie or touches local storage; the Privacy page says so in
+     section 02 and names the host in section 05.
+     On the other five pages the marker line is the snippet itself, byte-
+     identical across them, so it can be swapped in one pass. This page is the
+     exception: the script below adds the same snippet (same file, token and
+     attributes) only when the Rescue redirect in <head> didn't run, so an
+     address carrying a letter's code is never sent to Cloudflare.
+     When the snippet changes, change the token and attributes here too. -->
+<!-- Cloudflare Web Analytics --><script>
+  if (!window.__rxRedirect) {
+    var cf = document.createElement('script');
+    cf.type = 'module';
+    cf.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+    cf.setAttribute('data-cf-beacon', '{"token": "a429948714cd49e0b8efdce61ac86242"}');
+    document.body.appendChild(cf);
+  }
+</script><!-- End Cloudflare Web Analytics -->
 
 <script>
   /* iOS Safari applies :active to a tapped element only on a page that has a
@@ -122,7 +151,8 @@
 
      It does nothing, stores nothing and sends nothing. passive: true so it can
      never hold up a scroll. Identical on all six pages, and placed after the
-     analytics marker so that line stays byte-identical too. */
+     analytics marker so that line stays byte-identical too (on the other five;
+     see the note above the marker on this page). */
   document.addEventListener('touchstart', function () {}, { passive: true });
 </script>
 </body>

@@ -15,6 +15,17 @@ collaboration.pdf
 # docs/, where a re-include would be ignored.
 !sample-report/rellony-sample-report.pdf
 
+# …and Rellony Rescue's public sample plan, served at /rescue/sample.pdf. It
+# is a generated copy (sync-copies --site): change its source, never this file.
+!rescue/sample.pdf
+
+# Mailing data, letter codes and secrets never enter this public repo.
+.env
+.env.*
+data/
+batches/
+*.csv
+
 # OS / editor noise
 .DS_Store
 Thumbs.db

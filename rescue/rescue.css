@@ -1,0 +1,521 @@
+/* ==========================================================================
+   Rellony Rescue — the pages under /r/ and /rescue/: warm paper, and one
+   olive card per page for its main action.
+
+   Loaded after /styles.css on Rescue pages only, which carry <body class="rx">.
+   Every rule sits under .rx, so no Rellony Check page sees any of it.
+
+   The rule: the page is paper (vellum); what you read or fill in is a warm
+   white sheet lifted off it by a warm hairline and a soft, layered shadow;
+   olive is an accent (primary button, badge, bars, progress, the mark of a
+   chosen answer, small labels) plus the page's ONE olive card for its main
+   action and the site's olive footer. No pure white and no neutral grey:
+   every light tone here is warm.
+
+   The home page keeps its own rule ("no drop shadows"); the shadows below are
+   Rescue's alone, because white sheets on a paper page need them to separate.
+   ========================================================================== */
+
+/* --- tokens ------------------------------------------------------------------ */
+body.rx {
+  --rx-ground: var(--vellum);              /* #F4F1E9, the page */
+  --rx-sheet: #FFFCF6;                     /* cards, the question sheet, answer tiles */
+  --rx-hair: rgba(74, 62, 38, 0.10);       /* card outline, header and sticky-bar rules */
+  --rx-hair-firm: rgba(74, 62, 38, 0.20);  /* answer-tile outline, header divider */
+  --rx-field: rgba(74, 62, 38, 0.60);      /* a text box's outline: 3.34:1 on the sheet (WCAG 1.4.11) */
+  --line-paper: rgba(74, 62, 38, 0.12);    /* the site's divider, warmed */
+  --rx-tint: rgba(69, 75, 55, 0.08);       /* olive wash: secondary-button hover */
+  --rx-track: #EAE4D5;                     /* empty bars and progress: sand */
+  --rx-chosen: #F5F0E1;                    /* a chosen answer: warm cream */
+  --rule: rgba(69, 75, 55, 0.42);          /* the H1 hairline, olive on paper */
+  --rx-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  --rx-shadow-1: 0 1px 2px rgba(28, 26, 21, 0.05);
+  --rx-shadow-card: 0 1px 2px rgba(28, 26, 21, 0.04), 0 2px 6px rgba(28, 26, 21, 0.035), 0 14px 32px -16px rgba(28, 26, 21, 0.16);
+  --rx-shadow-lift: 0 1px 2px rgba(28, 26, 21, 0.05), 0 4px 12px rgba(28, 26, 21, 0.06), 0 20px 40px -18px rgba(28, 26, 21, 0.22);
+  --rx-shadow-btn: inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 1px 1px rgba(28, 26, 21, 0.16), 0 2px 4px rgba(46, 51, 38, 0.14), 0 10px 22px -10px rgba(46, 51, 38, 0.55);
+  --rx-shadow-btn-hover: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 1px 1px rgba(28, 26, 21, 0.16), 0 4px 8px rgba(46, 51, 38, 0.16), 0 16px 30px -12px rgba(46, 51, 38, 0.60);
+  --rx-shadow-btn-press: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 1px 1px rgba(28, 26, 21, 0.18);
+
+  color: var(--paper-ink);
+  background-color: var(--rx-ground);
+  /* the home page's grain, fainter: paper, not dirt */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+/* styles.css paints <html> olive for the overscroll on the home page; and
+   the phone sticky bar must never hide what has focus (WCAG 2.4.11) */
+html:has(body.rx) { background: var(--vellum); scroll-padding-bottom: 6rem; }
+
+.rx :focus-visible { outline-color: var(--paper-ink); }
+.rx .rx-olive :focus-visible,
+.rx .site-foot :focus-visible { outline-color: var(--bone); }
+.rx main:focus { outline: none; }
+
+/* --- the bar: lockup, a divider, "Rescue" --------------------------------------- */
+.rx .site-head { background: var(--rx-ground); border-bottom: 1px solid var(--rx-hair); }
+.rx-product {
+  padding-left: 0.9rem; border-left: 1px solid var(--rx-hair-firm);
+  font-family: var(--display); font-size: 0.875rem; font-weight: 600; line-height: 1.6;
+  letter-spacing: -0.005em; color: var(--paper-soft);
+}
+
+/* --- page frame and heading ----------------------------------------------------- */
+.rx-main { padding-block: clamp(1.25rem, 3.5vw, 3rem) clamp(2.5rem, 6vw, 4.5rem); }
+/* While a page waits for its data the frame keeps the screen, so the footer
+   doesn't jump up and back down (no layout shift). */
+.rx-main[aria-busy="true"] { min-height: 100vh; }
+.rx-h1 { font-size: clamp(1.875rem, 2.1vw + 1.25rem, 3.25rem); max-width: 22ch; text-wrap: balance; color: var(--paper-ink); }
+.rx-lede { margin-top: 0.6rem; max-width: 46ch; font-size: clamp(1.0625rem, 0.4vw + 0.95rem, 1.25rem); line-height: 1.5; color: var(--paper-soft); }
+.rx .h1-rule { margin: 1rem 0 1.25rem; max-width: 12ch; }
+.rx .eyebrow { color: var(--base); }
+
+.rx-grid { display: grid; gap: 1rem; align-items: start; }
+.rx-stack { display: grid; gap: 1rem; align-content: start; }
+.rx-narrow { max-width: 46rem; margin-inline: auto; }
+@media (min-width: 64rem) {
+  .rx-grid { grid-template-columns: minmax(0, 1fr) minmax(21rem, 25rem); gap: 1.25rem 1.5rem; }
+  .rx-aside { position: sticky; top: 1.5rem; }
+}
+
+/* A line of phrases joined by " · " breaks at a dot, not inside a phrase:
+   each phrase is an inline block, which wraps inside itself only when it is
+   wider than the whole line. */
+.rx-nw { display: inline-block; }
+
+/* --- sheets ------------------------------------------------------------------------ */
+.rx-card,
+.rx .panel {
+  background: var(--rx-sheet); color: var(--paper-ink);
+  border: 1px solid var(--rx-hair); border-radius: var(--r-paper);
+  box-shadow: var(--rx-shadow-card);
+  padding: clamp(1.1rem, 1.2vw + 0.85rem, 1.9rem);
+}
+.rx-card h2 { font-size: clamp(1.125rem, 0.45vw + 1rem, 1.375rem); margin-bottom: 0.85rem; text-wrap: balance; }
+.rx-card p { color: var(--paper-soft); text-wrap: pretty; }
+.rx-card strong { color: var(--paper-ink); font-weight: 600; }
+.rx-card a:not(.btn), .rx .panel a:not(.btn) { color: var(--paper-ink); }
+.rx-card .eyebrow { margin-bottom: 0.55rem; }
+.rx-fine { font-size: 0.8125rem; line-height: 1.5; color: var(--paper-soft); }
+
+/* a card's label row: what the card is (olive), a note on the right, a hairline */
+.rx-label {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.25rem 1rem;
+  margin-bottom: 1rem; padding-bottom: 0.85rem; border-bottom: 1px solid var(--line-paper);
+}
+.rx-label .eyebrow, .rx-label .rx-fine { margin: 0; }
+
+/* notes and wells sit on the sheet in vellum: olive at 8 % reads grey on it */
+.rx-well { padding: 0.75rem 0.9rem; background: var(--vellum); border-radius: var(--r-input); font-size: 0.875rem; line-height: 1.5; color: var(--paper-ink); }
+
+/* --- status: the rating as the FSA publishes it --------------------------------------- */
+.rx-status__head { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1rem; align-items: center; }
+/* a plain numeral on olive — never the FHRS sticker's shape or colours */
+.rx-badge {
+  display: grid; place-items: center; width: 3.5rem; height: 3.5rem; border-radius: 999px;
+  background: var(--base); color: var(--vellum);
+  font-family: var(--display); font-weight: 700; font-size: 1.875rem; line-height: 1; letter-spacing: -0.02em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 1px 1px rgba(28, 26, 21, 0.14), 0 8px 18px -8px rgba(46, 51, 38, 0.6);
+}
+.rx-card .rx-status__line { font-family: var(--display); font-weight: 600; font-size: 1.0625rem; color: var(--paper-ink); }
+.rx-status__meta { margin-top: 0.1rem; }
+.rx-status__source { margin-top: 0.9rem; padding-top: 0.85rem; border-top: 1px solid var(--line-paper); }
+
+/* --- the three scores ----------------------------------------------------------------- */
+.rx-scores__list { list-style: none; margin: 0; padding: 0; }
+.rx-score {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline;
+  gap: 0.45rem 1rem; padding-block: 0.7rem 0.8rem; border-bottom: 1px solid var(--line-paper);
+}
+.rx-score:first-child { padding-top: 0; }
+/* the rule's own hairline closes the list: no second line above it */
+.rx-score:last-child { border-bottom: 0; padding-bottom: 0.2rem; }
+.rx-score__name { color: var(--paper-ink); font-size: 0.9375rem; line-height: 1.35; }
+.rx-score__value { font-family: var(--display); font-weight: 700; font-size: 1.5rem; line-height: 1; letter-spacing: -0.02em; color: var(--paper-ink); }
+/* The track runs 0–30 (management's scale; hygiene and structure stop at 25).
+   The tick at 15 is the highest a 2 allows, named once under the first bar.
+   The bar is drawing; the number beside it is the data. Its length is set by
+   the script through --v (CSSOM, so the page needs no inline styles). */
+.rx-score__bar { grid-column: 1 / -1; position: relative; height: 0.5rem; border-radius: 999px; background: var(--rx-track); }
+.rx-score__bar::before {
+  content: ""; position: absolute; inset: 0 auto 0 0; width: calc(var(--v, 0) * 100% / 30);
+  border-radius: inherit; background: var(--base);
+}
+.rx-score__bar::after {
+  content: ""; position: absolute; left: 50%; top: -0.3rem; bottom: -0.3rem;
+  width: 2px; margin-left: -1px; border-radius: 1px; background: var(--base); opacity: 0.6;
+}
+.rx-score:first-child .rx-score__bar { margin-bottom: 1.35rem; }
+.rx-score__mark {
+  position: absolute; left: 50%; top: calc(100% + 0.45rem); transform: translateX(-50%);
+  white-space: nowrap; font-size: 0.75rem; line-height: 1; font-weight: 500; color: var(--paper-soft);
+}
+.rx-score.is-high .rx-score__value { color: var(--unverified-paper); }
+.rx-score.is-high .rx-score__bar::before { background: var(--unverified-paper); }
+
+.rx-rule { margin-top: 1.1rem; padding-top: 1.05rem; border-top: 1px solid var(--line-paper); }
+.rx-card .rx-rule > p:first-child { color: var(--paper-ink); }
+/* the table's figure stands out without pushing its line apart */
+.rx-rule__result { font-family: var(--display); font-weight: 700; font-size: 1.25em; line-height: 1; letter-spacing: -0.02em; }
+.rx-rule .rx-fine { margin-top: 0.5rem; }
+
+/* --- buttons: the home page's pill, with depth ------------------------------------------- */
+/* styles.css drops a link-button's underline only through .btn--inline */
+.rx a.btn { text-decoration: none; }
+.rx .btn {
+  opacity: 1; text-wrap: balance;
+  box-shadow: var(--rx-shadow-btn);
+  transition: background-color 0.18s var(--rx-ease), border-color 0.18s var(--rx-ease), box-shadow 0.18s var(--rx-ease), transform 0.09s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .rx .btn:hover { background: var(--btn-hover); border-color: var(--btn-hover); box-shadow: var(--rx-shadow-btn-hover); }
+}
+.rx .btn:active { background: var(--btn-press); border-color: var(--btn-press); box-shadow: var(--rx-shadow-btn-press); transform: scale(0.97); }
+.rx .btn[aria-busy="true"] { opacity: 0.6; cursor: progress; }
+
+/* Two levels: what happens, then what it costs you. The second line never
+   breaks inside a phrase: below 22.5rem it breaks at the dot instead, and the
+   dot goes (measured at 320, 360, 375 and 390). */
+.rx .btn--two { flex-direction: column; gap: 0.15rem; min-height: 3.75rem; padding: 0.7rem 1rem; line-height: 1.2; font-size: 1.0625rem; }
+.btn__sub { display: flex; justify-content: center; flex-wrap: nowrap; white-space: nowrap; font-size: 0.8125rem; font-weight: 500; opacity: 0.82; letter-spacing: 0.005em; }
+@media (max-width: 24rem) { .btn__sub { font-size: 0.75rem; } }
+@media (max-width: 22.49rem) {
+  .btn__sub { flex-direction: column; align-items: center; }
+  .btn__dot { display: none; }
+}
+
+/* the outlined secondary: the sheet, the home page's olive ring */
+.rx .btn--secondary { background: var(--rx-sheet); color: var(--base); border-color: var(--base); box-shadow: inset 0 0 0 1px var(--base), var(--rx-shadow-1); }
+@media (hover: hover) and (pointer: fine) {
+  .rx .btn--secondary:hover { background: var(--rx-tint); border-color: var(--base); box-shadow: inset 0 0 0 1px var(--base), 0 6px 16px -10px rgba(46, 51, 38, 0.45); }
+}
+.rx .btn--secondary:active { background: var(--press-paper); border-color: var(--base); box-shadow: inset 0 0 0 1px var(--base); }
+
+/* --- the page's one olive card ----------------------------------------------------------------- */
+.rx .rx-olive {
+  background-color: var(--base);
+  background-image: linear-gradient(180deg, rgba(240, 239, 227, 0.06) 0%, rgba(240, 239, 227, 0) 55%);
+  color: var(--bone);
+}
+/* /r/'s action card is a card of its own, so it carries the olive shadow; the
+   free check's price head is part of the price panel and has none */
+.rx .rx-action { border-color: transparent; box-shadow: 0 1px 2px rgba(28, 26, 21, 0.10), 0 22px 44px -20px rgba(46, 51, 38, 0.55); }
+/* its main button is cream */
+.rx .rx-olive .btn:not(.btn--secondary) {
+  background: var(--vellum); border-color: var(--vellum); color: var(--olive-ink);
+  box-shadow: inset 0 -1px 0 rgba(28, 26, 21, 0.06), 0 1px 1px rgba(0, 0, 0, 0.18), 0 10px 22px -10px rgba(0, 0, 0, 0.50);
+}
+@media (hover: hover) and (pointer: fine) {
+  .rx .rx-olive .btn:not(.btn--secondary):hover { background: var(--rx-sheet); border-color: var(--rx-sheet); box-shadow: 0 1px 1px rgba(0, 0, 0, 0.18), 0 16px 30px -12px rgba(0, 0, 0, 0.55); }
+}
+.rx .rx-olive .btn:not(.btn--secondary):active { background: var(--bone); border-color: var(--bone); }
+.rx .rx-olive .btn--secondary { background: transparent; color: var(--bone); border-color: rgba(240, 239, 227, 0.55); box-shadow: inset 0 0 0 1px rgba(240, 239, 227, 0.55); }
+@media (hover: hover) and (pointer: fine) {
+  .rx .rx-olive .btn--secondary:hover { background: var(--wash); border-color: var(--bone); box-shadow: inset 0 0 0 1px var(--bone); }
+}
+.rx .rx-olive .btn--secondary:active { background: var(--press-olive); }
+
+/* --- /r/: the action card ----------------------------------------------------------------- */
+.rx-action .btn { width: 100%; }
+.rx-action .btn-note { text-align: left; margin-top: 0.9rem; font-size: 0.8125rem; line-height: 1.5; color: var(--sage); }
+
+/* --- the council ---------------------------------------------------------------------------- */
+.rx-card .rx-council__fee { font-size: 1.0625rem; color: var(--paper-ink); }
+.rx-council__fee strong { margin-left: 0.15rem; font-family: var(--display); font-weight: 700; font-size: 1.5rem; letter-spacing: -0.02em; }
+.rx-council__apply { margin-top: 0.6rem; font-size: 0.9375rem; }
+.rx-council__links { margin-top: 0.75rem; font-size: 0.9375rem; }
+
+/* --- quiet links ------------------------------------------------------------------------------- */
+.rx-after { margin-top: 1.5rem; display: flex; flex-wrap: wrap; gap: 0 1.5rem; }
+.rx .rx-quiet {
+  display: inline-flex; align-items: center; min-height: 2.75rem;
+  font-size: 0.9375rem; font-weight: 500; color: var(--paper-soft);
+  text-decoration: underline; text-decoration-color: var(--rx-hair-firm); text-underline-offset: 0.25em;
+  transition: color 0.15s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .rx .rx-quiet:hover { color: var(--paper-ink); text-decoration-color: currentColor; }
+}
+.rx .rx-quiet:active { color: var(--paper-ink); }
+
+/* --- /r/ without a code ------------------------------------------------------------------------- */
+.rx-code { max-width: 30rem; }
+.rx-code__row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.6rem; align-items: start; }
+.rx .rx-code__row .btn { width: auto; min-width: 5.5rem; min-height: 3rem; padding-inline: 1.4rem; }
+.rx .rx-code input {
+  min-height: 3rem; font-family: var(--record); font-weight: 500; font-size: 1.125rem;
+  letter-spacing: 0.18em; text-transform: uppercase;
+}
+
+/* --- text boxes: warm, with an outline you can see ----------------------------------------------- */
+.rx input[type="text"],
+.rx input[type="email"],
+.rx textarea { background: var(--rx-sheet); color: var(--paper-ink); border: 1px solid var(--rx-field); }
+.rx input::placeholder, .rx textarea::placeholder { color: var(--paper-hint); }
+.rx .form-error { background: rgba(150, 36, 26, 0.06); color: var(--paper-ink); }
+.rx .field > label { color: var(--paper-ink); }
+.rx .hint { color: var(--paper-soft); }
+
+/* --- while data loads ------------------------------------------------------------------------------ */
+.rx-skel { display: grid; gap: 1rem; }
+.rx-skel__line { height: 2.4rem; max-width: 22ch; border-radius: 8px; background: var(--rx-track); }
+.rx-skel__card { height: 11rem; border-radius: var(--r-paper); background: var(--rx-sheet); border: 1px solid var(--rx-hair); box-shadow: var(--rx-shadow-card); }
+@media (prefers-reduced-motion: no-preference) {
+  .rx-skel__line, .rx-skel__card { animation: rx-breathe 1.6s ease-in-out infinite alternate; }
+}
+@keyframes rx-breathe { from { opacity: 1; } to { opacity: 0.55; } }
+
+/* --- when a page can't load ------------------------------------------------------------------------- */
+.rx-problem { max-width: 34rem; }
+.rx-problem p { color: var(--paper-ink); }
+.rx-problem .btn { width: auto; margin-top: 1rem; padding-inline: 1.75rem; }
+
+/* ==========================================================================
+   Questions — /rescue/start/
+   ========================================================================== */
+
+.rx-flow { max-width: 46rem; margin-inline: auto; }
+/* a new question screen fades in (opacity only) */
+@media (prefers-reduced-motion: no-preference) {
+  .rx-screen { animation: rx-in 0.16s ease-out; }
+}
+@keyframes rx-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* five steps; names shown from 40rem (screen readers always get them) */
+.rx-progress { list-style: none; margin: 0 0 1.4rem; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.35rem; }
+.rx-progress li { display: grid; gap: 0.45rem; font-size: 0.75rem; line-height: 1.3; color: var(--paper-soft); }
+.rx-progress li::before { content: ""; height: 0.3rem; border-radius: 999px; background: var(--rx-track); }
+.rx-progress li.is-done::before,
+.rx-progress li[aria-current="step"]::before { background: var(--base); }
+.rx-progress li[aria-current="step"] { color: var(--paper-ink); font-weight: 600; }
+@media (max-width: 39.99rem) {
+  .rx-progress li span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
+.rx-stepcount { margin-bottom: 0.5rem; font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.01em; color: var(--base); }
+.rx-screen-head { margin-bottom: clamp(1.25rem, 3vw, 2rem); }
+.rx-start-note { margin-top: 0.75rem; font-size: 0.9375rem; font-weight: 600; color: var(--paper-ink); }
+
+/* the sheet you fill in; a hairline between questions */
+.rx .rx-form { padding: clamp(1.1rem, 2vw + 0.6rem, 2.5rem); }
+.rx-q { border: 0; margin: 0; padding: 1.6rem 0 1.65rem; min-width: 0; border-top: 1px solid var(--line-paper); }
+.rx-q:first-of-type, .rx-method + .rx-q { border-top: 0; padding-top: 0.35rem; }
+/* A floated legend sits in the flow like a heading instead of straddling the
+   fieldset's top rule. The body clears it; a clearing element's own top
+   margin would be eaten by the float, so the gap lives inside the body. */
+.rx-q > legend { float: left; width: 100%; padding: 0; }
+.rx-q__body { clear: left; padding-top: 0.05rem; }
+.rx-ask {
+  display: grid; grid-template-columns: 2rem minmax(0, 1fr); gap: 0 0.5rem;
+  font-family: var(--display); font-weight: 600; font-size: clamp(1.0625rem, 0.3vw + 1rem, 1.25rem);
+  line-height: 1.3; letter-spacing: -0.012em; color: var(--paper-ink); text-wrap: pretty;
+}
+.rx-ask__no { font-weight: 700; font-size: 0.875rem; color: var(--base); padding-top: 0.2em; }
+.rx-help, .rx-q .rx-well, .rx-options, .rx-q .chips, .rx-stepper, .rx-q .rx-other, .rx-q .rx-text, .rx-q .form-error { margin-left: 2.5rem; }
+.rx-help { padding-top: 0.45rem; font-size: 0.9375rem; line-height: 1.5; color: var(--paper-soft); }
+.rx-q .rx-well { margin-top: 0.75rem; }
+.rx-options { display: grid; gap: 0.5rem; margin-top: 0.95rem; }
+.rx-q .chips { margin-top: 0.95rem; }
+.rx-q .form-error { margin-top: 0.75rem; }
+.rx-q .rx-other { margin: 0.6rem 0 0; }
+.rx-q .rx-text { margin: 0.95rem 0 0; }
+.rx-other label { display: block; margin-bottom: 0.35rem; font-size: 0.875rem; font-weight: 600; color: var(--paper-ink); }
+/* short answers: two to a row on phones, three only from 40rem */
+@media (min-width: 40rem) { .chips--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* a section of a screen, named after the SFBB safe method it fills in */
+.rx-method {
+  margin: 0.5rem 0 1rem; padding-top: 1.6rem; border-top: 1px solid var(--rx-hair-firm);
+  font-family: var(--display); font-weight: 700; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--base);
+}
+.rx-method:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+
+/* --- an answer: a tile you tap. Chosen = cream with an olive ring and mark,
+       never a solid olive fill (ten ticked rows would turn the sheet green). --- */
+.rx-option,
+.rx-q .chip {
+  display: grid; grid-template-columns: 1.25rem minmax(0, 1fr); gap: 0.75rem; align-items: start;
+  min-height: 3rem; padding: 0.8rem 0.95rem;
+  background: var(--rx-sheet); color: var(--paper-ink);
+  border: 1px solid var(--rx-hair-firm); border-radius: 12px; box-shadow: var(--rx-shadow-1);
+  font-size: 1rem; line-height: 1.4; text-align: left; cursor: pointer;
+  -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
+  transition: border-color 0.16s var(--rx-ease), background-color 0.16s var(--rx-ease), box-shadow 0.16s var(--rx-ease), transform 0.09s ease;
+}
+.rx-q .chip { grid-template-columns: 1.125rem minmax(0, 1fr); gap: 0.5rem; padding: 0.6rem 0.7rem; min-height: 2.75rem; font-size: 0.9375rem; }
+@media (hover: hover) and (pointer: fine) {
+  .rx-option:hover, .rx-q .chip:hover { border-color: rgba(69, 75, 55, 0.55); box-shadow: 0 1px 2px rgba(28, 26, 21, 0.05), 0 6px 14px -8px rgba(28, 26, 21, 0.20); }
+}
+.rx-option:active, .rx-q .chip:active { transform: scale(0.985); background: var(--press-paper); }
+.rx-option input, .rx-q .chip input {
+  appearance: none; -webkit-appearance: none; position: relative; flex: none;
+  width: 1.25rem; height: 1.25rem; margin: 0.05rem 0 0;
+  /* the empty mark carries "not chosen": 5.59:1 on the sheet; the tile's own
+     outline is decorative, its label already names it */
+  border: 1.5px solid var(--paper-soft); border-radius: 999px; background: var(--rx-sheet);
+}
+.rx-q .chip input { width: 1.125rem; height: 1.125rem; margin-top: 0.08rem; }
+.rx-option input[type="checkbox"], .rx-q .chip--multi input { border-radius: 5px; }
+.rx-option:has(input:checked), .rx-option.is-on,
+.rx-q .chip:has(input:checked), .rx-q .chip.is-on {
+  background: var(--rx-chosen); border-color: var(--base); color: var(--paper-ink); box-shadow: inset 0 0 0 1px var(--base);
+}
+.rx-option:has(input:checked) input, .rx-q .chip:has(input:checked) input { border-color: var(--base); }
+.rx-option input[type="radio"]:checked, .rx-q .chip:not(.chip--multi) input:checked {
+  background: radial-gradient(circle, var(--base) 0 38%, var(--rx-sheet) 42%);
+}
+.rx-option input[type="checkbox"]:checked, .rx-q .chip--multi input:checked {
+  background-color: var(--base);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23FFFCF6' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round' d='M3.5 8.4l3 3 5.8-6'/%3E%3C/svg%3E");
+  background-size: 100% 100%;
+}
+.rx-option:has(input:focus-visible), .rx-q .chip:has(input:focus-visible) { outline: 2px solid var(--paper-ink); outline-offset: 3px; }
+.rx-option input:focus-visible, .rx-q .chip input:focus-visible { outline: none; }
+
+/* "None of these yet" / "None of these": always the last tile, after a thin
+   dashed rule. Choosing it clears the other ticks; ticking any other clears it. */
+.rx-none-sep { border: 0; border-top: 1px dashed var(--rx-hair-firm); margin: 0.2rem 0; }
+.rx-q .chips .rx-none-sep { grid-column: 1 / -1; }
+
+/* --- a count: minus, the value, plus ------------------------------------------------------ */
+.rx-stepper { display: inline-flex; align-items: stretch; margin-top: 0.95rem; background: var(--rx-sheet); border: 1px solid var(--rx-field); border-radius: 999px; box-shadow: var(--rx-shadow-1); }
+.rx-stepper button { width: 3rem; min-height: 3rem; border: 0; border-radius: 999px; background: none; cursor: pointer; font: inherit; font-size: 1.375rem; font-weight: 600; color: var(--paper-ink); transition: background-color 0.12s ease; }
+.rx-stepper button:active { background: var(--press-paper); }
+.rx-stepper input { width: 3.5rem; border: 0; background: none; text-align: center; font-family: var(--display); font-weight: 700; font-size: 1.25rem; color: var(--paper-ink); -moz-appearance: textfield; }
+.rx-stepper input::placeholder { color: var(--paper-hint); }
+.rx-stepper input::-webkit-inner-spin-button, .rx-stepper input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* --- the foot of a screen ----------------------------------------------------------------------- */
+.rx-form__foot { margin-top: 0.5rem; padding-top: 1.5rem; border-top: 1px solid var(--line-paper); display: grid; gap: 0.75rem; }
+.rx-form__foot .btn { width: 100%; }
+.rx .rx-form__foot .backlink { justify-self: center; margin: 0; color: var(--paper-soft); text-decoration: none; }
+.rx .rx-form__foot .backlink:active { color: var(--paper-ink); background: var(--press-paper); }
+@media (min-width: 40rem) {
+  .rx-form__foot { grid-template-columns: auto 1fr; align-items: center; }
+  .rx-form__foot .btn { width: auto; min-width: 16rem; justify-self: end; grid-column: 2; grid-row: 1; }
+  .rx .rx-form__foot .backlink { justify-self: start; grid-column: 1; grid-row: 1; }
+}
+
+/* "Not saved yet": a quiet line that stays until the save goes through */
+.rx-toast {
+  position: fixed; left: 50%; bottom: calc(1rem + env(safe-area-inset-bottom)); z-index: 60; transform: translateX(-50%);
+  max-width: min(30rem, calc(100vw - 2rem)); padding: 0.7rem 1.1rem;
+  background: var(--paper-ink); color: var(--vellum); border-radius: 999px;
+  font-size: 0.875rem; line-height: 1.4; text-align: center; box-shadow: var(--rx-shadow-lift);
+}
+
+/* ==========================================================================
+   The free check — /rescue/preview/
+   ========================================================================== */
+
+.rx-gaps { list-style: none; margin: 0; padding: 0; }
+.rx-gap { padding-block: 0.9rem; border-top: 1px solid var(--line-paper); }
+.rx-gap:first-child { border-top: 0; padding-top: 0.15rem; }
+.rx-gap:last-child { padding-bottom: 0; }
+.rx-gap__title { display: block; color: var(--paper-ink); font-weight: 600; font-size: 1rem; line-height: 1.4; }
+.rx-card .rx-gap p { margin-top: 0.3rem; font-size: 0.9375rem; }
+.rx-card .rx-gap .rx-gap__said { margin-top: 0.35rem; font-size: 0.875rem; line-height: 1.45; color: var(--paper-soft); }
+.rx-gaps + .rx-gaps { margin-top: 0.9rem; padding-top: 0.9rem; border-top: 1px solid var(--line-paper); }
+
+/* Today · Do first · Important · Good practice — a hierarchy, strongest first */
+.rx-tag {
+  display: inline-block; margin-bottom: 0.35rem; padding: 0.1rem 0.55rem;
+  font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.6;
+  border: 1px solid currentColor; border-radius: 999px;
+}
+.rx-tag--today { background: var(--unverified-paper); border-color: var(--unverified-paper); color: var(--rx-sheet); }
+.rx-tag--first { color: var(--unverified-paper); }
+.rx-tag--important { color: var(--base); }
+.rx-tag--good { color: var(--paper-soft); }
+
+/* Important and Good practice fold behind "Show N more" */
+.rx-more { margin-top: 0.9rem; padding-top: 0.9rem; border-top: 1px solid var(--line-paper); }
+.rx-more button { display: inline-flex; align-items: center; gap: 0.4rem; min-height: 2.75rem; padding: 0 0.1rem; border: 0; background: none; cursor: pointer; font: inherit; font-size: 0.9375rem; font-weight: 600; color: var(--base); text-decoration: underline; text-decoration-color: var(--rx-hair-firm); text-underline-offset: 0.25em; }
+.rx-more button::after { content: ""; width: 0.45rem; height: 0.45rem; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: translateY(-0.15rem) rotate(45deg); transition: transform 0.16s var(--rx-ease); }
+.rx-more button[aria-expanded="true"]::after { transform: translateY(0.1rem) rotate(-135deg); }
+@media (hover: hover) and (pointer: fine) { .rx-more button:hover { text-decoration-color: currentColor; } }
+
+/* S2: what you get / what Rellony does not do */
+.rx-scope__cols { display: grid; gap: 1.5rem; }
+@media (min-width: 52rem) { .rx-scope__cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; } }
+.rx-scope h3 { margin-bottom: 0.6rem; font-size: 1rem; }
+.rx-card .rx-scope__count { margin: -0.15rem 0 0.6rem; font-size: 0.9375rem; line-height: 1.5; color: var(--paper-ink); }
+.rx-scope ul { list-style: none; margin: 0; padding: 0; }
+.rx-scope li { position: relative; padding: 0.45rem 0 0.45rem 1.5rem; border-bottom: 1px solid var(--line-paper); font-size: 0.9375rem; line-height: 1.45; color: var(--paper-soft); }
+.rx-scope li:last-child { border-bottom: 0; }
+.rx-scope li::before { content: ""; position: absolute; left: 0; top: 1.05em; width: 0.6rem; height: 1px; background: var(--rx-hair-firm); }
+.rx-scope .rx-scope__does li::before { content: "\2713"; top: 0.45rem; width: auto; height: auto; background: none; color: var(--confirmed-paper); font-weight: 700; }
+.rx-sample { margin-top: 1.1rem; padding-top: 1rem; border-top: 1px solid var(--line-paper); font-size: 0.9375rem; }
+
+/* --- the price panel: an olive head, the paper you fill in below it ------------------------------ */
+.rx .rx-price { padding: 0; overflow: hidden; box-shadow: var(--rx-shadow-lift); }
+.rx-price__head { padding: clamp(1.35rem, 1.4vw + 0.9rem, 2.25rem) clamp(1.35rem, 1.4vw + 0.9rem, 2.25rem) clamp(1.1rem, 1vw + 0.8rem, 1.6rem); }
+.rx-price__head h2 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 0.4rem; font-size: 1.1875rem; color: var(--bone); }
+.rx-price__head .price__figure { color: var(--bone); }
+.rx-price__points { list-style: none; margin: 0.85rem 0 0; padding: 0; }
+.rx-price__points li { padding: 0.45rem 0; border-top: 1px solid var(--line); font-size: 0.9375rem; line-height: 1.45; color: var(--sage); }
+
+/* --- "Not for you right now?" -------------------------------------------------------------------- */
+.rx-exit { padding: 1.1rem clamp(1.35rem, 1.4vw + 0.9rem, 2.25rem) clamp(1.25rem, 1.2vw + 0.85rem, 2rem); text-align: center; font-size: 0.875rem; color: var(--paper-soft); }
+.rx-exit .linkish { position: relative; color: var(--paper-soft); text-decoration-color: var(--rx-hair-firm); }
+.rx-exit .linkish::after { content: ""; position: absolute; inset: -12px -8px; }
+.rx-exit-q { text-align: left; }
+.rx-exit-q .rx-ask { display: block; font-size: 1.0625rem; }
+.rx-exit-q .rx-options { margin-left: 0; margin-top: 0.75rem; }
+.rx-exit-q .rx-option { font-size: 0.9375rem; }
+/* the four reasons are buttons (one tap sends), drawn as answer tiles without a mark */
+.rx .rx-option--button { display: block; width: 100%; font-family: inherit; font-weight: 400; }
+.rx .rx-option--button[aria-pressed="true"] { background: var(--rx-chosen); border-color: var(--base); box-shadow: inset 0 0 0 1px var(--base); }
+.rx .rx-option--button[aria-busy="true"] { cursor: progress; }
+.rx-option--button:focus-visible { outline: 2px solid var(--paper-ink); outline-offset: 3px; }
+.rx-exit-note { margin-top: 0.9rem; }
+.rx-exit-note .field { margin-bottom: 0.75rem; }
+.rx .rx-exit-note .btn { width: auto; min-width: 8rem; }
+.rx-exit .rx-well { text-align: left; font-size: 0.9375rem; }
+
+/* --- when we can't help ---------------------------------------------------------------------------- */
+.rx-card.rx-refer p { font-size: 1.0625rem; line-height: 1.6; color: var(--paper-ink); }
+.rx-refer .rx-quiet { margin-top: 0.75rem; }
+
+/* ==========================================================================
+   Phone: the bar that keeps the one action in reach. When it shows is the
+   page's own rule (stickyBar in js/dom.js); it also hides while the footer
+   is on screen, and never shows at 64rem and wider.
+   ========================================================================== */
+.rx-sticky {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+  padding: 0.7rem 1rem calc(0.7rem + env(safe-area-inset-bottom));
+  background: rgba(255, 252, 246, 0.94);
+  -webkit-backdrop-filter: saturate(1.4) blur(14px); backdrop-filter: saturate(1.4) blur(14px);
+  border-top: 1px solid var(--rx-hair);
+  box-shadow: 0 -10px 30px -18px rgba(28, 26, 21, 0.35);
+  transition: transform 0.2s var(--rx-ease), opacity 0.2s var(--rx-ease), visibility 0s linear 0s;
+}
+.rx-sticky[hidden] { display: block !important; transform: translateY(110%); opacity: 0; visibility: hidden; pointer-events: none; transition: transform 0.2s var(--rx-ease), opacity 0.2s var(--rx-ease), visibility 0s linear 0.2s; }
+.rx-sticky .btn { width: 100%; min-height: 3rem; }
+.btn__meta { margin-left: 0.5rem; font-weight: 500; opacity: 0.8; }
+@media (min-width: 64rem) { .rx-sticky, .rx-sticky[hidden] { display: none !important; } }
+
+/* --- the footer: the site's olive band, S1, the five links, who runs it ----------------------------- */
+.rx .site-foot { text-align: center; }
+.rx-foot__s1 { max-width: 60ch; margin: 0 auto; font-size: 0.9375rem; line-height: 1.55; color: var(--bone); text-wrap: balance; }
+.rx .site-foot .foot__links { margin-top: 1.25rem; }
+.rx .site-foot .foot__note p { font-size: 0.8125rem; line-height: 1.55; color: var(--sage); text-wrap: balance; }
+.rx .site-foot .foot__note p + p { margin-top: 0.6rem; }
+.rx .site-foot .foot__note a { color: var(--bone); }
+
+/* --- phones ------------------------------------------------------------------------------------------- */
+@media (max-width: 40rem) {
+  .rx-help, .rx-q .rx-well, .rx-options, .rx-q .chips, .rx-stepper, .rx-q .rx-other, .rx-q .rx-text, .rx-q .form-error { margin-left: 0; }
+  .rx-ask { grid-template-columns: 1.75rem minmax(0, 1fr); }
+  .rx-q { padding: 1.35rem 0 1.4rem; }
+  .rx-option { padding: 0.75rem 0.85rem; }
+  .rx .rx-form { padding: 1.1rem 1rem; }
+  .rx-q .chips { gap: 0.4rem; }
+  .rx-q .chip { padding: 0.55rem 0.6rem; font-size: 0.875rem; }
+  /* five links: a centred wrap gives 3 + 2 */
+  .rx .site-foot .foot__links { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 1.5rem; max-width: 18rem; margin-inline: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rx-sticky, .rx-sticky[hidden] { transition: none; }
+}
