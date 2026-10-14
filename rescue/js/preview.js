@@ -56,11 +56,22 @@ function gapItem(g) {
 function officerSection(gaps) {
   if (!gaps.length) return null;
   return h("section", { class: "rx-card", id: "gaps-officer", "aria-labelledby": "h-officer" },
-    h("h2", { id: "h-officer" }, fmt("What the officer looks for — where you are")),
+    h("h2", { id: "h-officer" }, "What the officer looks for"),
+    h("p", { class: "rx-card__sub" }, "Where you are, from your answers"),
     h("ul", { class: "rx-gaps" }, gaps.map((g) => h("li", { class: "rx-gap" },
       g.urgent ? h("span", { class: "rx-tag rx-tag--today" }, "Today") : null,
       h("strong", { class: "rx-gap__title" }, say(g.title)),
       g.detail ? h("p", {}, say(g.detail)) : null))));
+}
+
+// Scrolls at once, without the page's smooth scrolling (styles.css), in every browser.
+function jumpBy(dy) {
+  if (Math.abs(dy) < 1) return;
+  const root = document.documentElement;
+  const was = root.style.scrollBehavior;
+  root.style.scrollBehavior = "auto";
+  scrollBy(0, dy);
+  root.style.scrollBehavior = was;
 }
 
 function answersSection(gaps) {
@@ -68,7 +79,8 @@ function answersSection(gaps) {
   const open = gaps.filter((g) => g.open);
   const more = gaps.filter((g) => !g.open);
   const section = h("section", { class: "rx-card", id: "gaps-answers", "aria-labelledby": "h-answers" },
-    h("h2", { id: "h-answers" }, "From your hygiene and handwashing answers"));
+    h("h2", { id: "h-answers" }, "Hygiene and handwashing"),
+    h("p", { class: "rx-card__sub" }, "What to fix, most urgent first"));
   // Today and Do first are open; Important and Good practice fold (shown open when nothing else is)
   if (!open.length || !more.length) {
     section.append(h("ul", { class: "rx-gaps" }, gaps.map(gapItem)));
@@ -78,9 +90,13 @@ function answersSection(gaps) {
   const toggle = h("button", { type: "button", "aria-expanded": "false", "aria-controls": "gaps-more" }, `Show ${more.length} more`);
   toggle.addEventListener("click", () => {
     const opening = rest.hidden;
+    const before = toggle.getBoundingClientRect().top;
     rest.hidden = !opening;
     toggle.setAttribute("aria-expanded", String(opening));
     toggle.textContent = opening ? "Show fewer" : `Show ${more.length} more`;
+    // Closing shortens the page above the button: scroll with it, so the button stays under the
+    // finger and the next card follows (the page's own anchor; the browser's is off in rescue.css)
+    if (!opening) jumpBy(toggle.getBoundingClientRect().top - before);
   });
   section.append(h("ul", { class: "rx-gaps" }, open.map(gapItem)), rest, h("p", { class: "rx-more" }, toggle));
   return section;
@@ -174,11 +190,11 @@ function freeCheck(v) {
         scopeSection(v.counts)),
       h("div", { class: "rx-stack rx-aside" }, price)));
 
-  // the phone's bar: after the first gaps, hidden while the price panel (or the footer) is on screen
+  // the phone's bar: from the start, hidden while the price panel (or the footer) is on screen
   const jump = h("a", { class: "btn", href: "#price" }, fmt("Build your full system — £79"));
   const bar = h("div", { class: "rx-sticky", hidden: true }, jump);
   document.body.append(bar);
-  stickyBar(bar, { after: officer ?? price, hide: [price] });
+  stickyBar(bar, { hide: [price] });
 }
 
 // ---------------------------------------------------------------- when we can't help

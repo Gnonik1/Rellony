@@ -6,13 +6,13 @@
 import { call, normaliseCode, rawCode, session, sleep, startSession } from "./api.js";
 import { busy, problem, show } from "./cards.js";
 import { h, skeleton, toast } from "./dom.js";
-import { applyVisibility, readAnswer, renderQuestion, renumber, showError } from "./questions.js";
+import { applyVisibility, firstField, readAnswer, renderQuestion, showError } from "./questions.js";
 import { fmt, phrases, say } from "./text.js";
 
 const PROGRESS = ["Your business", "What you cook", "Team and records", "Hygiene", "Free check"];
 const STEPS = [
-  { screen: "F1.1", title: "Your business", sub: "Two quick checks first", lead: "About 3 minutes to your free check · no payment, no account", ids: ["p.type", "p.formal"] },
-  { screen: "F1.2", title: "What you cook and serve", sub: "So we only ask what applies to your kitchen", ids: ["p.food", "p.proc", "p.svc"] },
+  { screen: "F1.1", title: "Your business", sub: "Two quick checks first", lead: "Free · about 3 minutes · no account", ids: ["p.type", "p.formal"] },
+  { screen: "F1.2", title: "What you cook and serve", sub: "So we only ask what applies to you", ids: ["p.food", "p.proc", "p.svc"] },
   { screen: "F1.3", title: "Your team, equipment and records", sub: "A few counts, and what you keep today", ids: ["p.staff", "p.equip", "p.fridges", "p.freezers", "p.system", "p.records"] },
   { screen: "F2", title: "Personal hygiene and handwashing", sub: "The basics officers check first" },
 ];
@@ -150,11 +150,8 @@ function renderStep(step, { focus = true } = {}) {
       s.lead ? h("p", { class: "rx-start-note" }, phrases(s.lead)) : null),
     form));
 
-  // F1's questions number 01–11 across its three steps; F2's from 01
-  const first = s.ids ? bank.profile.findIndex((q) => q.id === s.ids[0]) + 1 : 1;
   const refresh = () => {
     if (evalCond) applyVisibility(form, ctx({ [into(step)]: collect(form).answers }), evalCond);
-    renumber(form, first);
   };
   refresh();
   form.addEventListener("change", refresh);
@@ -164,9 +161,10 @@ function renderStep(step, { focus = true } = {}) {
     if (submit.getAttribute("aria-busy") === "true") return;
     const { answers, missing } = collect(form);
     form.querySelectorAll("fieldset.rx-q").forEach((fs) => showError(fs, missing.includes(fs)));
+    // a required question stops the step here: nothing is saved and the page doesn't move on
     if (missing.length) {
       const fs = missing[0];
-      (fs.querySelector(".rx-q__body input:not([type=hidden])") || fs).focus();
+      firstField(fs).focus({ preventScroll: true });
       fs.scrollIntoView({ block: "start", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
       return;
     }

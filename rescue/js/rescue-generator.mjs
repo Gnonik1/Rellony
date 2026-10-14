@@ -49,10 +49,13 @@ export function programmeDates(day0) {
 // ---------------------------------------------------------------- conditions
 const ATOM = /^(!?)([pa])\.(.+)\.([A-Za-z0-9_+\-]+)$/;
 
+// An answer holds `val`: a plain value, a list, "Something else" on a choice ({ value: "other", other })
+// or on a multi ({ values, other } — "other" holds when its text isn't empty).
 function has(v, val) {
   if (v === undefined || v === null) return false;
   if (Array.isArray(v)) return v.includes(val);
-  if (typeof v === "object" && v.value !== undefined) return v.value === val; // {value, other}
+  if (typeof v === "object" && Array.isArray(v.values)) return v.values.includes(val) || (val === "other" && !!clean(v.other));
+  if (typeof v === "object" && v.value !== undefined) return v.value === val;
   return String(v) === val;
 }
 
@@ -558,11 +561,6 @@ function buildChecks(bank, ctx) {
 const FREQ_LABEL = { after_use: "After each use", shift: "Every shift", daily: "Daily", weekly: "Weekly", fortnightly: "Every 2 weeks", monthly: "Monthly", quarterly: "Every 3 months" };
 const DAY_KEYS = { mon: "Mon", monday: "Mon", tue: "Tue", tues: "Tue", tuesday: "Tue", wed: "Wed", wednesday: "Wed", thu: "Thu", thur: "Thu", thurs: "Thu", thursday: "Thu", fri: "Fri", friday: "Fri", sat: "Sat", saturday: "Sat", sun: "Sun", sunday: "Sun" };
 
-function answerHas(v, val) {
-  if (v && typeof v === "object" && !Array.isArray(v) && Array.isArray(v.values)) return v.values.includes(val);
-  return has(v, val);
-}
-
 export function buildFill(bank, fieldmap, input, pack) {
   const ctx = ctxOf(input);
   const applies = Object.fromEntries(bank.methods.map((m) => [m.id, evalCond(m.applies, ctx)]));
@@ -589,7 +587,7 @@ export function buildFill(bank, fieldmap, input, pack) {
       const m = ATOM.exec(a);
       if (!m) throw new Error(`bad fill condition: ${raw}`);
       const [, , kind, ref, val] = m;
-      r = answerHas(kind === "p" ? ctx.profile?.["p." + ref] : ctx.answers?.[ref], val);
+      r = has(kind === "p" ? ctx.profile?.["p." + ref] : ctx.answers?.[ref], val);
     }
     return neg ? !r : r;
   };

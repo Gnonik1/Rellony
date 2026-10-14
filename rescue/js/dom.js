@@ -48,12 +48,14 @@ export function toast(text) {
 }
 
 // The phone's sticky bar. Two rules:
-//   { main }        shown from the start until `main` first comes on screen, then never again on this
-//                   visit; never if `main` is on screen at load (the personal page)
-//   { after, hide } shown once `after` has scrolled past the top, hidden while any of `hide` is on
-//                   screen (the free check)
+//   { main }  shown from the start until `main` first comes on screen, then never again on this
+//             visit; never if `main` is on screen at load (the personal page)
+//   { hide }  shown from the start, hidden while any of `hide` is on screen (the free check: the
+//             price panel)
 // Both: hidden while the footer is on screen. CSS keeps it off at 64rem and wider.
-export function stickyBar(bar, { main, after, hide = [] }) {
+// It is checked on scroll, on resize, and whenever the page changes height without a scroll
+// ("Show fewer", an opened question): a shorter page can bring the footer up under a still finger.
+export function stickyBar(bar, { main, hide = [] }) {
   const foot = document.querySelector(".site-foot");
   const visible = (el, inset = 0) => {
     const r = el.getBoundingClientRect();
@@ -67,11 +69,12 @@ export function stickyBar(bar, { main, after, hide = [] }) {
       if (visible(main, bar.hidden ? 0 : bar.offsetHeight)) mainSeen = true;
       show = !mainSeen;
     } else {
-      show = after.getBoundingClientRect().top < 0 && !hide.some((el) => visible(el));
+      show = !hide.some((el) => visible(el));
     }
     bar.hidden = !show || (foot ? visible(foot) : false);
   };
   addEventListener("scroll", update, { passive: true });
   addEventListener("resize", update);
+  if ("ResizeObserver" in window) new ResizeObserver(() => update()).observe(document.body);
   update();
 }
