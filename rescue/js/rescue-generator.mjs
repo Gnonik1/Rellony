@@ -468,7 +468,7 @@ export function buildPack(bank, library, input, fieldmap = null) {
 
   return {
     meta: {
-      generator: "rellony-rescue-generator 1.3.0",
+      generator: "rellony-rescue-generator 1.3.1",
       bankVersion: bank.version,
       packDate: input.packDate,
       programme: programmeDates(input.packDate),
@@ -780,8 +780,12 @@ export function sfbbPointer(fieldmap, bank, step) {
     const p = fieldmap.parts[step.ref.part];
     return { mode: "part", label: p.label, where: pageRange(p.pages) };
   }
-  const r = packRef(fieldmap, step.ref);
   const m = step.method ? bank.methods.find((x) => x.id === step.method) : null;
+  // A choice whose chosen option is the gap (e.g. "A hand dryer") fills its own box now — the pack's "what do you
+  // use instead?" — so no box waits to be ticked or written when the step is done: point to the safe method.
+  // (Stage E held RR-0002 for this: "write what you now do in the box" on a box the fill had written.)
+  const chosen = step.ref?.q && m ? m.questions?.find((q) => q.id === step.ref.q)?.type === "choice" : false;
+  const r = chosen ? null : packRef(fieldmap, step.ref);
   if (r && r.exact && r.kind === "check" && (r.box === "yes" || r.box === "tick")) {
     return { mode: r.box === "yes" ? "tick_yes" : "tick", label: m?.title || null, where: `page ${r.page}`, page: r.page, field: r.field };
   }

@@ -196,6 +196,14 @@ html:has(body.rx) { background: var(--vellum); scroll-padding-bottom: 6rem; over
   .rx .btn--secondary:hover { background: var(--rx-tint); border-color: var(--base); box-shadow: inset 0 0 0 1px var(--base), 0 6px 16px -10px rgba(46, 51, 38, 0.45); }
 }
 .rx .btn--secondary:active { background: var(--press-paper); border-color: var(--base); box-shadow: inset 0 0 0 1px var(--base); }
+/* inside a form, styles.css's form:valid .btn:hover / :active (0,3,1) painted the outlined button dark under its
+   dark text ("Add your own opening check", "Refund £79"): the outlined button keeps its own fills there */
+@media (hover: hover) and (pointer: fine) {
+  .rx form .btn.btn--secondary:hover { background: var(--rx-tint); border-color: var(--base); }
+  .rx .rx-olive form .btn.btn--secondary:hover { background: var(--wash); border-color: var(--bone); }
+}
+.rx form .btn.btn--secondary:active { background: var(--press-paper); border-color: var(--base); }
+.rx .rx-olive form .btn.btn--secondary:active { background: var(--press-olive); border-color: var(--bone); }
 
 /* --- the page's one olive card ----------------------------------------------------------------- */
 .rx .rx-olive {
