@@ -1964,17 +1964,27 @@ form:valid .btn[aria-busy="true"] { opacity: 0.6; cursor: progress; }
 .rescue-band__h { font-family: var(--display); font-weight: 700; font-size: clamp(1.25rem, 0.9vw + 1rem, 1.625rem); line-height: 1.2; color: var(--bone); }
 .rescue-band__sub { margin-top: 0.4rem !important; max-width: 60ch; font-size: 0.9375rem; line-height: 1.55; color: var(--sage); }
 .rescue-band__actions { display: grid; gap: 1rem; justify-items: start; }
-@media (min-width: 40rem) { .rescue-band__actions { grid-auto-flow: column; align-items: end; gap: 1.5rem; } }
+@media (min-width: 40rem) { .rescue-band__actions { grid-auto-flow: column; align-items: center; gap: 1.5rem; } }
 .rescue-band__go { display: inline-flex; align-items: center; min-height: 2.75rem; padding: 0 1.4rem; border-radius: 999px;
   background: var(--bone); color: var(--olive-ink); font-weight: 600; text-decoration: none; transition: background-color 0.15s ease; }
 .rescue-band__go:hover { background: #FFFCF6; }
-.rescue-band__code { display: grid; gap: 0.35rem; }
-.rescue-band__code label { font-size: 0.8125rem; color: var(--sage); }
+.rescue-band__code { display: flex; align-items: center; gap: 0.75rem; }
+.rescue-band__code label { font-size: 0.875rem; color: var(--sage); white-space: nowrap; }
+.rescue-band__vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .rescue-band__field { display: flex; }
-.rescue-band__code input { width: 8.5rem; min-height: 2.75rem; padding: 0 0.9rem; border: 1px solid var(--line-firm); border-right: 0;
+.rescue-band .rescue-band__code input[type="text"] { width: 7rem; min-height: 2.75rem; padding: 0 0.9rem; border: 1px solid var(--line-firm); border-right: 0;
   border-radius: 999px 0 0 999px; background: var(--wash); color: var(--bone); font: 600 1rem/1 var(--record); letter-spacing: 0.12em; text-transform: uppercase; }
 .rescue-band__code button { min-height: 2.75rem; padding: 0 1.15rem; border: 1px solid var(--line-firm); border-radius: 0 999px 999px 0;
   background: transparent; color: var(--bone); font: 600 0.9375rem/1 var(--text); cursor: pointer; transition: background-color 0.15s ease; }
 .rescue-band__code button:hover { background: var(--wash); }
+/* the site's text-box rules (hover, focus: dark border and inner ring) are for white forms, not the olive band */
+.rescue-band .rescue-band__code input[type="text"]:hover { border-color: var(--rule); }
+.rescue-band .rescue-band__code input[type="text"]:focus { border-color: var(--bone); box-shadow: none; }
+.rescue-band .rescue-band__code input::placeholder { color: var(--sage); opacity: 0.7; letter-spacing: 0.04em; text-transform: none; font-family: var(--text); font-weight: 400; }
+@media (max-width: 39.99rem) {
+  .rescue-band__inner { gap: 1rem; padding-block: 1.1rem 1.2rem; }
+  .rescue-band__sub { font-size: 0.875rem; }
+  .rescue-band__actions { gap: 0.75rem; }
+}
 .rescue-band__go:focus-visible, .rescue-band__code input:focus-visible, .rescue-band__code button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { .rescue-band__go, .rescue-band__code button { transition: none; } }
