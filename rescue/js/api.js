@@ -41,6 +41,34 @@ export const session = {
   },
 };
 
+// The private link of an order (Phase 5): the token after #t= in the link we email. It is kept in this
+// browser (like the session token) so the owner can come back without the email, and taken out of the
+// address bar at once, so it isn't shown, bookmarked or shared by accident.
+const ORDER_KEY = "rellony.rescue.order";
+let heldLink = null;
+export const orderLink = {
+  get() {
+    try { return JSON.parse(localStorage.getItem(ORDER_KEY) || "null")?.link ?? heldLink; } catch { return heldLink; }
+  },
+  set(link, ref = null) {
+    heldLink = link;
+    try { localStorage.setItem(ORDER_KEY, JSON.stringify({ link, ref })); } catch { /* storage blocked: this page only */ }
+  },
+  clear() {
+    heldLink = null;
+    try { localStorage.removeItem(ORDER_KEY); } catch { /* nothing to clear */ }
+  },
+  // #t=<token> in the address: keep it, and drop it from the address (any other hash stays)
+  fromAddress() {
+    const m = /(?:^#|&)t=([A-Za-z0-9_-]{44})(?:&|$)/.exec(location.hash);
+    if (!m) return null;
+    this.set(m[1]);
+    const rest = location.hash.replace(/(^#|&)t=[A-Za-z0-9_-]{44}/, "$1").replace(/^#&/, "#").replace(/&$/, "");
+    history.replaceState(null, "", location.pathname + location.search + (rest === "#" ? "" : rest));
+    return m[1];
+  },
+};
+
 // The letter code in the address bar (?c=…), as typed, or null.
 export function rawCode() {
   const c = new URLSearchParams(location.search).get("c");

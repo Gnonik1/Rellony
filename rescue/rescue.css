@@ -552,3 +552,177 @@ html:has(body.rx) { background: var(--vellum); scroll-padding-bottom: 6rem; over
 @media (prefers-reduced-motion: reduce) {
   .rx-sticky, .rx-sticky[hidden] { transition: none; }
 }
+
+/* ==========================================================================
+   Phase 5 — the checkout, the paid questions, the pack page, the legal pages
+   (design v1.5 §11). Same materials: paper, warm sheets, one olive card.
+   ========================================================================== */
+
+/* --- the checkout: the paper under the price panel's olive head ------------------------------------ */
+.rx-pay { display: grid; gap: 1rem; padding: clamp(1.25rem, 1.2vw + 0.9rem, 2rem) clamp(1.35rem, 1.4vw + 0.9rem, 2.25rem) 0; }
+.rx-pay__form { display: grid; gap: 1rem; }
+.rx-pay__form .field { margin: 0; }
+.rx-pay__form input { width: 100%; min-height: 3rem; }
+.rx-pay .btn { width: 100%; }
+.rx-summary { display: grid; gap: 0.35rem; padding: 0.95rem 1rem; font-size: 0.9375rem; }
+.rx-summary:focus { outline: none; }
+.rx-summary:focus-visible { outline: 2px solid var(--paper-ink); outline-offset: 3px; }
+.rx-summary p { margin: 0; color: var(--paper-ink); overflow-wrap: anywhere; }
+.rx-summary .rx-summary__h { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--base); }
+.rx-summary__suggest { padding: 0.45rem 0.6rem; border-radius: 6px; background: rgba(150, 36, 26, 0.06); }
+.rx-summary .linkish { min-height: 2.75rem; padding: 0 0.15rem; }
+.rx-summary__edit a { color: var(--paper-ink); }
+.rx .rx-s3 { font-size: 0.9375rem; line-height: 1.45; cursor: pointer; }
+.rx .rx-s3 a { color: var(--paper-ink); }
+.rx .rx-s3.is-invalid { border-color: var(--contradicted-paper); box-shadow: inset 0 0 0 1px var(--contradicted-paper); }
+.rx-paybuttons { display: grid; gap: 0.6rem; min-height: 6.6rem; align-content: start; transition: opacity 0.2s var(--rx-ease); }
+.rx-paybuttons.is-busy { opacity: 0.45; pointer-events: none; }
+.rx-paybuttons paypal-button, .rx-paybuttons paypal-basic-card-container { display: block; width: 100%; }
+.rx-paybuttons__wait { display: grid; gap: 0.6rem; }
+.rx-paybuttons__wait span { height: 3rem; border-radius: 999px; background: var(--rx-track); }
+@media (prefers-reduced-motion: no-preference) { .rx-paybuttons__wait span { animation: rx-breathe 1.2s ease-in-out infinite alternate; } }
+.rx-card .rx-pay__note, .rx-pay__note { margin: 0; font-size: 0.8125rem; line-height: 1.5; color: var(--paper-soft); text-align: center; }
+.rx-pay__status:empty { display: none; }
+.rx-wait { position: relative; padding-left: 2.2rem; }
+.rx-wait::before { content: ""; position: absolute; left: 0.85rem; top: 50%; width: 0.85rem; height: 0.85rem; margin-top: -0.425rem; border-radius: 999px; border: 2px solid var(--rx-track); border-top-color: var(--base); }
+@media (prefers-reduced-motion: no-preference) { .rx-wait::before { animation: rx-spin 0.9s linear infinite; } }
+@keyframes rx-spin { to { transform: rotate(360deg); } }
+
+/* --- after payment, and other one-card screens -------------------------------------------------- */
+.rx-done { max-width: 38rem; }
+.rx-done .rx-action { display: grid; gap: 1rem; }
+.rx .rx-action__lead { margin: 0; font-family: var(--display); font-weight: 600; font-size: 1.125rem; line-height: 1.4; color: var(--bone); text-wrap: pretty; }
+.rx-done .rx-action .btn-note { margin-top: 0; }
+.rx-done__ref { margin-top: 1rem; }
+.rx-action .btn-note--top { margin: 0 0 0.85rem; }
+.rx-again { display: grid; gap: 0.75rem; }
+.rx-again .btn { width: 100%; }
+.rx-again__form { display: grid; gap: 0.75rem; }
+.rx-again__form input { width: 100%; min-height: 3rem; }
+.rx .rx-olive .rx-again__done { margin: 0; color: var(--bone); line-height: 1.5; }
+.rx .rx-olive .form-error { background: rgba(240, 239, 227, 0.12); color: var(--bone); }
+.rx-again__done:focus { outline: none; }
+
+/* --- the paid questions ------------------------------------------------------------------------- */
+.rx-progress--paid { grid-template-columns: repeat(var(--n, 11), minmax(0, 1fr)); gap: 0.25rem; }
+.rx-progress--paid li span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.rx-q-note { margin-top: 1rem; text-align: center; }
+.rx-text .hint { margin: 0 0 0.4rem; font-size: 0.875rem; }
+.rx-text input { width: 100%; min-height: 3rem; }
+.rx-suggest { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.55rem; }
+.rx .rx-suggest__b { min-height: 2.75rem; padding: 0 0.95rem; border: 1px solid var(--rx-hair-firm); border-radius: 999px; background: var(--rx-sheet); color: var(--paper-ink); font: inherit; font-size: 0.875rem; cursor: pointer; box-shadow: var(--rx-shadow-1); }
+.rx .rx-suggest__b:active { background: var(--press-paper); transform: scale(0.97); }
+.rx-struct { margin-top: 1.05rem; display: grid; gap: 0.5rem; }
+.rx-struct textarea { width: 100%; min-height: 9rem; line-height: 1.5; }
+.rx .rx-struct select, .rx .rx-freq {
+  min-height: 2.75rem; padding: 0.35rem 2rem 0.35rem 0.7rem; border: 1px solid var(--rx-field); border-radius: 8px;
+  background: var(--rx-sheet); color: var(--paper-ink); font: inherit; font-size: 0.9375rem; max-width: 100%;
+}
+.rx .rx-freq:disabled { opacity: 0.45; }
+.rx .rx-sched__h { margin: 0.9rem 0 0.1rem; font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.01em; color: var(--base); }
+.rx-sched__h:first-child { margin-top: 0; }
+.rx-sched, .rx-own, .rx-suppliers, .rx-checks__sfbb { list-style: none; margin: 0; padding: 0; }
+.rx-sched__row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.5rem 0.75rem; align-items: center; padding: 0.5rem 0; border-top: 1px solid var(--line-paper); }
+.rx-sched__item { display: flex; gap: 0.65rem; align-items: flex-start; min-height: 2.75rem; padding-top: 0.55rem; cursor: pointer; font-size: 0.9375rem; line-height: 1.4; }
+.rx-sched__row.is-off .rx-sched__item span { color: var(--paper-soft); }
+.rx-struct input[type="checkbox"], .rx-sched__dis input, .rx-steps input, .rx-day input { accent-color: var(--base); width: 1.15rem; height: 1.15rem; flex: none; margin: 0.1rem 0 0; }
+.rx-sched__row--own { grid-template-columns: minmax(0, 1fr) auto; }
+.rx-sched__row--own input[type="text"] { grid-column: 1 / -1; width: 100%; min-height: 2.75rem; }
+.rx-sched__dis { display: inline-flex; gap: 0.5rem; align-items: center; min-height: 2.75rem; font-size: 0.875rem; }
+.rx .rx-remove { justify-self: start; min-height: 2.75rem; padding: 0 0.15rem; font-size: 0.875rem; color: var(--paper-soft); }
+.rx .rx-add { justify-self: start; width: auto; min-height: 2.75rem; margin-top: 0.4rem; padding-inline: 1.2rem; font-size: 0.9375rem; }
+.rx-menu { display: grid; gap: 0.4rem; }
+.rx-menu__eg { margin: 0.1rem 0 0.4rem 2.2rem; }
+.rx-menu__eg label { display: block; margin-bottom: 0.2rem; font-size: 0.875rem; font-weight: 600; }
+.rx-menu__eg .hint { margin: 0 0 0.35rem; font-size: 0.8125rem; }
+.rx-menu__eg input { width: 100%; min-height: 2.75rem; }
+.rx-checks { display: grid; gap: 0.4rem; padding-bottom: 0.6rem; }
+.rx-checks__sfbb li { position: relative; padding: 0.3rem 0 0.3rem 1.4rem; font-size: 0.875rem; line-height: 1.45; color: var(--paper-soft); }
+.rx-checks__sfbb li::before { content: "\2713"; position: absolute; left: 0; color: var(--confirmed-paper); font-weight: 700; }
+.rx-own li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.5rem; align-items: center; margin-top: 0.4rem; }
+.rx-own input { width: 100%; min-height: 2.75rem; }
+.rx-extra { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.45rem; padding: 0.75rem 0; border-top: 1px solid var(--line-paper); }
+@media (min-width: 40rem) { .rx-extra { grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 1rem; } }
+.rx-extra:first-child { border-top: 0; padding-top: 0; }
+.rx-extra__what { font-weight: 600; font-size: 0.9375rem; color: var(--paper-ink); }
+.rx-card .rx-extra__detail, .rx-extra__detail { margin-top: 0.2rem; font-size: 0.875rem; line-height: 1.45; color: var(--paper-soft); max-width: 52ch; }
+.rx-supplier { display: grid; gap: 0.6rem; margin-bottom: 0.6rem; padding: 0.9rem 1rem; background: var(--vellum); border-radius: var(--r-input); }
+.rx-supplier .field { margin: 0; }
+.rx-supplier input[type="text"] { width: 100%; min-height: 2.75rem; }
+.rx-days { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.rx-days legend { width: 100%; margin-bottom: 0.3rem; font-size: 0.875rem; font-weight: 600; color: var(--paper-ink); }
+.rx-day { display: inline-flex; align-items: center; gap: 0.35rem; min-height: 2.75rem; padding: 0 0.7rem; border: 1px solid var(--rx-hair-firm); border-radius: 999px; background: var(--rx-sheet); font-size: 0.875rem; cursor: pointer; }
+.rx-day:has(input:checked) { background: var(--rx-chosen); border-color: var(--base); }
+.rx-day input { margin: 0; }
+
+/* check your answers */
+.rx-sum__head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: 0.6rem; }
+.rx-card .rx-sum__head h2 { margin: 0; }
+.rx .rx-sum__change { flex: none; display: inline-flex; align-items: center; min-height: 2.75rem; font-size: 0.9375rem; font-weight: 600; color: var(--base); }
+.rx-sum dl { margin: 0; }
+.rx-sum__row { display: grid; gap: 0.15rem; padding: 0.6rem 0; border-top: 1px solid var(--line-paper); }
+@media (min-width: 40rem) { .rx-sum__row { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 1rem; } }
+.rx-sum dt { font-size: 0.875rem; line-height: 1.45; color: var(--paper-soft); }
+.rx-sum dd { margin: 0; font-size: 0.9375rem; line-height: 1.45; color: var(--paper-ink); overflow-wrap: anywhere; }
+.rx-sum dd.is-missing { color: var(--contradicted-paper); font-weight: 600; }
+.rx .rx-make { display: grid; gap: 0.75rem; margin-top: 1rem; }
+.rx-make .btn { width: 100%; }
+@media (min-width: 40rem) { .rx-make .btn { width: auto; min-width: 16rem; justify-self: end; } }
+
+/* --- the pack page --------------------------------------------------------------------------------- */
+.rx-dates { max-width: 60ch; font-size: 1rem; }
+.rx-intro p { color: var(--paper-ink); }
+.rx-plan-pdf { display: grid; gap: 0.4rem; margin-top: 1rem; }
+.rx-plan-pdf .btn { width: 100%; }
+@media (min-width: 40rem) { .rx-plan-pdf .btn { width: auto; justify-self: start; padding-inline: 1.6rem; } }
+.rx-plan { display: grid; gap: 1rem; }
+.rx-plan > h2 { margin-top: 0.5rem; font-size: clamp(1.25rem, 0.6vw + 1.05rem, 1.625rem); }
+.rx-plan__intro { max-width: 62ch; color: var(--paper-soft); font-size: 0.9375rem; line-height: 1.55; }
+.rx-week h3 { margin-bottom: 0.9rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--line-paper); font-size: 1.0625rem; color: var(--base); }
+.rx-week--today h3 { color: var(--unverified-paper); }
+.rx-week__sub { font-weight: 500; color: var(--paper-soft); }
+.rx-topic + .rx-topic { margin-top: 1.25rem; }
+.rx-topic h4 { margin-bottom: 0.5rem; font-size: 1rem; color: var(--paper-ink); }
+.rx-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.45rem; }
+.rx-steps .rx-option { cursor: pointer; }
+.rx-steps .rx-option:has(input:checked) .rx-tile__text > :first-child { color: var(--paper-soft); }
+.rx-step__when { display: block; margin-top: 0.15rem; font-size: 0.8125rem; font-weight: 600; color: var(--confirmed-paper); }
+.rx-step__when:empty { display: none; }
+.rx-topic__ev { margin-top: 0.5rem; }
+.rx-sfbb h2 { color: var(--bone); font-size: 1.125rem; margin-bottom: 0.25rem; }
+.rx-sfbb__steps { list-style: none; counter-reset: step; margin: 0; padding: 0; display: grid; gap: 1.1rem; }
+.rx-sfbb__steps > li { counter-increment: step; display: grid; gap: 0.7rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+.rx .rx-sfbb .rx-sfbb__step { margin: 0; color: var(--sage); font-size: 0.9375rem; line-height: 1.5; }
+.rx-sfbb__step strong { display: block; margin-bottom: 0.2rem; color: var(--bone); font-family: var(--display); font-size: 1rem; }
+.rx-sfbb__step strong::before { content: counter(step) " · "; }
+.rx-sfbb .btn { width: 100%; }
+.rx-sfbb .btn-note { margin: 0; font-size: 0.8125rem; line-height: 1.5; color: var(--sage); }
+.rx-sfbb__out { display: grid; gap: 0.7rem; }
+.rx-sfbb__out:empty { display: none; }
+.rx .rx-sfbb__out p { margin: 0; color: var(--bone); }
+.rx .rx-sfbb__wrong { padding: 0.75rem 0.9rem; border-radius: var(--r-input); background: rgba(240, 239, 227, 0.12); line-height: 1.5; }
+.rx-scope--fold summary { cursor: pointer; min-height: 2.75rem; display: flex; align-items: center; font-family: var(--display); font-weight: 600; font-size: 1.0625rem; }
+.rx-scope--fold[open] summary { margin-bottom: 1rem; }
+.rx-order { align-items: center; }
+
+/* --- Terms, Refunds, Legal information -------------------------------------------------------------- */
+.rx-legal { max-width: 46rem; }
+.rx-legal .h1-rule { display: block; }
+.rx-legal h2 { margin: 2rem 0 0.5rem; font-size: 1.125rem; color: var(--paper-ink); }
+.rx-legal p, .rx-legal li { max-width: 68ch; color: var(--paper-ink); line-height: 1.6; }
+.rx-legal p + p { margin-top: 0.6rem; }
+.rx-legal .rx-legal__sub { padding-left: 1.25rem; }
+.rx-legal ul { margin: 0.5rem 0 1rem; padding-left: 1.25rem; }
+.rx-legal li + li { margin-top: 0.35rem; }
+.rx-legal .rx-legal__summary { margin: 1rem 0 0.5rem; }
+.rx-legal .rx-fine { margin-top: 2rem; }
+
+/* --- Giorgi's review page ----------------------------------------------------------------------------- */
+.rx-review__plan { margin: 0.75rem 0 1rem; padding-left: 1.25rem; font-size: 0.9375rem; }
+.rx-review__plan > li + li { margin-top: 0.6rem; }
+.rx-review__plan ul { margin: 0.25rem 0 0; padding-left: 1rem; color: var(--paper-soft); }
+
+@media print {
+  .rx .site-head, .rx .site-foot, .rx-sfbb, .rx-plan-pdf, .rx-sticky, .rx-toast { display: none !important; }
+  .rx-card, .rx .panel { box-shadow: none; }
+}

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Rellony Rescue: the paid
+     questions, opened by the order's private link (kept in this browser).
+     Everything on this page is drawn by /rescue/js/paid.js from
+     /rescue/js/bank-client.json; the HTML is the frame and a skeleton that
+     holds the screen while it loads.
+     Our own scripts and styles only: no analytics, no third-party requests.
+     The functions origin is the one place it talks to; the local dev server
+     (127.0.0.1:54321) is there for testing on this laptop. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://ajuuvsrqmqtzpahmlubl.supabase.co http://127.0.0.1:54321; base-uri 'none'; form-action 'self'; object-src 'none'">
+<title>Your full system · Rellony Rescue</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://ajuuvsrqmqtzpahmlubl.supabase.co" crossorigin>
+<link rel="preload" href="/fonts/ibm-plex-sans-400-600-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/archivo-600-700-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/rescue/rescue.css">
+<link rel="modulepreload" href="/rescue/js/config.js">
+<link rel="modulepreload" href="/rescue/js/api.js">
+<link rel="modulepreload" href="/rescue/js/text.js">
+<link rel="modulepreload" href="/rescue/js/dom.js">
+<link rel="modulepreload" href="/rescue/js/cards.js">
+<link rel="modulepreload" href="/rescue/js/questions.js">
+<script type="module" src="/rescue/js/paid.js"></script>
+</head>
+<body class="rx">
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head" id="top">
+  <div class="shell site-head__inner">
+    <span class="wordmark">
+      <img class="wm-full" src="/rellony-lockup.svg" alt="Rellony" width="141" height="40">
+      <img class="wm-mark" src="/rellony-mark-gradient.svg" alt="Rellony" width="24" height="34">
+    </span>
+    <span class="rx-product">Rescue</span>
+  </div>
+</header>
+
+<main id="main" class="rx-main" tabindex="-1" aria-busy="true">
+  <div class="shell" id="app">
+    <div class="rx-skel" aria-hidden="true"><div class="rx-skel__line"></div><div class="rx-skel__card"></div><div class="rx-skel__card"></div></div>
+  </div>
+</main>
+
+<footer class="site-foot">
+  <div class="shell">
+    <p class="rx-foot__s1">Rellony Rescue is a self-help service. We don’t visit premises, contact councils or promise ratings&nbsp;— the officer decides. Independent: not part of the FSA or any council.</p>
+    <ul class="foot__links">
+      <li><a href="/rescue/terms/">Terms</a></li>
+      <li><a href="/rescue/refunds/">Refunds</a></li>
+      <li><a href="/privacy/">Privacy</a></li>
+      <li><a href="/legal/">Legal information</a></li>
+      <li><a href="/stop/">Stop letters</a></li>
+    </ul>
+    <div class="foot__note">
+      <p>Rellony is a trading name of Giorgi Nonikashvili, Tbilisi, Georgia&nbsp;· <a href="mailto:rescue@rellony.com">rescue@rellony.com</a></p>
+      <p>The FSA’s <em>Safer food, better business for caterers</em>, used under the Open Government Licence v3.0 (the FSA doesn’t endorse Rellony). Ratings data: Food Standards Agency open data (Open Government Licence).</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

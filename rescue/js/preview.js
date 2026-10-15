@@ -1,11 +1,14 @@
 // /rescue/preview/ — the free check, or the screen that says we can't help.
 //   /rescue/preview/?c=CODE   for that letter's session; no code: a website visitor's own session
-// The payment block (email, order summary, S3, PayPal) comes in Phase 5; until then the price panel
-// ends with the price and "Not for you right now?".
-import { call, normaliseCode, rawCode, session, sleep, startSession } from "./api.js";
-import { busy, problem, scoreCard, show } from "./cards.js";
+// The price panel holds the checkout (checkout.js: email, order summary, S3, PayPal's buttons); after
+// payment the page becomes "Payment received", with the way into the paid questions. A session whose
+// business has bought shows that instead, with its private link (or a way to have it emailed again).
+import { call, normaliseCode, orderLink, rawCode, session, sleep, startSession } from "./api.js";
+import { busy, linkAgain, problem, scoreCard, show } from "./cards.js";
+import { checkout } from "./checkout.js";
+import { GET, item, NOT } from "./scope.js";
 import { h, hairline, newTab, skeleton, stickyBar } from "./dom.js";
-import { fmt, say } from "./text.js";
+import { fmt, phrases, say } from "./text.js";
 
 const STEP_OF = { "F1.1": 1, "F1.2": 2, "F1.3": 3, F2: 4 };
 const PILL = { "Today": "today", "Do first": "first", "Important": "important", "Good practice": "good" };
@@ -16,34 +19,6 @@ const selfUrl = () => `/rescue/preview/${code ? `?c=${code}` : ""}`;
 
 // ---------------------------------------------------------------- the free check
 const em = (text) => h("em", {}, text);
-const PACK = "Safer food, better business for caterers";
-// The scope box, word for word as the Terms and the Rescue plan have it; on the web "This Rescue
-// plan" reads "Your Rescue plan" and a one-sentence item drops its full stop (the stops rule)
-const GET = [
-  ["The FSA's own ", em(PACK), " pack, filled in on your device from your answers — you check it, finish it and sign it."],
-  ["Your Rescue plan: where you stand, a 4-week plan of the gaps in your answers (and in your council's letter, if you tell us what it says), and where each fix goes in your SFBB pack."],
-  ["An allergen matrix to fill in, and a daily fridge and freezer log (optional, unless your council's letter raises temperature records)."],
-  ["A short email on days 3, 7, 14 and 21, and a final one on day 28 with your self-check."],
-  ["A tool that turns your own photos into an evidence PDF, and a draft re-visit request you edit and send yourself."],
-  ["Answers to your emails about using your plan and your SFBB pack (rescue@rellony.com) within 2 working days, until support ends (day 35)."],
-];
-const NOT = [
-  "Visit or inspect your premises, or check the work you do.",
-  "Contact your council or act on your behalf.",
-  "Decide or check allergen information.",
-  "Give legal advice, or professional advice specific to your premises.",
-  "Certify or approve your business — the self-check is your own checklist.",
-  "Speak for the Food Standards Agency or your council — Rellony is independent of both.",
-  "Promise a rating — only the officer decides. Food safety stays your legal responsibility as the food business operator.",
-].map((x) => [x]);
-
-// One list item from its pieces: text pieces get the typography; the last text piece gets the stops
-// rule for the whole item.
-function item(pieces) {
-  const whole = pieces.map((p) => (typeof p === "string" ? p : p.textContent)).join("");
-  const last = pieces.length - 1;
-  return h("li", {}, pieces.map((p, i) => (typeof p !== "string" ? p : i === last && say(whole) !== fmt(whole) ? fmt(p.replace(/\.$/, "")) : fmt(p))));
-}
 
 function gapItem(g) {
   const said = g.said ? `${g.said.kind === "chose" ? "You said" : "Not ticked"}: ${say(g.said.text)}` : null;
@@ -117,7 +92,7 @@ function scopeSection(counts) {
       fmt(" — "), em("our Rescue plan for a fictional business")));
 }
 
-function pricePanel() {
+function pricePanel(v) {
   const exit = h("div", { class: "rx-exit" });
   const ask = h("button", { type: "button", class: "linkish" }, "Not for you right now?");
   ask.addEventListener("click", () => exitQuestion(exit));
@@ -129,7 +104,40 @@ function pricePanel() {
         h("li", {}, fmt("About 12 more minutes of questions")),
         h("li", {}, fmt("Your pack the same day — we check our first orders by hand, so allow up to 24 hours")),
         h("li", {}, fmt("£79 in total — we don't add VAT or any other charge")))),
+    checkout({ code, businessName: v.businessName, onPaid: paidScreen }),
     exit);
+}
+
+// ---------------------------------------------------------------- after payment (page copy §7)
+function paidScreen({ ref, email }) {
+  document.title = "Payment received · Rellony Rescue";
+  document.querySelector(".rx-sticky")?.remove();
+  const title = h("h1", { class: "rx-h1", tabindex: "-1" }, "Payment received");
+  show(h("div", { class: "rx-done" },
+    title,
+    hairline(),
+    h("section", { class: "panel rx-action rx-olive", "aria-label": "Finish your system" },
+      h("p", { class: "rx-action__lead" }, fmt("Let's finish your system — about 12 minutes. Your answers save as you go.")),
+      h("a", { class: "btn", href: "/rescue/q/", id: "main-action" }, "Finish your system"),
+      h("p", { class: "btn-note" }, fmt(`We've emailed a private link to ${email} so you can carry on later on any device.`))),
+    h("p", { class: "rx-done__ref rx-fine" }, phrases(`Order ${ref} · £79 · PayPal emails you its own receipt`))));
+  scrollTo(0, 0);
+  title.focus({ preventScroll: true });
+}
+
+// ---------------------------------------------------------------- a business that has bought
+function boughtScreen(v) {
+  // this browser holds the order's private link: straight to the pack page (it opens the questions
+  // while they're unfinished)
+  if (orderLink.get()) { location.replace("/p/"); return; }
+  document.title = "Already bought · Rellony Rescue";
+  show(h("div", { class: "rx-done" },
+    h("h1", { class: "rx-h1", tabindex: "-1" }, fmt("You've already bought Rellony Rescue")),
+    v.businessName ? h("p", { class: "rx-lede" }, fmt(`For ${v.businessName}`)) : null,
+    hairline(),
+    h("section", { class: "panel rx-action rx-olive", "aria-label": "Your private link" },
+      h("p", { class: "rx-action__lead" }, fmt("Your questions and your pack page open from the private link we emailed to the address used to pay.")),
+      linkAgain({ code, olive: true }))));
 }
 
 // "Not for you right now?": one question, one tap. Stored only as the funnel event
@@ -176,7 +184,7 @@ function exitQuestion(box) {
 function freeCheck(v) {
   document.title = "Your free check · Rellony Rescue";
   const officer = officerSection(v.profileGaps);
-  const price = pricePanel();
+  const price = pricePanel(v);
   // a visitor from the website has no letter, so no published scores: no score card or rule
   show(
     h("h1", { class: "rx-h1", tabindex: "-1" }, "Your free check"),
@@ -243,6 +251,7 @@ async function load(retaken = false) {
   const r = await call("preview", { token: session.get()?.token });
   if (r.status === 200 && r.data?.kind === "check") freeCheck(r.data);
   else if (r.status === 200 && r.data?.kind === "refer") refer(r.data);
+  else if (r.status === 200 && r.data?.kind === "bought") boughtScreen(r.data);
   else if (r.status === 409 && r.data?.error === "missing") location.replace(startUrl(STEP_OF[r.data.screen] ?? 1));
   else if (r.status === 401 && code && !retaken) { const s = await startSession(code); if (s.status === 200 || s.status === 201) load(true); else problem(() => load()); }
   else if (r.status === 401) location.replace(startUrl());

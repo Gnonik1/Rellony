@@ -437,7 +437,7 @@ export function buildPack(bank, library, input, fieldmap = null) {
 
   return {
     meta: {
-      generator: "rellony-rescue-generator 1.1.0",
+      generator: "rellony-rescue-generator 1.2.0",
       bankVersion: bank.version,
       packDate: input.packDate,
       programme: programmeDates(input.packDate),
@@ -486,7 +486,8 @@ export function buildPack(bank, library, input, fieldmap = null) {
     fourWeekly: bank.diary.four_weekly_review,
     briefings: bank.briefings,
     allergens: bank.allergens_14,
-    allergenMatrix: { dishes: (input.dishes || []).map(clean).filter(Boolean).slice(0, 80), blankRows: 20 },
+    // dish names: the owner's list on P3 (bank 1.2.0, MG4.q9), or input.dishes where a caller passes them
+    allergenMatrix: { dishes: dishNames(input.dishes || ctx.answers["MG4.q9"]), blankRows: 20 },
     records: {
       fridges: Math.max(0, Number(ctx.profile["p.fridges"] ?? 2)),
       freezers: Math.max(0, Number(ctx.profile["p.freezers"] ?? 1)),
@@ -498,6 +499,17 @@ export function buildPack(bank, library, input, fieldmap = null) {
     evidence,
     findings: (input.findings || []).map((f) => ({ ...f, text: clean(f.text) })),
   };
+}
+
+// Dish names for the allergen matrix: names only, each once (ignoring case), at most 80.
+function dishNames(list) {
+  const seen = new Set();
+  return (Array.isArray(list) ? list : []).map(clean).filter((d) => {
+    const k = d.toLowerCase();
+    if (!d || seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  }).slice(0, 80);
 }
 
 function buildCleaning(bank, ctx) {

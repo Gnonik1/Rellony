@@ -4,13 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- Rellony Rescue: the free
-     check, or the screen that says we can't help. Everything on this page is
-     drawn by /rescue/js/preview.js; the HTML is the frame and a skeleton that
-     holds the screen while it loads.
-     Our own scripts and styles only: no analytics, no third-party requests.
-     The functions origin is the one place it talks to; the local dev server
-     (127.0.0.1:54321) is there for testing on this laptop. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://ajuuvsrqmqtzpahmlubl.supabase.co http://127.0.0.1:54321; base-uri 'none'; form-action 'self'; object-src 'none'">
+     check (with the checkout in its price panel), or the screen that says we
+     can't help. Everything on this page is drawn by /rescue/js/preview.js; the
+     HTML is the frame and a skeleton that holds the screen while it loads.
+     No analytics. Our own functions are the one place it talks to (the local
+     dev server, 127.0.0.1:54321, is there for testing on this laptop) — until
+     the owner presses "Continue to payment": only then does PayPal's script
+     (JavaScript SDK v6) load, from *.paypal.com, with its frames, images and
+     calls. PayPal's buttons are web components that bring their own styles,
+     hence 'unsafe-inline' for styles on this page only (scripts stay 'self'
+     plus PayPal). Check the console in the PayPal sandbox test for any CSP
+     report before go-live (brief §0g). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://*.paypal.com https://*.paypalobjects.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.paypal.com https://*.paypalobjects.com; font-src 'self' https://*.paypalobjects.com; connect-src 'self' https://ajuuvsrqmqtzpahmlubl.supabase.co http://127.0.0.1:54321 https://*.paypal.com https://*.paypalobjects.com; frame-src https://*.paypal.com; base-uri 'none'; form-action 'self'; object-src 'none'">
 <title>Rellony Rescue</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -28,6 +33,8 @@
 <link rel="modulepreload" href="/rescue/js/text.js">
 <link rel="modulepreload" href="/rescue/js/dom.js">
 <link rel="modulepreload" href="/rescue/js/cards.js">
+<link rel="modulepreload" href="/rescue/js/checkout.js">
+<link rel="modulepreload" href="/rescue/js/scope.js">
 <script type="module" src="/rescue/js/preview.js"></script>
 </head>
 <body class="rx">

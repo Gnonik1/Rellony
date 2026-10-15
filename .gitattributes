@@ -1,0 +1,3 @@
+# The vendored libraries are kept byte for byte as npm ships them (their SHA-256 is pinned in
+# Rellony-rescue's tools/sync-copies): no line-ending conversion, ever.
+rescue/vendor/** -text

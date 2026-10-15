@@ -1,8 +1,8 @@
 // /r/ — the personal page a letter's QR code or printed address leads to.
 //   /r/?c=CODE  the page for that letter (404.html sends /r/CODE here)
 //   /r/         the code box ("Got our letter?"), also shown for a code we can't find
-import { call, normaliseCode, rawCode } from "./api.js";
-import { busy, problem, scoreCard, show } from "./cards.js";
+import { call, normaliseCode, orderLink, rawCode } from "./api.js";
+import { busy, linkAgain, problem, scoreCard, show } from "./cards.js";
 import { h, hairline, newTab, skeleton, stickyBar } from "./dom.js";
 import { fmt, longDate, money, phrases } from "./text.js";
 
@@ -61,7 +61,7 @@ function render(p) {
   const start = `/rescue/start/?c=${p.code}`;
   const h1 = p.r10 > 1 ? `${name}: one score is holding you at 1` : `${name}, here's where you stand`;
 
-  const action = h("a", { class: "btn btn--two", id: "main-action", href: start },
+  const action = p.bought ? null : h("a", { class: "btn btn--two", id: "main-action", href: start },
     h("span", {}, "Check your business free"),
     h("span", { class: "btn__sub" },
       h("span", {}, fmt("About 3 minutes")),
@@ -87,7 +87,7 @@ function render(p) {
       h("div", { class: "rx-stack" }, status, scoreCard(p.scores, p.r10)),
       h("div", { class: "rx-stack rx-aside" },
         // the page's one olive card; the letter-first block joins it in Phase 4
-        h("section", { class: "panel rx-action rx-olive", "aria-label": "Your free check" },
+        p.bought ? boughtCard(p) : h("section", { class: "panel rx-action rx-olive", "aria-label": "Your free check" },
           action,
           h("p", { class: "btn-note" }, fmt(`Your answers save under your code — scan the QR again or type rellony.com/r/${p.code} on any device to carry on`))),
         councilCard(p))),
@@ -96,11 +96,24 @@ function render(p) {
       h("a", { class: "rx-quiet", href: "/stop/" }, "Stop letters"),
       h("a", { class: "rx-quiet", href: "/privacy/" }, "Privacy")));
 
-  // the phone's bar: from the start until the main button first comes on screen
+  // the phone's bar: from the start until the main button first comes on screen (none once bought)
+  if (!action) return;
   const bar = h("div", { class: "rx-sticky", hidden: true },
     h("a", { class: "btn", href: start }, "Check your business free", h("span", { class: "btn__meta" }, fmt("· 3 min"))));
   document.body.append(bar);
   stickyBar(bar, { main: action });
+}
+
+// Once the business has bought (Phase 5): its pack page, if this browser holds the private link, or
+// the link emailed again to the address used to pay.
+function boughtCard(p) {
+  const held = orderLink.get();
+  return h("section", { class: "panel rx-action rx-olive", "aria-label": "Rellony Rescue" },
+    h("p", { class: "rx-action__lead" }, fmt("You've bought Rellony Rescue for this business")),
+    held
+      ? h("a", { class: "btn", href: "/p/", id: "main-action" }, "Open your pack page")
+      : [h("p", { class: "btn-note btn-note--top" }, fmt("Your questions and your pack page open from the private link we emailed to the address used to pay")),
+        linkAgain({ code: p.code, olive: true })]);
 }
 
 // ---------------------------------------------------------------- load

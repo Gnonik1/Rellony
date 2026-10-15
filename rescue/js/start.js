@@ -88,6 +88,12 @@ function flush() {
         toast(null);
         expired();
         return false;
+      } else if (r.status === 409 && r.data?.error === "bought") {
+        // the business has bought since this page loaded: the free check says so
+        queue.clear();
+        toast(null);
+        location.replace(previewUrl());
+        return false;
       } else if (r.status === 409) {
         // the questions changed since this page loaded: load them again (once)
         queue.clear();
@@ -250,6 +256,8 @@ async function load() {
   if (r.status === 404) { location.replace(`/r/?c=${code}`); return; }
   if (r.status === 410) { expired(); return; }
   if (!(r.status === 200 || r.status === 201) || !b) { problem(load); return; }
+  // bought: the free answers are locked (corrections are made in the paid area); the free check says so
+  if (r.data.bought) { location.replace(previewUrl()); return; }
   bank = b;
   state = { profile: r.data.profile || {}, answers: r.data.answers || {} };
   if (!evalCond && hasConditions()) {
