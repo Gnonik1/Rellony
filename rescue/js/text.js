@@ -34,14 +34,17 @@ export function longDate(iso) {
 }
 export const money = (n) => (Number.isInteger(n) ? String(n) : Number(n).toFixed(2));
 
-// A line of phrases joined by " · " that breaks at a dot, never inside a phrase.
+// A line of phrases joined by " · " that breaks after a dot, never inside a phrase and never before a dot:
+// each dot ends its phrase inside the phrase's box (a no-break space next to an inline block doesn't stop
+// a break there — CSS Text 3, so the dot alone could start a line, as on an iPhone).
 export function phrases(text) {
   const out = document.createDocumentFragment();
-  fmt(text).split(" · ").forEach((p, i) => {
-    if (i) out.append(" · ");
+  const parts = fmt(text).split(" · ");
+  parts.forEach((p, i) => {
+    if (i) out.append(" ");
     const span = document.createElement("span");
     span.className = "rx-nw";
-    span.textContent = p;
+    span.textContent = i < parts.length - 1 ? `${p}\u00a0\u00b7` : p;
     out.append(span);
   });
   return out;

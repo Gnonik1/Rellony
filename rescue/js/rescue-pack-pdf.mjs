@@ -61,27 +61,46 @@ const cite = (pack, key) => (pack.meta.sfbb?.cites?.[key] ? `pack page ${pack.me
 const paren = (s) => (s ? ` (${s})` : "");
 
 // For a step that points at one box, the topic line names the whole safe method (its page range).
-const relatedWhere = (pack, s) => {
-  const id = s.method;
-  const raw = id ? pack.meta.sfbb?.methodPages?.[id] : null;
-  if (!raw) return s.sfbb.where;
-  const parts = String(raw).split(",").map((x) => x.trim().replace("-", "–")).filter(Boolean);
+const relatedWhere = (pack, method, x) => {
+  const raw = method ? pack.meta.sfbb?.methodPages?.[method] : null;
+  if (!raw) return x.where;
+  const parts = String(raw).split(",").map((y) => y.trim().replace("-", "–")).filter(Boolean);
   return `${parts.length > 1 || parts[0].includes("–") ? "pages" : "page"} ${parts.join(" and ")}`;
 };
 
-// One line under a plan step that points at a box in the SFBB pack.
-export function pointerText(s) {
-  const x = s.sfbb;
-  if (!x) return null;
-  const of = x.label ? ` (${x.label})` : "";
-  switch (x.mode) {
-    case "tick_yes": return `When this is done: tick 'Yes' on ${x.where} of your SFBB pack${of}.`;
-    case "tick": return `When this is done: tick the box on ${x.where} of your SFBB pack${of}.`;
-    case "write": return `When this is done: write what you now do in the box on ${x.where} of your SFBB pack${of}.`;
-    case "related": return `SFBB pack: ${x.label}, ${x.where}.`;
-    case "part": return `SFBB pack: ${x.label}, ${x.where}.`;
-    default: return null;
+// Every place a step points to: its own, then the places of the answers merged into it (generator 1.3.0).
+const placesOf = (s) => [s.sfbb, ...(s.sfbbAlso || [])].filter(Boolean);
+const ACT = { tick_yes: "tick 'Yes'", tick: "tick the box", write: "write what you now do in the box" };
+
+// The safe methods a topic's steps belong to, once per topic: ["Cooking safely, pages 50–51", …].
+export function topicPlaces(pack, g) {
+  return [...new Set(g.steps.flatMap((s) => placesOf(s).map((x, i) => (x.label
+    ? `${x.label}, ${x.mode === "related" || x.mode === "part" ? x.where : relatedWhere(pack, i ? x.method : s.method, x)}`
+    : null))).filter(Boolean))];
+}
+
+// The line under a plan step that tells the owner which box in the SFBB pack it fills (null when the step
+// fills no box of its own — the topic's line names the safe method). One box keeps the familiar wording;
+// a merged step names each box: "When this is done, in your SFBB pack: tick 'Yes' on page 23 (Pest
+// control) and on page 35 (Clear and clean as you go)."
+export function boxText(s) {
+  const boxes = placesOf(s).filter((x) => ACT[x.mode]);
+  if (!boxes.length) return null;
+  if (boxes.length === 1) {
+    const x = boxes[0];
+    return `When this is done: ${ACT[x.mode]} on ${x.where} of your SFBB pack${x.label ? ` (${x.label})` : ""}.`;
   }
+  const byAct = new Map();
+  for (const x of boxes) byAct.set(x.mode, [...(byAct.get(x.mode) || []), `on ${x.where}${x.label ? ` (${x.label})` : ""}`]);
+  return `When this is done, in your SFBB pack: ${[...byAct].map(([mode, at]) => `${ACT[mode]} ${at.join(" and ")}`).join("; ")}.`;
+}
+
+// One line under a plan step: the box it fills, else where it belongs in the SFBB pack.
+export function pointerText(s) {
+  const box = boxText(s);
+  if (box) return box;
+  const refs = [...new Set(placesOf(s).filter((x) => x.label).map((x) => `${x.label}, ${x.where}`))];
+  return refs.length ? `SFBB pack: ${refs.join("; ")}.` : null;
 }
 
 // ---------------------------------------------------------------- what Rellony does and doesn't (same wording as the website)
@@ -265,10 +284,10 @@ function plan(pack) {
       for (const f of g.findings) head.push(small(f.text ? `From your inspection letter (as you told us): ${f.text}` : "Your inspection letter raised this (as you told us).", { italics: true, margin: [0, 0, 0, 2] }));
       if (g.deadlines?.length) head.push(small(`Council deadline: ${g.deadlines.join("; ")}`, { bold: true, color: C.warn }));
       // The safe methods this topic belongs to, once per topic (each step only adds the box to tick, if any).
-      const related = [...new Set(g.steps.map((s) => (s.sfbb && s.sfbb.label ? `${s.sfbb.label}, ${s.sfbb.mode === "related" || s.sfbb.mode === "part" ? s.sfbb.where : relatedWhere(pack, s)}` : null)).filter(Boolean))];
+      const related = topicPlaces(pack, g);
       if (related.length) head.push({ text: t(`In your SFBB pack: ${related.join(" · ")}`), style: "ptr", margin: [0, 0, 0, 2] });
       const rows = g.steps.map((s, j) => {
-        const ptr = s.sfbb && ["tick_yes", "tick", "write"].includes(s.sfbb.mode) ? pointerText(s) : null;
+        const ptr = boxText(s);
         return {
           stack: [
             { columns: [box(), { text: t(`${g.n}.${j + 1}  ${s.text}`), style: "p" }, { text: "Done: ________", style: "small", width: 70 }], columnGap: 4 },

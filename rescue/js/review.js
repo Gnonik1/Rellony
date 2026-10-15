@@ -28,15 +28,21 @@ function row(label, value) { return h("div", { class: "rx-sum__row" }, h("dt", {
 function render(d) {
   document.title = `Review ${d.ref} · Rellony Rescue`;
   const status = h("div", { role: "status", "aria-live": "polite" });
-  const facts = h("section", { class: "rx-card rx-sum" }, h("dl", {},
+  // the quality hold counts down when an order is approved: this order, then the rest (as the review email says)
+  const hold = Number(d.holdRemaining);
+  const holdText = !Number.isFinite(hold) ? "—" : d.status === "awaiting_review" && hold > 0
+    ? `This order, then ${hold - 1} more` : `${hold} more ${hold === 1 ? "order" : "orders"}`;
+  const facts = h("section", { class: "rx-card rx-sum rx-review__facts" }, h("dl", {},
     row("Business", d.businessName), row("Email", d.email), row("Letter code", d.code), row("Council", d.council),
     row("Status", d.status), row("Paid", `${day(d.paidAt)} · £${d.amount} · ${d.method ?? ""}`), row("Finished questions", day(d.finishedAt)),
     row("Held by the checks", d.heldReasons?.length ? d.heldReasons.join(", ") : "No"),
-    row("Quality hold left", String(d.holdRemaining ?? "—")),
+    row("Quality hold", holdText),
     d.refundedAt ? row("Refunded", `${day(d.refundedAt)} — ${d.refundReason ?? ""}`) : null,
     d.disputedAt ? row("Dispute opened", day(d.disputedAt)) : null));
 
   const parts = [h("h1", { class: "rx-h1", tabindex: "-1" }, `Review ${d.ref}`), hairline(), facts];
+  // the decision first (Approve, Refund), then the plan, folded
+  const actions = [];
   const p = d.pack?.pack;
   if (p) {
     const pdf = h("button", { type: "button", class: "btn btn--secondary" }, "Download the Rescue plan (PDF)");
@@ -48,9 +54,10 @@ function render(d) {
       h("h2", {}, `Plan: ${p.plan.counts.steps} steps in ${p.plan.counts.groups} topics (${p.plan.counts.urgent} today)`),
       h("p", { class: "rx-fine" }, `Bank ${d.pack.versions.bank} · library ${d.pack.versions.library} · ${d.pack.versions.generator} · built ${day(d.pack.builtAt)}`),
       d.pack.validation?.reasons?.length ? h("p", { class: "form-error" }, `Checks: ${d.pack.validation.reasons.join(", ")}`) : null,
-      h("ol", { class: "rx-review__plan" }, p.plan.groups.map((g) => h("li", {}, h("strong", {}, `${g.week === 0 ? "Today" : `Week ${g.week}`} · ${say(g.title)}`),
-        h("ul", {}, g.steps.map((s) => h("li", {}, say(s.text))))))),
-      pdf));
+      pdf,
+      h("details", { class: "rx-fold rx-review__fold" }, h("summary", {}, h("span", {}, "Show every step")),
+        h("ol", { class: "rx-review__plan" }, p.plan.groups.map((g) => h("li", {}, h("strong", {}, `${g.week === 0 ? "Today" : `Week ${g.week}`} · ${say(g.title)}`),
+          h("ul", {}, g.steps.map((s) => h("li", {}, say(s.text))))))))));
   }
   if (d.status === "awaiting_review" || d.status === "held") {
     const approve = h("button", { type: "button", class: "btn" }, "Approve and release");
@@ -63,10 +70,11 @@ function render(d) {
       else if (r.data?.error === "checks") status.replaceChildren(h("p", { class: "form-error" }, `The checks still fail: ${r.data.reasons.join(", ")} — fix the cause, or refund`));
       else status.replaceChildren(h("p", { class: "form-error" }, `Not released (${r.data?.error ?? r.status})`));
     });
-    parts.push(h("section", { class: "panel rx-make" }, approve));
+    actions.push(h("section", { class: "panel rx-make" }, approve));
   }
-  if (["paid", "awaiting_review", "held", "delivered"].includes(d.status)) parts.push(refundForm(d, status));
-  parts.push(status);
+  if (["paid", "awaiting_review", "held", "delivered"].includes(d.status)) actions.push(refundForm(d, status));
+  const plan = parts.splice(3);
+  parts.push(status, ...actions, ...plan);
   show(h("div", { class: "rx-flow" }, parts));
 }
 

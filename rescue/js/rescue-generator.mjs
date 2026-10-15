@@ -336,6 +336,7 @@ export function buildPack(bank, library, input, fieldmap = null) {
   // ---- plan: every gap (profile, answers, letter) is grouped by topic (library entry, else safe method)
   const groups = new Map();
   const allSteps = new Set();
+  const repeats = new WeakSet();   // steps whose words another topic already has (merged below)
   const groupFor = (key, title, libId, methodId) => {
     if (!groups.has(key)) {
       groups.set(key, { key, title, lib: libId || null, methods: new Set(), sev: 3, urgent: false, escalate: false,
@@ -350,11 +351,15 @@ export function buildPack(bank, library, input, fieldmap = null) {
     g.sev = Math.min(g.sev, sev);
     g.urgent = g.urgent || !!urgent;
     g.sources.add(source);
-    if (allSteps.has(t)) return;
+    // The same words twice in one topic: one step, both answers (merged across topics further down).
+    const same = g.steps.find((s) => s.text === t);
+    if (same) { same.also = [...(same.also || []), { method: methodId, ref }]; same.urgent ||= !!urgent; same.sev = Math.min(same.sev, sev); return; }
+    const step = { text: t, sev, urgent: !!urgent, source, method: methodId, ref };
+    if (allSteps.has(t)) repeats.add(step);
     allSteps.add(t);
     // ref = the answer that created the step (question + item/option), so the plan can point to the
     // matching box in the official SFBB pack ("tick Yes on page N when done").
-    g.steps.push({ text: t, sev, urgent: !!urgent, source, method: methodId, ref });
+    g.steps.push(step);
   };
   const keyOf = (libId, methodId) => (libId && lib[libId] ? "L:" + libId : "M:" + methodId);
   const titleOf = (libId, fallback) => (libId && lib[libId] ? lib[libId].title : fallback);
@@ -387,7 +392,7 @@ export function buildPack(bank, library, input, fieldmap = null) {
       const target = groupFor(keyOf(id, "LETTER"), lib[id].title, id, null);
       if (target !== grp) { target.sources.add("letter"); target.sev = Math.min(target.sev, lib[id].priority); }
       // C01 (written system) is what this pack delivers, so its generic library steps are never added.
-      if (id !== "C01" && !target.steps.length) {
+      if (id !== "C01" && !target.steps.some((s) => !repeats.has(s))) {
         for (const d of lib[id].do_now || []) addStep(target, d, lib[id].priority, false, "letter");
       }
       // Steps the letter itself calls for are always added, even when the answers already gave steps for this
@@ -400,8 +405,7 @@ export function buildPack(bank, library, input, fieldmap = null) {
   // other sev-1/sev-2 topics -> week 2; the rest -> week 3. Keeps week 1 focused on risk.
   const prio = (g) => (g.lib && lib[g.lib] ? lib[g.lib].priority : 2);
   const weekOf = (g) => (g.urgent ? 0 : g.sev === 1 && prio(g) === 1 ? 1 : g.sev <= 2 ? 2 : 3);
-  const planGroups = [...groups.values()]
-    .filter((g) => g.steps.length || g.findings.length)
+  const ordered = [...groups.values()]
     .map((g) => ({
       ...g,
       methods: [...g.methods],
@@ -412,13 +416,40 @@ export function buildPack(bank, library, input, fieldmap = null) {
       libPriority: g.lib && lib[g.lib] ? lib[g.lib].priority : 3,
     }))
     .sort((a, b) => a.week - b.week || a.libPriority - b.libPriority || a.title.localeCompare(b.title));
+  // One action, one step: SFBB gives some advice under several safe methods (bank 1.2.1 words it the same
+  // way each time), so the same step can come from several answers. It is listed once, in the earliest
+  // topic of the plan, and keeps every answer it came from — its pointer names each box it fills.
+  const firstOf = new Map();
+  for (const g of ordered) {
+    g.steps = g.steps.filter((s) => {
+      const first = firstOf.get(s.text);
+      if (!first) { firstOf.set(s.text, s); return true; }
+      first.also = [...(first.also || []), { method: s.method, ref: s.ref }, ...(s.also || [])];
+      first.urgent ||= s.urgent;
+      first.sev = Math.min(first.sev, s.sev);
+      return false;
+    });
+  }
+  const planGroups = ordered.filter((g) => g.steps.length || g.findings.length);
   planGroups.forEach((g, i) => (g.n = i + 1));
   // Flat list of steps, numbered within groups (e.g. 3.2), for web checkboxes and the method pages.
-  // Each step points to its place in the owner's official SFBB pack (when a fieldmap is given).
-  for (const g of planGroups) for (const s of g.steps) s.sfbb = sfbbPointer(fieldmap, bank, s);
+  // Each step points to its place in the owner's official SFBB pack (when a fieldmap is given); a merged
+  // step also lists the other places (sfbbAlso), each once.
+  const placeKey = (x) => `${x.mode}|${x.where}|${x.label}`;
+  for (const g of planGroups) for (const s of g.steps) {
+    s.sfbb = sfbbPointer(fieldmap, bank, s);
+    const seen = new Set(s.sfbb ? [placeKey(s.sfbb)] : []);
+    const also = (s.also || []).map((a) => {
+      const x = sfbbPointer(fieldmap, bank, a);
+      return x && { ...x, method: a.method || null };
+    }).filter((x) => x && !seen.has(placeKey(x)) && seen.add(placeKey(x)));
+    delete s.also;
+    if (also.length) s.sfbbAlso = also;
+  }
   const items = planGroups.flatMap((g) =>
     g.steps.map((s, j) => ({ n: `${g.n}.${j + 1}`, group: g.n, week: g.week, action: s.text, urgent: s.urgent, sev: s.sev,
-                             source: s.source, method: s.method, ref: s.ref || null, sfbb: s.sfbb || null, lib: g.lib, title: g.title }))
+                             source: s.source, method: s.method, ref: s.ref || null, sfbb: s.sfbb || null,
+                             ...(s.sfbbAlso ? { sfbbAlso: s.sfbbAlso } : {}), lib: g.lib, title: g.title }))
   );
 
   // ---- structured parts
@@ -437,7 +468,7 @@ export function buildPack(bank, library, input, fieldmap = null) {
 
   return {
     meta: {
-      generator: "rellony-rescue-generator 1.2.0",
+      generator: "rellony-rescue-generator 1.3.0",
       bankVersion: bank.version,
       packDate: input.packDate,
       programme: programmeDates(input.packDate),
