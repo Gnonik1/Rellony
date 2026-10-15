@@ -236,7 +236,7 @@ function planSection(d) {
   const has = d.pack.plan.items.length;
   return h("section", { class: "rx-plan", "aria-labelledby": "h-plan" },
     h("h2", { id: "h-plan" }, "Your 4-week plan"),
-    h("p", { class: "rx-plan__intro" }, fmt("Every gap found in your answers (and in your inspection letter, if you told us what it says) is listed here once, by topic, in our practical wording of official guidance — mainly the FSA's Safer food, better business. If your officer told you something different, follow the officer.")),
+    h("p", { class: "rx-plan__intro" }, fmt(`Every gap found in your answers${(d.pack.findings || []).length ? " (and in your inspection letter, as you told us)" : ""} is listed here once, by topic, in our practical wording of official guidance — mainly the FSA's Safer food, better business. If your officer told you something different, follow the officer.`)),
     has ? total : null,
     has ? weeks
       : h("p", { class: "rx-well" }, fmt("Your answers showed no gaps to fix. Follow the weekly routine in your Rescue plan, use your SFBB pack every day, and keep it up to date when anything in your kitchen changes.")),
@@ -246,7 +246,7 @@ function planSection(d) {
 function delivered(d) {
   const name = d.businessName;
   document.title = fmt(`${name} — your food safety system · Rellony Rescue`);
-  const strip = phrases(`Programme ${date(d.day0)}–${date(d.endsAt)} · Self-check ${date(d.endsAt)} · Email support until ${date(d.supportEndsAt)} · Pack available until ${date(d.expiresAt)}`);
+  const strip = phrases(`Programme ${date(d.day0)}–${date(d.endsAt)} · Email support until ${date(d.supportEndsAt)} · Pack available until ${date(d.expiresAt)}`);
   const scope = h("details", { class: "rx-card rx-scope rx-scope--fold rx-fold" },
     h("summary", {}, h("span", {}, fmt("What Rellony does — and doesn't"))),
     h("div", { class: "rx-scope__cols" },

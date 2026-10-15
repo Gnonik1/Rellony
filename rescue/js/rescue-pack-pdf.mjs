@@ -106,10 +106,9 @@ export function pointerText(s) {
 // ---------------------------------------------------------------- what Rellony does and doesn't (same wording as the website)
 const SCOPE_DOES = [
   "the FSA's own Safer food, better business for caterers pack, filled in on your device from your answers — you check it, finish it and sign it;",
-  "this Rescue plan: where you stand, a 4-week plan of the gaps in your answers (and in your council's letter, if you told us what it says), and where each fix goes in your SFBB pack;",
-  "an allergen matrix to fill in, and a daily fridge and freezer log (optional, unless your council's letter raises temperature records);",
-  "a short email on days 3, 7, 14 and 21, and a final one on day 28 with your self-check;",
-  "a tool that turns your own photos into an evidence PDF, and a draft re-visit request you can edit and send yourself;",
+  "this Rescue plan: where you stand, a 4-week plan of the gaps in your answers, and where each fix goes in your SFBB pack;",
+  "an allergen matrix to fill in, and an optional daily fridge and freezer log;",
+  "your private pack page, where you tick off your steps as you go;",
   "answers to your emails about using your plan and your SFBB pack (rescue@rellony.com) within 2 working days, until support ends.",
 ];
 const SCOPE_DOESNT = [
@@ -117,13 +116,13 @@ const SCOPE_DOESNT = [
   "contact your council or act on your behalf;",
   "decide or check allergen information;",
   "give legal advice, or professional advice specific to your premises;",
-  "certify or approve your business — the self-check is your own checklist;",
+  "certify or approve your business;",
   "speak for the Food Standards Agency or your council — Rellony is independent of both;",
   "promise a rating — only the officer decides. Food safety stays your legal responsibility as the food business operator.",
 ];
 function scopeBox(pack) {
   const pr = pack.meta.programme;
-  const dates = pr ? `Your dates: programme ${fmtDate(pr.day0)} to ${fmtDate(pr.endsAt)} (self-check on ${fmtDate(pr.selfCheckDay)}) · email support until ${fmtDate(pr.supportEndsAt)} · this plan and its tools stay available until ${fmtDate(pr.accessUntil)}.` : null;
+  const dates = pr ? `Your dates: programme ${fmtDate(pr.day0)} to ${fmtDate(pr.endsAt)} · email support until ${fmtDate(pr.supportEndsAt)} · this plan and its tools stay available until ${fmtDate(pr.accessUntil)}.` : null;
   return {
     table: { widths: ["*"], body: [[{ stack: [
       { text: "What Rellony does — and doesn't", bold: true, margin: [0, 0, 0, 4] },
@@ -265,8 +264,9 @@ function howToUse(pack, fill) {
 
 // ---------------------------------------------------------------- the plan
 function plan(pack) {
+  const hasLetter = (pack.findings || []).length > 0;
   const out = [h1("Your 4-week plan", NEW),
-    p("Every gap found in your answers (and in your inspection letter, if you told us what it says) is listed here once, by topic, in our practical wording of official guidance — mainly the FSA's Safer food, better business. If your officer told you something different, follow the officer. Tick each step when done and write the date; keep photos and receipts as evidence."),
+    p(`Every gap found in your answers${hasLetter ? " (and in your inspection letter, as you told us)" : ""} is listed here once, by topic, in our practical wording of official guidance — mainly the FSA's Safer food, better business. If your officer told you something different, follow the officer. Tick each step when done and write the date; keep photos and receipts as evidence.`),
     p([{ text: "Your SFBB pack: ", bold: true }, "under each topic, the safe method it belongs to. Where a step says 'When this is done: tick Yes on page …', we left that box blank because your answers showed a gap — tick it only when the step really is done."], { margin: [0, 2, 0, 0] })];
   if (!pack.plan.items.length) {
     out.push(framed([p("Your answers showed no gaps to fix. Follow the weekly routine below, use your SFBB pack every day, and keep it up to date when anything in your kitchen changes.")], C.accent, [0, 10, 0, 0]));
@@ -377,10 +377,11 @@ function optionalLog(pack) {
 // ---------------------------------------------------------------- about
 function about(pack) {
   const sf = pack.meta.sfbb;
+  const hasLetter = (pack.findings || []).length > 0;
   return [h1("About this plan", { pageBreak: "before", pageOrientation: "portrait" }),
     p(pack.meta.attribution),
     p(`Safer food, better business for caterers: ${pack.meta.sourcePage}`),
-    p("This plan was made by Rellony's software, using fixed rules, from your answers (and what you told us your council's letter says). No one from Rellony has seen or assessed your premises. It is information to help you comply, not legal advice, and it cannot guarantee any food hygiene rating — the officer decides at inspection. Where your officer's instructions differ from this plan, follow the officer."),
+    p(`This plan was made by Rellony's software, using fixed rules, from your answers${hasLetter ? " (and what you told us your council's letter says)" : ""}. No one from Rellony has seen or assessed your premises. It is information to help you comply, not legal advice, and it cannot guarantee any food hygiene rating — the officer decides at inspection. Where your officer's instructions differ from this plan, follow the officer.`),
     p("Your SFBB pack is the FSA's own PDF from GOV.UK, unaltered: only its form boxes were filled in, on your device, from your answers. You, as the food business operator, are responsible for checking that it describes what really happens in your kitchen, completing it and following it."),
     p("Allergen information is never decided by Rellony or by software: fill in the allergen matrix from your own recipes and labels."),
     scopeBox(pack),

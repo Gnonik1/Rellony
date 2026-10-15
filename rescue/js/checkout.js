@@ -11,7 +11,7 @@ import { PAYPAL } from "./config.js";
 import { h, newTab } from "./dom.js";
 import { fmt } from "./text.js";
 
-export const TERMS_VERSION = "1.0";
+export const TERMS_VERSION = "1.1";
 const AMOUNT = "79.00";
 
 // ---------------------------------------------------------------- an email address that looks mistyped
@@ -83,7 +83,7 @@ export function checkout({ code, businessName, onPaid }) {
         bizInput) : null,
       h("div", { class: "field" },
         h("label", { for: "pay-email" }, "Where should we send your pack?"),
-        h("p", { class: "hint", id: "pay-email-hint" }, fmt("Used only for this service — your pack, the programme emails and our replies, never marketing")),
+        h("p", { class: "hint", id: "pay-email-hint" }, fmt("Used only for this service — your pack and our replies, never marketing")),
         emailInput),
       h("button", { type: "submit", class: "btn" }, "Continue to payment"));
     emailInput.addEventListener("input", () => clearError(emailInput));

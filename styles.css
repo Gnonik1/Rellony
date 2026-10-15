@@ -1266,6 +1266,8 @@ form:valid .btn[disabled] { opacity: 0.4; cursor: progress; }
   border-top: 1px solid var(--line-paper); display: flex; gap: 0.75rem;
 }
 .doc h2 .sec { font-weight: 600; color: var(--paper-soft); flex: none; letter-spacing: -0.01em; }
+/* sub-headings inside a section (the privacy page's Rellony Rescue notice) */
+.doc h3 { margin: 1.75rem 0 0.5rem; color: var(--paper-ink); }
 .doc p, .doc li, .doc dd { color: var(--paper-soft); }
 .doc ul { padding-left: 1.2rem; margin: 0.9rem 0; }
 .doc li { margin-bottom: 0.5rem; }
