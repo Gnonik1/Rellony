@@ -1954,3 +1954,27 @@ form:valid .btn[aria-busy="true"] { opacity: 0.6; cursor: progress; }
     scroll-behavior: auto !important;
   }
 }
+
+/* --- Rellony Rescue band (home page, above the hero): the way in for food businesses rated 1 ------------ */
+.rescue-band { background: var(--band); border-bottom: 1px solid var(--line); }
+.rescue-band__inner { display: grid; gap: 1.25rem 2.5rem; align-items: center; padding-block: 1.4rem 1.5rem; }
+@media (min-width: 64rem) { .rescue-band__inner { grid-template-columns: minmax(0, 1fr) auto; padding-block: 1.6rem; } }
+.rescue-band p { margin: 0; }
+.rescue-band__eyebrow { margin-bottom: 0.3rem !important; font-size: 0.8125rem; letter-spacing: 0.03em; color: var(--sage); }
+.rescue-band__h { font-family: var(--display); font-weight: 700; font-size: clamp(1.25rem, 0.9vw + 1rem, 1.625rem); line-height: 1.2; color: var(--bone); }
+.rescue-band__sub { margin-top: 0.4rem !important; max-width: 60ch; font-size: 0.9375rem; line-height: 1.55; color: var(--sage); }
+.rescue-band__actions { display: grid; gap: 1rem; justify-items: start; }
+@media (min-width: 40rem) { .rescue-band__actions { grid-auto-flow: column; align-items: end; gap: 1.5rem; } }
+.rescue-band__go { display: inline-flex; align-items: center; min-height: 2.75rem; padding: 0 1.4rem; border-radius: 999px;
+  background: var(--bone); color: var(--olive-ink); font-weight: 600; text-decoration: none; transition: background-color 0.15s ease; }
+.rescue-band__go:hover { background: #FFFCF6; }
+.rescue-band__code { display: grid; gap: 0.35rem; }
+.rescue-band__code label { font-size: 0.8125rem; color: var(--sage); }
+.rescue-band__field { display: flex; }
+.rescue-band__code input { width: 8.5rem; min-height: 2.75rem; padding: 0 0.9rem; border: 1px solid var(--line-firm); border-right: 0;
+  border-radius: 999px 0 0 999px; background: var(--wash); color: var(--bone); font: 600 1rem/1 var(--record); letter-spacing: 0.12em; text-transform: uppercase; }
+.rescue-band__code button { min-height: 2.75rem; padding: 0 1.15rem; border: 1px solid var(--line-firm); border-radius: 0 999px 999px 0;
+  background: transparent; color: var(--bone); font: 600 0.9375rem/1 var(--text); cursor: pointer; transition: background-color 0.15s ease; }
+.rescue-band__code button:hover { background: var(--wash); }
+.rescue-band__go:focus-visible, .rescue-band__code input:focus-visible, .rescue-band__code button:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .rescue-band__go, .rescue-band__code button { transition: none; } }
