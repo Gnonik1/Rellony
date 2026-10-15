@@ -27,10 +27,10 @@ export const FUNCTIONS_URL = chosen.url;
 export const PUBLISHABLE_KEY = chosen.key;
 
 // PayPal (Phase 5, brief §0g D1): the JavaScript SDK v6 and the app's client ID, which PayPal says is
-// safe in front-end code (the secret stays in Supabase). Sandbox until go-live (Phase 7): then `env`
-// becomes "live", `sdk` https://www.paypal.com/web-sdk/v6/core and `clientId` the live app's ID.
+// safe in front-end code (the secret stays in Supabase). Live since go-live (15 October 2026): the live
+// app's ID and SDK, with PAYPAL_ENV=live in Supabase (the sandbox SDK was www.sandbox.paypal.com).
 // With the local functions (127.0.0.1 or localhost, no ?api=live) the pages use a stand-in SDK the local
 // test server serves (/__dev/, never deployed), and nothing reaches PayPal.
-const PAYPAL_SITE = { env: "sandbox", sdk: "https://www.sandbox.paypal.com/web-sdk/v6/core", clientId: "BAAiHMfI06ZnDFJoQiBQc_e6BZBN8m5Ru0uI6qomc3itHWu3vvbjj4VDcP3JrR80Fp-qiSL0Po6QoZiz2E" };
+const PAYPAL_SITE = { env: "live", sdk: "https://www.paypal.com/web-sdk/v6/core", clientId: "BAAtSph9a-yXSF6us7x0F7KOTivEN7ybsRYCRHJXr_y9lAZ7_ZTiA7z2Wg_mrg-LNa_Rp94i_SRiFr8FQ0" };
 const PAYPAL_LOCAL = { env: "dev", sdk: "/__dev/paypal-v6.js", clientId: "dev" };
 export const PAYPAL = chosen === LIVE ? PAYPAL_SITE : PAYPAL_LOCAL;

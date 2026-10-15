@@ -25,9 +25,14 @@ const day = (d) => (d ? longDate(String(d).slice(0, 10)) : "—");
 
 function row(label, value) { return h("div", { class: "rx-sum__row" }, h("dt", {}, label), h("dd", {}, value ?? "—")); }
 
+// after Approve or Refund the page is drawn again from the server (the rebuilt plan, its checks, the new status),
+// with what just happened on top
+let flash = null;
+
 function render(d) {
   document.title = `Review ${d.ref} · Rellony Rescue`;
-  const status = h("div", { role: "status", "aria-live": "polite" });
+  const status = h("div", { role: "status", "aria-live": "polite" }, flash ? h("p", { class: "rx-well" }, flash) : null);
+  flash = null;
   // the quality hold counts down when an order is approved: this order, then the rest (as the review email says)
   const hold = Number(d.holdRemaining);
   const holdText = !Number.isFinite(hold) ? "—" : d.status === "awaiting_review" && hold > 0
@@ -66,7 +71,7 @@ function render(d) {
       approve.setAttribute("aria-busy", "true");
       const r = await call("admin", { review, action: "approve" }, 30000);
       approve.removeAttribute("aria-busy");
-      if (r.status === 200) { status.replaceChildren(h("p", { class: "rx-well" }, "Released — the owner has the “Pack ready” email. Day 0 is today.")); approve.remove(); }
+      if (r.status === 200) { flash = "Released — the owner has the “Pack ready” email. Day 0 is today."; await load(); return; }
       else if (r.data?.error === "checks") status.replaceChildren(h("p", { class: "form-error" }, `The checks still fail: ${r.data.reasons.join(", ")} — fix the cause, or refund`));
       else status.replaceChildren(h("p", { class: "form-error" }, `Not released (${r.data?.error ?? r.status})`));
     });
@@ -102,7 +107,7 @@ function refundForm(d, status) {
     go.setAttribute("aria-busy", "true");
     const r = await call("admin", { review, action: "refund", reason: select.value, note: note.value }, 30000);
     go.removeAttribute("aria-busy");
-    if (r.status === 200) { form.replaceWith(h("p", { class: "rx-well" }, `Refunded (PayPal: ${r.data.paypal ?? "sent"}). The owner has the refund email.`)); }
+    if (r.status === 200) { flash = `Refunded (PayPal: ${r.data.paypal ?? "sent"}). The owner has the refund email.`; await load(); return; }
     else status.replaceChildren(h("p", { class: "form-error" }, `Not refunded (${r.data?.error ?? r.status}${r.data?.detail ? `: ${r.data.detail}` : ""})`));
   });
   return form;
